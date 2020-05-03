@@ -15,29 +15,12 @@
     </UserControl.Resources>
     
     <Border BorderThickness="1" BorderBrush="Black">
-        <!--<UniformGrid>
-            <local:CellControl/>
-            <local:CellControl/>
-            <local:CellControl/>
-            <local:CellControl/>
-            <local:CellControl/>
-            <local:CellControl/>
-            <local:CellControl/>
-            <local:CellControl/>
-            <local:CellControl/>
-        </UniformGrid>-->
         <ItemsControl ItemsSource="{Binding Path=Cells}" x:Name="SquareItems">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Rows="3" Columns="3" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemContainerStyle>
-                <Style>
-                    <Setter Property="Grid.Row" Value="{Binding Row}"/>
-                    <Setter Property="Grid.Column" Value="{Binding Col}"/>
-                </Style>
-            </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <local:CellControl/>

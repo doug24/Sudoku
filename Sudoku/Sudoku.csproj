@@ -55,18 +55,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BoolToVisibilityConverter.cs" />
-    <Compile Include="CellViewModel.cs" />
-    <Compile Include="SodukoBoard.xaml.cs">
-      <DependentUpon>SodukoBoard.xaml</DependentUpon>
+    <Compile Include="Helpers\BoolToVisibilityConverter.cs" />
+    <Compile Include="ViewModels\CandidateViewModel.cs" />
+    <Compile Include="ViewModels\CellViewModel.cs" />
+    <Compile Include="Controls\SudokuBoard.xaml.cs">
+      <DependentUpon>SudokuBoard.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SquareControl.xaml.cs">
+    <Compile Include="Controls\SquareControl.xaml.cs">
       <DependentUpon>SquareControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SquareViewModel.cs" />
-    <Compile Include="SudokuViewModel.cs" />
-    <Compile Include="ViewModelBase.cs" />
-    <Page Include="CellControl.xaml">
+    <Compile Include="ViewModels\SquareViewModel.cs" />
+    <Compile Include="ViewModels\SudokuViewModel.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
+    <Page Include="Controls\CellControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -78,18 +79,18 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CellControl.xaml.cs">
+    <Compile Include="Controls\CellControl.xaml.cs">
       <DependentUpon>CellControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SodukoBoard.xaml">
+    <Page Include="Controls\SudokuBoard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SquareControl.xaml">
+    <Page Include="Controls\SquareControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

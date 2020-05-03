@@ -17,7 +17,7 @@
         </Grid.RowDefinitions>
 
         <Border BorderBrush="Blue" BorderThickness="1">
-            <local:SodukoBoard Grid.Row="0" Grid.Column="0" DataContext="{Binding}"/>
+            <local:SudokuBoard Grid.Row="0" Grid.Column="0" DataContext="{Binding}"/>
         </Border>
 
         <!--<ItemsControl Grid.Row="0" Grid.Column="0" ItemsSource="{Binding Cells}"
