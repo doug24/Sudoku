@@ -69,7 +69,7 @@ namespace Sudoku
             {
                 for (int col = baseCol; col < baseCol + 3; col++)
                 {
-                    Cells.Add(new CellViewModel(row, col));
+                    Cells.Add(new CellViewModel(row, col, Square));
                 }
             }
         }

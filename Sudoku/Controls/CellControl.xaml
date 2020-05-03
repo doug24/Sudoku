@@ -23,7 +23,7 @@
         </DataTemplate>
     </UserControl.Resources>
         
-    <Border BorderThickness="1" BorderBrush="DimGray">
+    <Border BorderThickness="1" BorderBrush="DimGray" Background="{Binding Background}">
         <Grid>
             <Viewbox>
                 <TextBlock Text="{Binding Number}" 
