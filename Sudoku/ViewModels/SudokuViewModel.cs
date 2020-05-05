@@ -39,7 +39,13 @@ namespace Sudoku
                 .ThenBy(cell => cell.Col)
                 .ToList();
 
+            Initialize();
+        }
+
+        public async void Initialize()
+        {
             Puzzle puz = new Puzzle();
+            await puz.Generate();
 
             if (puz.Initial.Length == allCells.Count)
             {
