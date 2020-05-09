@@ -7,12 +7,12 @@ namespace Sudoku
     /// </summary>
     public partial class MainWindow : Window
     {
-        private SudokuViewModel viewModel;
+        private GameBoardViewModel viewModel;
         public MainWindow()
         {
             InitializeComponent();
 
-            viewModel = new SudokuViewModel();
+            viewModel = new GameBoardViewModel();
             DataContext = viewModel;
         }
     }

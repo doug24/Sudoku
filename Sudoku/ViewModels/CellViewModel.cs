@@ -25,6 +25,9 @@ namespace Sudoku
             Col = col;
             Square = sqr;
 
+            LayoutRow = row < 4 ? row - 1 : row < 7 ? row : row + 1;
+            LayoutCol = col < 4 ? col - 1 : col < 7 ? col : col + 1;
+
             for (int idx = 1; idx <= 9; idx++)
             {
                 Candidates.Add(new CandidateViewModel(idx));
@@ -33,12 +36,15 @@ namespace Sudoku
 
         public override string ToString()
         {
-            return $"r{Row} c{Col} : {Number}";
+            return $"r{Row} c{Col} s{Square}";
         }
 
         public int Row { get; private set; }
         public int Col { get; private set; }
         public int Square { get; private set; }
+
+        public int LayoutRow { get; private set; }
+        public int LayoutCol { get; private set; }
 
         public ObservableCollection<CandidateViewModel> Candidates { get; } = new ObservableCollection<CandidateViewModel>();
 
@@ -56,13 +62,15 @@ namespace Sudoku
         {
             Number = ch.ToString();
             Given = true;
-            Background = Brushes.LightCyan;
         }
 
         public void SetValue(int value)
         {
             if (!Given)
+            {
                 Number = value.ToString();
+                Foreground = Brushes.DarkGreen;
+            }
         }
 
         public void ClearValue()
@@ -101,7 +109,7 @@ namespace Sudoku
             }
         }
 
-        public Brush background = Brushes.Transparent;
+        public Brush background = Brushes.White;
         public Brush Background
         {
             get { return background; }
@@ -112,6 +120,20 @@ namespace Sudoku
 
                 background = value;
                 OnPropertyChanged(nameof(Background));
+            }
+        }
+
+        public Brush foreground = Brushes.Black;
+        public Brush Foreground
+        {
+            get { return foreground; }
+            set
+            {
+                if (foreground == value)
+                    return;
+
+                foreground = value;
+                OnPropertyChanged(nameof(Foreground));
             }
         }
     }
