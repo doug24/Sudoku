@@ -1,16 +1,13 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows;
 using System.Windows.Controls.Primitives;
 
 namespace Sudoku
 {
     public static class MultiSelect
     {
-        static MultiSelect()
-        {
-            Selector.ItemsSourceProperty.OverrideMetadata(typeof(Selector),
-                new FrameworkPropertyMetadata(ItemsSourceChanged));
-        }
-
         public static bool GetIsEnabled(Selector target)
         {
             return (bool)target.GetValue(IsEnabledProperty);
@@ -23,42 +20,57 @@ namespace Sudoku
 
         public static readonly DependencyProperty IsEnabledProperty =
             DependencyProperty.RegisterAttached("IsEnabled", typeof(bool), typeof(MultiSelect),
-                new UIPropertyMetadata(false, IsEnabledChanged));
+                new UIPropertyMetadata(IsEnabledChanged));
 
         static void IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             Selector selector = sender as Selector;
-            IMultiSelectCollectionView collectionView = selector.ItemsSource as IMultiSelectCollectionView;
+            bool enabled = (bool)e.NewValue;
 
-            if (selector != null && collectionView != null)
+            if (selector != null)
             {
-                if ((bool)e.NewValue)
+                DependencyPropertyDescriptor itemsSourceProperty =
+                    DependencyPropertyDescriptor.FromProperty(Selector.ItemsSourceProperty, typeof(Selector));
+                IMultiSelectCollectionView collectionView = selector.ItemsSource as IMultiSelectCollectionView;
+
+                if (enabled)
                 {
-                    collectionView.AddControl(selector);
+                    if (collectionView != null) collectionView.AddControl(selector);
+                    itemsSourceProperty.AddValueChanged(selector, ItemsSourceChanged);
                 }
                 else
                 {
-                    collectionView.RemoveControl(selector);
+                    if (collectionView != null) collectionView.RemoveControl(selector);
+                    itemsSourceProperty.RemoveValueChanged(selector, ItemsSourceChanged);
                 }
             }
         }
 
-        static void ItemsSourceChanged(object sender, DependencyPropertyChangedEventArgs e)
+        static void ItemsSourceChanged(object sender, EventArgs e)
         {
             Selector selector = sender as Selector;
 
             if (GetIsEnabled(selector))
             {
-                if (e.OldValue is IMultiSelectCollectionView oldCollectionView)
+                IMultiSelectCollectionView oldCollectionView;
+                IMultiSelectCollectionView newCollectionView = selector.ItemsSource as IMultiSelectCollectionView;
+                collectionViews.TryGetValue(selector, out oldCollectionView);
+
+                if (oldCollectionView != null)
                 {
                     oldCollectionView.RemoveControl(selector);
+                    collectionViews.Remove(selector);
                 }
 
-                if (e.NewValue is IMultiSelectCollectionView newCollectionView)
+                if (newCollectionView != null)
                 {
                     newCollectionView.AddControl(selector);
+                    collectionViews.Add(selector, newCollectionView);
                 }
             }
         }
+
+        static Dictionary<Selector, IMultiSelectCollectionView> collectionViews =
+            new Dictionary<Selector, IMultiSelectCollectionView>();
     }
 }
