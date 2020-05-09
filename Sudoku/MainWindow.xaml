@@ -10,12 +10,12 @@
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
-                <MenuItem Header="Count" Command="{Binding ShowCountCommand}"/>
+                <MenuItem Header="Count" Command="{Binding GameBoard.ShowCountCommand}"/>
             </MenuItem>
         </Menu>
         <Border DockPanel.Dock="Left"
                 BorderBrush="Blue" BorderThickness="1">
-            <local:GameBoard DataContext="{Binding}"/>
+            <local:GameBoard DataContext="{Binding GameBoard}"/>
         </Border>
         <Border></Border>
     </DockPanel>
