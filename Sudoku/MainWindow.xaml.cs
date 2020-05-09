@@ -7,13 +7,18 @@ namespace Sudoku
     /// </summary>
     public partial class MainWindow : Window
     {
-        private SudokuViewModel viewModel;
+        private readonly SudokuViewModel viewModel;
         public MainWindow()
         {
             InitializeComponent();
 
             viewModel = new SudokuViewModel();
             DataContext = viewModel;
+
+            Loaded += (s, e) =>
+            {
+                viewModel.GameBoard.NewPuzzle();
+            };
         }
     }
 }

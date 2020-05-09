@@ -25,8 +25,8 @@ namespace Sudoku
             Col = col;
             Square = sqr;
 
-            LayoutRow = row < 4 ? row - 1 : row < 7 ? row : row + 1;
-            LayoutCol = col < 4 ? col - 1 : col < 7 ? col : col + 1;
+            LayoutRow = row < 3 ? row : row < 6 ? row + 1 : row + 2;
+            LayoutCol = col < 3 ? col : col < 6 ? col + 1 : col + 2;
 
             for (int idx = 1; idx <= 9; idx++)
             {

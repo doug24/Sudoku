@@ -5,12 +5,13 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using QQWingLib;
 
 namespace Sudoku
 {
     public class GameBoardViewModel : ViewModelBase
     {
-        private ObservableCollection<CellViewModel> list = new ObservableCollection<CellViewModel>();
+        private readonly ObservableCollection<CellViewModel> list = new ObservableCollection<CellViewModel>();
         public MultiSelectCollectionView<CellViewModel> Cells { get; private set; }
 
         private readonly Dictionary<int, List<CellViewModel>> rows;
@@ -18,15 +19,14 @@ namespace Sudoku
         private readonly Dictionary<int, List<CellViewModel>> sqrs;
         private readonly List<CellViewModel> allCells;
 
-
         public GameBoardViewModel()
         {
             Cells = new MultiSelectCollectionView<CellViewModel>(list);
             Cells.SelectionChanged += Cells_SelectionChanged;
 
-            for (int row = 1; row <= 9; row++)
+            for (int row = 0; row < 9; row++)
             {
-                for (int col = 1; col <= 9; col++)
+                for (int col = 0; col < 9; col++)
                 {
                     list.Add(new CellViewModel(row, col, GetSquare(row, col)));
                 }
@@ -48,8 +48,6 @@ namespace Sudoku
                 .OrderBy(cell => cell.Row)
                 .ThenBy(cell => cell.Col)
                 .ToList();
-
-            Initialize();
         }
 
         private void Cells_SelectionChanged(object sender, EventArgs e)
@@ -102,38 +100,11 @@ namespace Sudoku
 
         private int GetSquare(int row, int col)
         {
-            if (row > 0 && row <= 3)
-            {
-                if (col > 0 && col <= 3)
-                    return 1;
-                else if (col <= 6)
-                    return 2;
-                else if (col <= 9)
-                    return 3;
-            }
-            else if (row <= 6)
-            {
-                if (col > 0 && col <= 3)
-                    return 4;
-                else if (col <= 6)
-                    return 5;
-                else if (col <= 9)
-                    return 6;
-            }
-            else if (row <= 9)
-            {
-                if (col > 0 && col <= 3)
-                    return 7;
-                else if (col <= 6)
-                    return 8;
-                else if (col <= 9)
-                    return 9;
-            }
-
-            return 1;
+            int cell = QQWing.RowColumnToCell(row, col);
+            return QQWing.CellToSection(cell);
         }
 
-        public async void Initialize()
+        internal async void NewPuzzle()
         {
             Puzzle puz = new Puzzle();
             await puz.Generate();
