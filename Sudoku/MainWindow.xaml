@@ -6,7 +6,10 @@
         xmlns:local="clr-namespace:Sudoku"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:SudokuViewModel, IsDesignTimeCreatable=True}"
-        Title="MainWindow" Height="500" Width="800">
+        Title="Sudoku" 
+        KeyDown="Window_KeyDown"
+        Height="500" Width="800">
+    
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">

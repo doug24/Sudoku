@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 
 namespace Sudoku
 {
@@ -20,5 +21,7 @@ namespace Sudoku
                 viewModel.GameBoard.NewPuzzle();
             };
         }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e) => viewModel.KeyDown(e);
     }
 }

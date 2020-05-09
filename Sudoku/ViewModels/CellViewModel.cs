@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Media;
 
 namespace Sudoku
@@ -16,7 +17,7 @@ namespace Sudoku
                 can.Visible = true;
             }
 
-            SetValue(8);
+            Number = "8";
         }
 
         public CellViewModel(int row, int col, int sqr)
@@ -46,40 +47,59 @@ namespace Sudoku
         public int LayoutRow { get; private set; }
         public int LayoutCol { get; private set; }
 
+        public int Value { get; private set; }
+        public int Answer { get; private set; }
+
         public ObservableCollection<CandidateViewModel> Candidates { get; } = new ObservableCollection<CandidateViewModel>();
 
         public void Reset()
         {
             Given = false;
-            ClearValue();
+            Foreground = Brushes.DarkGreen;
+            Number = string.Empty;
+            Value = 0;
+            Answer = 0;
+
             foreach (var can in Candidates)
             {
                 can.Visible = false;
             }
         }
 
-        public void SetGiven(char ch)
+        public void Initialize(CellState state, int answer)
         {
-            Number = ch.ToString();
-            Given = true;
+            Reset();
+
+            Answer = answer;
+
+            SetState(state);
         }
 
-        public void SetValue(int value)
+        public void SetState(CellState state)
         {
-            if (!Given)
+            if (state.Given)
             {
-                Number = value.ToString();
-                Foreground = Brushes.DarkGreen;
+                Value = state.Value;
+                Given = true;
+                Number = Value.ToString();
+                Foreground = Brushes.Black;
+            }
+            else
+            {
+                Value = state.Value;
+                Number = state.Value <= 0 ? string.Empty : state.Value.ToString();
+                Foreground = Value == Answer ? Brushes.DarkGreen : Brushes.Red;
+            }
+            SetCandidates(state.Candidates);
+        }
+
+        private void SetCandidates(int[] candidates)
+        {
+            for (int c = 1; c <= 9; c++)
+            {
+                Candidates[c - 1].Visible = candidates.Contains(c) && string.IsNullOrEmpty(Number);
             }
         }
-
-        public void ClearValue()
-        {
-            if (!Given)
-                Number = string.Empty;
-        }
-
-
 
         private bool given;
         public bool Given
@@ -123,7 +143,7 @@ namespace Sudoku
             }
         }
 
-        public Brush foreground = Brushes.Black;
+        public Brush foreground = Brushes.DarkGreen;
         public Brush Foreground
         {
             get { return foreground; }

@@ -63,6 +63,7 @@
     <Compile Include="Helpers\IMultiSelectCollectionView.cs" />
     <Compile Include="Helpers\MultiSelect.cs" />
     <Compile Include="Helpers\MultiSelectCollectionView.cs" />
+    <Compile Include="Model\CellState.cs" />
     <Compile Include="Model\Puzzle.cs" />
     <Compile Include="ViewModels\CandidateViewModel.cs" />
     <Compile Include="ViewModels\CellViewModel.cs" />

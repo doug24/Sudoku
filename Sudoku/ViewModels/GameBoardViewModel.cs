@@ -11,6 +11,8 @@ namespace Sudoku
 {
     public class GameBoardViewModel : ViewModelBase
     {
+        private readonly Stack<List<CellState>> moves = new Stack<List<CellState>>();
+
         private readonly ObservableCollection<CellViewModel> list = new ObservableCollection<CellViewModel>();
         public MultiSelectCollectionView<CellViewModel> Cells { get; private set; }
 
@@ -48,6 +50,62 @@ namespace Sudoku
                 .OrderBy(cell => cell.Row)
                 .ThenBy(cell => cell.Col)
                 .ToList();
+        }
+
+        internal void KeyDown(int value)
+        {
+            bool ctl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+            bool alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
+
+            List<CellState> list = new List<CellState>();
+
+            foreach (var cell in Cells.SelectedItems)
+            {
+                int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+
+                var oldState = GetCurrentCellState(cellIndex);
+                CellState newState = null;
+                if (alt)
+                {
+                    if (oldState.HasCandidate(value))
+                        newState = oldState.RemoveCandidate(value);
+                    else
+                        newState = oldState.AddCandidate(value);
+                }
+                if (!ctl && !alt)
+                {
+                    if (oldState.HasValue(value))
+                        newState = oldState.UnsetValue();
+                    else
+                        newState = oldState.SetValue(value);
+                }
+
+                if (newState != null && newState != oldState)
+                {
+                    cell.SetState(newState);
+                    list.Add(newState);
+                }
+            }
+
+            if (list.Count > 0)
+            {
+                moves.Push(list);
+            }
+        }
+
+        private CellState GetCurrentCellState(int cellIndex)
+        {
+            foreach (var move in moves)
+            {
+                foreach (var state in move)
+                {
+                    if (state.CellIndex == cellIndex)
+                    {
+                        return state;
+                    }
+                }
+            }
+            return null;
         }
 
         private void Cells_SelectionChanged(object sender, EventArgs e)
@@ -111,17 +169,24 @@ namespace Sudoku
 
             if (puz.Initial.Length == allCells.Count)
             {
+                moves.Clear();
+                List<CellState> list = new List<CellState>();
+
                 int idx = 0;
                 foreach (var cell in allCells)
                 {
-                    cell.Reset();
+                    int given = puz.Initial[idx] - '0';
+                    int answer = puz.Solution[idx] - '0';
 
-                    char ch = puz.Initial[idx++];
-                    if (char.IsDigit(ch))
-                    {
-                        cell.SetGiven(ch);
-                    }
+                    var cellState = new CellState(idx, given > 0, Math.Max(0, given));
+                    cell.Initialize(cellState, answer);
+
+                    list.Add(cellState);
+
+                    idx++;
                 }
+
+                moves.Push(list);
             }
         }
     }
