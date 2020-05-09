@@ -40,13 +40,13 @@ namespace QQWingLib
 
         private static readonly int GRID_SIZE = 3;
 
-        private static readonly int ROW_COL_SEC_SIZE = (GRID_SIZE * GRID_SIZE);
+        private static readonly int ROW_COL_SEC_SIZE = GRID_SIZE * GRID_SIZE;
 
-        private static readonly int SEC_GROUP_SIZE = (ROW_COL_SEC_SIZE * GRID_SIZE);
+        private static readonly int SEC_GROUP_SIZE = ROW_COL_SEC_SIZE * GRID_SIZE;
 
-        private static readonly int BOARD_SIZE = (ROW_COL_SEC_SIZE * ROW_COL_SEC_SIZE);
+        private static readonly int BOARD_SIZE = ROW_COL_SEC_SIZE * ROW_COL_SEC_SIZE;
 
-        private static readonly int POSSIBILITY_SIZE = (BOARD_SIZE * ROW_COL_SEC_SIZE);
+        private static readonly int POSSIBILITY_SIZE = BOARD_SIZE * ROW_COL_SEC_SIZE;
 
         private static readonly Random random = new Random();
 
@@ -1793,7 +1793,7 @@ namespace QQWingLib
         /// Given the index of a cell (0-80) calculate the column (0-8) in which that
         /// cell resides.
         /// </summary>
-        internal static int CellToColumn(int cell)
+        public static int CellToColumn(int cell)
         {
             return cell % ROW_COL_SEC_SIZE;
         }
@@ -1802,7 +1802,7 @@ namespace QQWingLib
         /// Given the index of a cell (0-80) calculate the row (0-8) in which it
         /// resides.
         /// </summary>
-        internal static int CellToRow(int cell)
+        public static int CellToRow(int cell)
         {
             return cell / ROW_COL_SEC_SIZE;
         }
@@ -1811,26 +1811,26 @@ namespace QQWingLib
         /// Given the index of a cell (0-80) calculate the section (0-8) in which it
         /// resides.
         /// </summary>
-        static int CellToSection(int cell)
+        public static int CellToSection(int cell)
         {
-            return ((cell / SEC_GROUP_SIZE * GRID_SIZE)
-            + (CellToColumn(cell) / GRID_SIZE));
+            return (cell / SEC_GROUP_SIZE * GRID_SIZE)
+            + (CellToColumn(cell) / GRID_SIZE);
         }
 
         /// <summary>
         /// Given the index of a cell (0-80) calculate the cell (0-80) that is the
         /// upper left start cell of that section.
         /// </summary>
-        static int CellToSectionStartCell(int cell)
+        public static int CellToSectionStartCell(int cell)
         {
-            return ((cell / SEC_GROUP_SIZE * SEC_GROUP_SIZE)
-            + (CellToColumn(cell) / GRID_SIZE * GRID_SIZE));
+            return (cell / SEC_GROUP_SIZE * SEC_GROUP_SIZE)
+            + (CellToColumn(cell) / GRID_SIZE * GRID_SIZE);
         }
 
         /// <summary>
         /// Given a row (0-8) calculate the first cell (0-80) of that row.
         /// </summary>
-        static int RowToFirstCell(int row)
+        public static int RowToFirstCell(int row)
         {
             return 9 * row;
         }
@@ -1838,7 +1838,7 @@ namespace QQWingLib
         /// <summary>
         /// Given a column (0-8) calculate the first cell (0-80) of that column.
         /// </summary>
-        static int ColumnToFirstCell(int column)
+        public static int ColumnToFirstCell(int column)
         {
             return column;
         }
@@ -1846,10 +1846,10 @@ namespace QQWingLib
         /// <summary>
         /// Given a section (0-8) calculate the first cell (0-80) of that section.
         /// </summary>
-        static int SectionToFirstCell(int section)
+        public static int SectionToFirstCell(int section)
         {
-            return ((section % GRID_SIZE * GRID_SIZE)
-            + (section / GRID_SIZE * SEC_GROUP_SIZE));
+            return (section % GRID_SIZE * GRID_SIZE)
+            + (section / GRID_SIZE * SEC_GROUP_SIZE);
         }
 
         /// <summary>
@@ -1864,7 +1864,7 @@ namespace QQWingLib
         /// <summary>
         /// Given a row (0-8) and a column (0-8) calculate the cell (0-80).
         /// </summary>
-        static int RowColumnToCell(int row, int column)
+        public static int RowColumnToCell(int row, int column)
         {
             return (row * ROW_COL_SEC_SIZE) + column;
         }
@@ -1873,11 +1873,11 @@ namespace QQWingLib
         /// Given a section (0-8) and an offset into that section (0-8) calculate the
         /// cell (0-80)
         /// </summary>
-        static int SectionToCell(int section, int offset)
+        public static int SectionToCell(int section, int offset)
         {
-            return (SectionToFirstCell(section)
-                + ((offset / GRID_SIZE) * ROW_COL_SEC_SIZE)
-                + (offset % GRID_SIZE));
+            return SectionToFirstCell(section)
+                + (offset / GRID_SIZE * ROW_COL_SEC_SIZE)
+                + (offset % GRID_SIZE);
         }
     }
 }
