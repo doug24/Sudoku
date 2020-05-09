@@ -1,4 +1,3 @@
-// @formatter:off
 /*
  * qqwing - Sudoku solver and generator
  * Copyright (C) 2014 Stephen Ostermiller
@@ -17,51 +16,51 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-// @formatter:on
-using System;
+
+using System.Diagnostics;
 using System.Text;
 
 namespace QQWingLib
 {
-    /**
-     * While solving the puzzle, log steps taken in a log item. This is useful for
-     * later printing out the solve history or gathering statistics about how hard
-     * the puzzle was to solve.
-     */
+    /// <summary>
+    /// While solving the puzzle, log steps taken in a log item. This is useful for
+    /// later printing out the solve history or gathering statistics about how hard
+    /// the puzzle was to solve.
+    /// </summary>
     public class LogItem
     {
-        /**
-         * The recursion level at which this item was gathered. Used for backing out
-         * log items solve branches that don't lead to a solution.
-         */
+        /// <summary>
+        /// The recursion level at which this item was gathered. Used for backing out
+        /// log items solve branches that don't lead to a solution.
+        /// </summary>
         private int round;
 
-        /**
-         * The type of log message that will determine the message printed.
-         */
+        /// <summary>
+        /// The type of log message that will determine the message printed.
+        /// </summary>
         private LogType type;
 
-        /**
-         * Value that was set by the operation (or zero for no value)
-         */
+        /// <summary>
+        /// Value that was set by the operation (or zero for no value)
+        /// </summary>
         private int value;
 
-        /**
-         * position on the board at which the value (if any) was set.
-         */
+        /// <summary>
+        /// position on the board at which the value (if any) was set.
+        /// </summary>
         private int position;
 
         public LogItem(int r, LogType t)
         {
-            init(r, t, 0, -1);
+            Init(r, t, 0, -1);
         }
 
         public LogItem(int r, LogType t, int v, int p)
         {
-            init(r, t, v, p);
+            Init(r, t, v, p);
         }
 
-        private void init(int r, LogType t, int v, int p)
+        private void Init(int r, LogType t, int v, int p)
         {
             round = r;
             type = t;
@@ -69,89 +68,89 @@ namespace QQWingLib
             position = p;
         }
 
-        public int getRound()
+        public int GetRound()
         {
             return round;
         }
 
-        /**
-         * Get the type of this log item.
-         */
-        public LogType getType()
+        /// <summary>
+        /// Get the type of this log item.
+        /// </summary>
+        public LogType GetLogType()
         {
             return type;
         }
 
-        public void print()
+        public void Print()
         {
-            Console.WriteLine(toString());
+            Debug.WriteLine(ToString());
         }
 
-        /**
-         * Get the row (1 indexed), or -1 if no row
-         */
-        public int getRow()
-        {
-            if (position <= -1) return -1;
-            return QQWing.cellToRow(position) + 1;
-        }
-
-        /**
-         * Get the column (1 indexed), or -1 if no column
-         */
-        public int getColumn()
+        /// <summary>
+        /// Get the row (1 indexed), or -1 if no row
+        /// </summary>
+        public int GetRow()
         {
             if (position <= -1) return -1;
-            return QQWing.cellToColumn(position) + 1;
+            return QQWing.CellToRow(position) + 1;
         }
 
-        /**
-         * Get the position (0-80) on the board or -1 if no position
-         */
-        public int getPosition()
+        /// <summary>
+        /// Get the column (1 indexed), or -1 if no column
+        /// </summary>
+        public int GetColumn()
+        {
+            if (position <= -1) return -1;
+            return QQWing.CellToColumn(position) + 1;
+        }
+
+        /// <summary>
+        /// Get the position (0-80) on the board or -1 if no position
+        /// </summary>
+        public int GetPosition()
         {
             return position;
         }
 
-        /**
-         * Get the value, or -1 if no value
-         */
-        public int getValue()
+        /// <summary>
+        /// Get the value, or -1 if no value
+        /// </summary>
+        public int GetValue()
         {
             if (value <= 0) return -1;
             return value;
         }
 
-        /**
-         * Print the current log item. The message used is determined by the type of
-         * log item.
-         */
-        public String getDescription()
+        /// <summary>
+        /// Print the current log item. The message used is determined by the type of
+        /// log item.
+        /// </summary>
+        public string GetDescription()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("Round: ").Append(getRound());
+            sb.Append("Round: ").Append(GetRound());
             sb.Append(" - ");
-            sb.Append(getType().getDescription());
+            sb.Append(GetLogType().GetDescription());
             if (value > 0 || position > -1)
             {
                 sb.Append(" (");
                 if (position > -1)
                 {
-                    sb.Append("Row: ").Append(getRow()).Append(" - Column: ").Append(getColumn());
+                    sb.Append("Row: ").Append(GetRow()).Append(" - Column: ").Append(GetColumn());
                 }
                 if (value > 0)
                 {
                     if (position > -1) sb.Append(" - ");
-                    sb.Append("Value: ").Append(getValue());
+                    sb.Append("Value: ").Append(GetValue());
                 }
                 sb.Append(")");
             }
             return sb.ToString();
         }
 
-        public String toString()
+        public override string ToString()
         {
-            return getDescription();
+            return GetDescription();
         }
     }
 }

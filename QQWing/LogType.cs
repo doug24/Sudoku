@@ -1,4 +1,3 @@
-// @formatter:off
 /*
  * qqwing - Sudoku solver and generator
  * Copyright (C) 2014 Stephen Ostermiller
@@ -17,7 +16,6 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-// @formatter:on
 
 namespace QQWingLib
 {
@@ -65,7 +63,7 @@ namespace QQWingLib
             "Remove possibilities from hidden pair in section"
         };
 
-        public static string getDescription(this LogType item)
+        public static string GetDescription(this LogType item)
         {
             return descriptions[(int)item];
         }

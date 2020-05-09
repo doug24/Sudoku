@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -56,9 +54,9 @@ namespace Sudoku
             bool done = false;
 
             QQWing ss = new QQWing();
-            ss.setRecordHistory(true);
-            //ss.setLogHistory(true);
-            ss.setPrintStyle(PrintStyle.ONE_LINE);
+            ss.SetRecordHistory(true);
+            //ss.SetLogHistory(true);
+            ss.SetPrintStyle(PrintStyle.ONE_LINE);
 
             // Solve puzzle or generate puzzles
             // until end of input for solving, or
@@ -67,17 +65,17 @@ namespace Sudoku
             {
                 // Record whether the puzzle was possible or not,
                 // so that we don't try to solve impossible givens.
-                bool havePuzzle = ss.generatePuzzleSymmetry(symmetry);
+                bool havePuzzle = ss.GeneratePuzzleSymmetry(symmetry);
 
                 if (token.IsCancellationRequested) break;
 
                 if (havePuzzle)
                 {
                     // Solve the puzzle
-                    ss.solve();
+                    ss.Solve();
 
                     // Bail out if it didn't meet the difficulty standards for generation
-                    if (difficulty != Difficulty.UNKNOWN && difficulty != ss.getDifficulty())
+                    if (difficulty != Difficulty.UNKNOWN && difficulty != ss.GetDifficulty())
                     {
                         havePuzzle = false;
                     }
@@ -90,11 +88,11 @@ namespace Sudoku
                 // Check havePuzzle again, it may have changed based on difficulty
                 if (havePuzzle)
                 {
-                    if (ss.isSolved())
+                    if (ss.IsSolved())
                     {
                         result = new PuzzleData(
-                            ss.getPuzzleString().TrimEnd(),
-                            ss.getSolutionString().TrimEnd());
+                            ss.GetPuzzleString().TrimEnd(),
+                            ss.GetSolutionString().TrimEnd());
                     }
                     else
                     {
