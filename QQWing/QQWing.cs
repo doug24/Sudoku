@@ -1856,7 +1856,7 @@ namespace QQWingLib
         /// Given a value for a cell (0-8) and a cell number (0-80) calculate the
         /// offset into the possibility array (0-728).
         /// </summary>
-        static int GetPossibilityIndex(int valueIndex, int cell)
+        public static int GetPossibilityIndex(int valueIndex, int cell)
         {
             return valueIndex + (ROW_COL_SEC_SIZE * cell);
         }

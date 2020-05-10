@@ -67,6 +67,7 @@ namespace Sudoku
                         GameBoard.Redo();
                     break;
             }
+            e.Handled = true;
         }
     }
 }

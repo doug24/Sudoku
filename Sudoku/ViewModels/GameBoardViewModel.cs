@@ -214,6 +214,8 @@ namespace Sudoku
 
             if (puz.Initial.Length == allCells.Count)
             {
+                int[] candidates = GetCandidates(puz.Initial);
+
                 undoStack.Clear();
                 List<CellState> list = new List<CellState>();
 
@@ -223,7 +225,7 @@ namespace Sudoku
                     int given = puz.Initial[idx] - '0';
                     int answer = puz.Solution[idx] - '0';
 
-                    var cellState = new CellState(idx, given > 0, Math.Max(0, given));
+                    var cellState = new CellState(idx, given > 0, Math.Max(0, given), GetCandiatesForCell(candidates, idx));
                     cell.Initialize(cellState, answer);
 
                     list.Add(cellState);
@@ -233,6 +235,66 @@ namespace Sudoku
 
                 undoStack.Push(list);
             }
+        }
+
+        private int[] GetCandidates(string puzzleString)
+        {
+            int[] candidates = new int[81 * 9];
+            for (int cell = 0; cell < 81; cell++)
+            {
+                for (int idx = 0; idx < 9; idx++)
+                {
+                    candidates[cell * 9 + idx] = idx + 1;
+                }
+            }
+
+            for (int cell = 0; cell < 81; cell++)
+            {
+                int given = Math.Max(0, puzzleString[cell] - '0');
+                if (given > 0)
+                {
+                    int valIdx = given - 1;
+                    int cellRow = QQWing.CellToRow(cell);
+                    int cellCol = QQWing.CellToColumn(cell);
+                    int cellSqr = QQWing.CellToSection(cell);
+
+                    for (int col = 0; col < 9; col++)
+                    {
+                        int cellIndex = QQWing.RowColumnToCell(cellRow, col);
+                        int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
+                        candidates[pi] = 0;
+                    }
+
+                    for (int row = 0; row < 9; row++)
+                    {
+                        int cellIndex = QQWing.RowColumnToCell(row, cellCol);
+                        int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
+                        candidates[pi] = 0;
+                    }
+
+                    for (int off = 0; off < 9; off++)
+                    {
+                        int cellIndex = QQWing.SectionToCell(cellSqr, off);
+                        int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
+                        candidates[pi] = 0;
+                    }
+                }
+            }
+
+            return candidates;
+        }
+
+        private int[] GetCandiatesForCell(int[] candidates, int cell)
+        {
+            List<int> list = new List<int>();
+            for (int idx = 0; idx < 9; idx++)
+            {
+                int pi = QQWing.GetPossibilityIndex(idx, cell);
+                int num = candidates[pi];
+                if (num > 0)
+                    list.Add(num);
+            }
+            return list.ToArray();
         }
     }
 }
