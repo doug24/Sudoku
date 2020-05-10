@@ -13,8 +13,8 @@ namespace Sudoku
         {
         }
 
-        public string Initial { get; private set; }
-        public string Solution { get; private set; }
+        public int[] Initial { get; private set; }
+        public int[] Solution { get; private set; }
 
         //public string Initial  { get => ".....9.5.1.....2...2.7..8.6.45.1....89..4.51............8..2..9.5.4.8.....1..7..."; }
         //public string Solution { get => "784629351136584297529731846645913728897246513312875964478152639953468172261397485"; }
@@ -91,8 +91,8 @@ namespace Sudoku
                     if (ss.IsSolved())
                     {
                         result = new PuzzleData(
-                            ss.GetPuzzleString().TrimEnd(),
-                            ss.GetSolutionString().TrimEnd());
+                            ss.GetPuzzle(),
+                            ss.GetSolution());
                     }
                     else
                     {
@@ -107,18 +107,18 @@ namespace Sudoku
 
     public class PuzzleData
     {
-        public PuzzleData(string initial, string solution)
+        public PuzzleData(int[] initial, int[] solution)
         {
             Initial = initial;
             Solution = solution;
         }
 
-        public string Initial { get; private set; }
-        public string Solution { get; private set; }
+        public int[] Initial { get; private set; }
+        public int[] Solution { get; private set; }
 
         public override string ToString()
         {
-            return Initial;
+            return string.Join("", Initial);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.IO;
+using System.Windows.Input;
 
 namespace Sudoku
 {
@@ -20,6 +22,53 @@ namespace Sudoku
 
                 gameBoard = value;
                 OnPropertyChanged(nameof(GameBoard));
+            }
+        }
+
+        private RelayCommand newPuzzleCommand;
+        public ICommand NewPuzzleCommand
+        {
+            get
+            {
+                if (newPuzzleCommand == null)
+                {
+                    newPuzzleCommand = new RelayCommand(
+                        p => GameBoard.NewPuzzle()
+                        );
+                }
+                return newPuzzleCommand;
+            }
+        }
+
+        private RelayCommand saveCommand;
+        public ICommand SaveCommand
+        {
+            get
+            {
+                if (saveCommand == null)
+                {
+                    saveCommand = new RelayCommand(
+                        p => Save(),
+                        q => GameBoard.IsInProgress
+                        );
+                }
+                return saveCommand;
+            }
+        }
+
+        private RelayCommand restoreCommand;
+        public ICommand RestoreCommand
+        {
+            get
+            {
+                if (restoreCommand == null)
+                {
+                    restoreCommand = new RelayCommand(
+                        p => Restore(),
+                        q => HasSessionFile()
+                        );
+                }
+                return restoreCommand;
             }
         }
 
@@ -58,16 +107,42 @@ namespace Sudoku
                 case Key.D9:
                 case Key.NumPad9:
                     GameBoard.KeyDown(9); break;
-                case Key.Z:
-                    if (ctrl)
-                        GameBoard.Undo();
+                case Key.S:
+                    if (ctrl && GameBoard.IsInProgress)
+                        Save();
                     break;
                 case Key.Y:
                     if (ctrl)
                         GameBoard.Redo();
                     break;
+                case Key.Z:
+                    if (ctrl)
+                        GameBoard.Undo();
+                    break;
             }
             e.Handled = true;
+        }
+
+        private bool HasSessionFile()
+        {
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            return File.Exists(Path.Combine(path, "session.sdx"));
+        }
+
+        private void Save()
+        {
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var file = Path.Combine(path, "session.sdx");
+            string state = GameBoard.ToSdxString();
+            File.WriteAllText(file, state);
+        }
+
+        private void Restore()
+        {
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var file = Path.Combine(path, "session.sdx");
+            string[] sdxData = File.ReadAllLines(file);
+            GameBoard.Restore(sdxData);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -54,6 +55,26 @@ namespace Sudoku
                 .ToList();
         }
 
+        public bool IsInProgress { get; private set; }
+
+        internal string ToSdxString()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int row = 0; row < 9; row++)
+            {
+                for (int col = 0; col < 9; col++)
+                {
+                    int cellIndex = QQWing.RowColumnToCell(row, col);
+                    var state = GetCurrentCellState(cellIndex);
+                    if (col < 8)
+                        sb.Append(state.ToSdxString()).Append(" ");
+                    else
+                        sb.AppendLine(state.ToSdxString());
+                }
+            }
+            return sb.ToString();
+        }
+
         internal void Undo()
         {
             if (undoStack.Count > 1)
@@ -98,6 +119,8 @@ namespace Sudoku
 
         internal void KeyDown(int value)
         {
+            if (!IsInProgress) return;
+
             bool ctl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
             bool alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
 
@@ -136,6 +159,22 @@ namespace Sudoku
                 undoStack.Push(list);
                 redoStack.Clear();
             }
+
+            IsInProgress = !CheckComplete();
+        }
+
+        private bool CheckComplete()
+        {
+            bool complete = true;
+            foreach (var cell in allCells)
+            {
+                if (cell.Value != cell.Answer)
+                {
+                    complete = false;
+                    break;
+                }
+            }
+            return complete;
         }
 
         private CellState GetCurrentCellState(int cellIndex)
@@ -207,6 +246,73 @@ namespace Sudoku
             return QQWing.CellToSection(cell);
         }
 
+        internal void Restore(string[] sdxData)
+        {
+            undoStack.Clear();
+            redoStack.Clear();
+            List<CellState> list = new List<CellState>();
+
+            int[] initial = GetPuzzle(sdxData);
+
+            QQWing ss = new QQWing();
+            ss.SetPuzzle(initial);
+            ss.Solve();
+            if (ss.IsSolved())
+            {
+                int[] solution = ss.GetSolution();
+
+                for (int row = 0; row < 9; row++)
+                {
+                    string[] parts = sdxData[row].Split(' ');
+                    if (parts.Length == 9)
+                    {
+                        for (int col = 0; col < 9; col++)
+                        {
+                            int cellIndex = QQWing.RowColumnToCell(row, col);
+                            var state = CellState.FromSdxString(cellIndex, parts[col]);
+                            list.Add(state);
+                            allCells[cellIndex].Initialize(state, solution[cellIndex]);
+                        }
+                    }
+                }
+            }
+            undoStack.Push(list);
+            IsInProgress = true;
+        }
+
+        private int[] GetPuzzle(string[] sdxData)
+        {
+            if (sdxData.Length != 9)
+                return new int[0];
+
+            int[] puzzle = new int[81];
+            for (int row = 0; row < 9; row++)
+            {
+                string[] parts = sdxData[row].Split(' ');
+                if (parts.Length != 9)
+                    return new int[0];
+
+                for (int col = 0; col < 9; col++)
+                {
+                    string str = parts[col];
+                    if (str.Length == 1)
+                    {
+                        int cellIndex = QQWing.RowColumnToCell(row, col);
+                        int given = str[0] - '0';
+                        puzzle[cellIndex] = given;
+                    }
+                }
+            }
+            return puzzle;
+        }
+
+        //private int[] Clone(int[] input)
+        //{
+        //    int[] clone = new int[input.Length];
+        //    Array.Copy(input, clone, input.Length);
+        //    return clone;
+        //}
+
         internal async void NewPuzzle()
         {
             Puzzle puz = new Puzzle();
@@ -222,8 +328,8 @@ namespace Sudoku
                 int idx = 0;
                 foreach (var cell in allCells)
                 {
-                    int given = puz.Initial[idx] - '0';
-                    int answer = puz.Solution[idx] - '0';
+                    int given = puz.Initial[idx];
+                    int answer = puz.Solution[idx];
 
                     var cellState = new CellState(idx, given > 0, Math.Max(0, given), GetCandiatesForCell(candidates, idx));
                     cell.Initialize(cellState, answer);
@@ -234,10 +340,11 @@ namespace Sudoku
                 }
 
                 undoStack.Push(list);
+                IsInProgress = true;
             }
         }
 
-        private int[] GetCandidates(string puzzleString)
+        private int[] GetCandidates(int[] puzzle)
         {
             int[] candidates = new int[81 * 9];
             for (int cell = 0; cell < 81; cell++)
@@ -250,7 +357,7 @@ namespace Sudoku
 
             for (int cell = 0; cell < 81; cell++)
             {
-                int given = Math.Max(0, puzzleString[cell] - '0');
+                int given = Math.Max(0, puzzle[cell]);
                 if (given > 0)
                 {
                     int valIdx = given - 1;
