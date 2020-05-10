@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -11,7 +12,8 @@ namespace Sudoku
 {
     public class GameBoardViewModel : ViewModelBase
     {
-        private readonly Stack<List<CellState>> moves = new Stack<List<CellState>>();
+        private readonly Stack<List<CellState>> undoStack = new Stack<List<CellState>>();
+        private readonly Stack<List<CellState>> redoStack = new Stack<List<CellState>>();
 
         private readonly ObservableCollection<CellViewModel> list = new ObservableCollection<CellViewModel>();
         public MultiSelectCollectionView<CellViewModel> Cells { get; private set; }
@@ -52,6 +54,48 @@ namespace Sudoku
                 .ToList();
         }
 
+        internal void Undo()
+        {
+            if (undoStack.Count > 1)
+            {
+                Debug.WriteLine($"Undo before - undo stack count: {undoStack.Count}; redo stack count {redoStack.Count}");
+
+                var list = undoStack.Pop();
+                redoStack.Push(list);
+
+                foreach (var c in list)
+                {
+                    var state = GetCurrentCellState(c.CellIndex);
+                    var cell = allCells[c.CellIndex];
+                    cell.SetState(state);
+                    Debug.WriteLine($"Set {state}");
+                }
+
+                Debug.WriteLine($"Undo after - undo stack count: {undoStack.Count}; redo stack count {redoStack.Count}");
+            }
+        }
+
+        internal void Redo()
+        {
+            if (redoStack.Count > 0)
+            {
+                Debug.WriteLine($"Redo before - undo stack count: {undoStack.Count}; redo stack count {redoStack.Count}");
+
+                var list = redoStack.Pop();
+                undoStack.Push(list);
+
+                foreach (var c in list)
+                {
+                    var state = GetCurrentCellState(c.CellIndex);
+                    var cell = allCells[c.CellIndex];
+                    cell.SetState(state);
+                    Debug.WriteLine($"Set {state}");
+                }
+
+                Debug.WriteLine($"Redo after - undo stack count: {undoStack.Count}; redo stack count {redoStack.Count}");
+            }
+        }
+
         internal void KeyDown(int value)
         {
             bool ctl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
@@ -89,13 +133,14 @@ namespace Sudoku
 
             if (list.Count > 0)
             {
-                moves.Push(list);
+                undoStack.Push(list);
+                redoStack.Clear();
             }
         }
 
         private CellState GetCurrentCellState(int cellIndex)
         {
-            foreach (var move in moves)
+            foreach (var move in undoStack)
             {
                 foreach (var state in move)
                 {
@@ -169,7 +214,7 @@ namespace Sudoku
 
             if (puz.Initial.Length == allCells.Count)
             {
-                moves.Clear();
+                undoStack.Clear();
                 List<CellState> list = new List<CellState>();
 
                 int idx = 0;
@@ -186,7 +231,7 @@ namespace Sudoku
                     idx++;
                 }
 
-                moves.Push(list);
+                undoStack.Push(list);
             }
         }
     }

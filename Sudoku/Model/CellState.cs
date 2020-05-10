@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using QQWingLib;
 
 namespace Sudoku
 {
@@ -94,6 +95,13 @@ namespace Sudoku
                 return new CellState(CellIndex, Given, 0, Candidates);
             else
                 return this;
+        }
+
+        public override string ToString()
+        {
+            int row = QQWing.CellToRow(CellIndex) + 1;
+            int col = QQWing.CellToColumn(CellIndex) + 1;
+            return $"cell[{row}, {col}] : {ToSdxString()}";
         }
 
         public string ToSdxString()

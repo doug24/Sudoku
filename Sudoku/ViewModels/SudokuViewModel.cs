@@ -25,7 +25,7 @@ namespace Sudoku
 
         internal void KeyDown(KeyEventArgs e)
         {
-            //bool ctrl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+            bool ctrl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
 
             Key key = e.Key == Key.System ? e.SystemKey : e.Key;
 
@@ -58,6 +58,14 @@ namespace Sudoku
                 case Key.D9:
                 case Key.NumPad9:
                     GameBoard.KeyDown(9); break;
+                case Key.Z:
+                    if (ctrl)
+                        GameBoard.Undo();
+                    break;
+                case Key.Y:
+                    if (ctrl)
+                        GameBoard.Redo();
+                    break;
             }
         }
     }
