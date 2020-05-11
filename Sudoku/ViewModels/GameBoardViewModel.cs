@@ -343,7 +343,8 @@ namespace Sudoku
                         !line.StartsWith("*") &&
                         !line.StartsWith("-") &&
                         !line.StartsWith("|-") &&
-                        !char.IsLetter(line[0]))
+                        !line.StartsWith("E") &&
+                        !line.StartsWith("I"))
                     {
                         list.Add(line.Replace("|", ""));
                     }
