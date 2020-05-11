@@ -15,8 +15,10 @@
     </UserControl.Resources>
     
     <Grid Background="DarkViolet">
-        <ListBox ItemsSource="{Binding Cells}"
+        <ListBox x:Name="gameListBox"
+                 ItemsSource="{Binding Cells}"
                  SelectionMode="Extended"
+                 PreviewTouchDown="ListBox_PreviewTouchDown"
                  local:MultiSelect.IsEnabled="True"
                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
                  Background="DarkViolet"
