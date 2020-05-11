@@ -55,6 +55,7 @@ namespace Sudoku
         public void Reset()
         {
             Given = false;
+            Background = Brushes.White;
             Foreground = Brushes.DarkGreen;
             Number = string.Empty;
             Value = 0;

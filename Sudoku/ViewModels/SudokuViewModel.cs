@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Input;
+using Microsoft.Win32;
 
 namespace Sudoku
 {
@@ -24,6 +25,35 @@ namespace Sudoku
                 OnPropertyChanged(nameof(GameBoard));
             }
         }
+        private RelayCommand openFileCommand;
+        public ICommand OpenFileCommand
+        {
+            get
+            {
+                if (openFileCommand == null)
+                {
+                    openFileCommand = new RelayCommand(
+                        p => OpenFile()
+                        );
+                }
+                return openFileCommand;
+            }
+        }
+
+        private RelayCommand saveAsCommand;
+        public ICommand SaveAsCommand
+        {
+            get
+            {
+                if (saveAsCommand == null)
+                {
+                    saveAsCommand = new RelayCommand(
+                        p => SaveAs()
+                        );
+                }
+                return saveAsCommand;
+            }
+        }
 
         private RelayCommand newPuzzleCommand;
         public ICommand NewPuzzleCommand
@@ -40,19 +70,19 @@ namespace Sudoku
             }
         }
 
-        private RelayCommand saveCommand;
-        public ICommand SaveCommand
+        private RelayCommand snapshotCommand;
+        public ICommand SnapshotCommand
         {
             get
             {
-                if (saveCommand == null)
+                if (snapshotCommand == null)
                 {
-                    saveCommand = new RelayCommand(
-                        p => Save(),
+                    snapshotCommand = new RelayCommand(
+                        p => Snapshot(),
                         q => GameBoard.IsInProgress
                         );
                 }
-                return saveCommand;
+                return snapshotCommand;
             }
         }
 
@@ -109,7 +139,7 @@ namespace Sudoku
                     GameBoard.KeyDown(9); break;
                 case Key.S:
                     if (ctrl && GameBoard.IsInProgress)
-                        Save();
+                        Snapshot();
                     break;
                 case Key.Y:
                     if (ctrl)
@@ -123,13 +153,43 @@ namespace Sudoku
             e.Handled = true;
         }
 
+        private void OpenFile()
+        {
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                DefaultExt = ".ss",
+                Filter = "Sudoku Files (.ss)|*.ss"
+            };
+            var result = dlg.ShowDialog();
+            if (result == true)
+            {
+                string[] lines = File.ReadAllLines(dlg.FileName);
+                GameBoard.OpenSimpleSudoku(lines);
+            }
+        }
+
+        private void SaveAs()
+        {
+            SaveFileDialog dlg = new SaveFileDialog
+            {
+                DefaultExt = ".ss",
+                Filter = "Sudoku Files (.ss)|*.ss"
+            };
+            var result = dlg.ShowDialog();
+            if (result == true)
+            {
+                string puzzle = GameBoard.ToSimpleSudokuString();
+                File.WriteAllText(dlg.FileName, puzzle);
+            }
+        }
+
         private bool HasSessionFile()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             return File.Exists(Path.Combine(path, "session.sdx"));
         }
 
-        private void Save()
+        private void Snapshot()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var file = Path.Combine(path, "session.sdx");

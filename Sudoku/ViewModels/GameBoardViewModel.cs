@@ -75,6 +75,23 @@ namespace Sudoku
             return sb.ToString();
         }
 
+        internal string ToSimpleSudokuString()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int row = 0; row < 9; row++)
+            {
+                for (int col = 0; col < 9; col++)
+                {
+                    int cellIndex = QQWing.RowColumnToCell(row, col);
+                    var cell = allCells[cellIndex];
+                    sb.Append(cell.Given ? cell.Value.ToString() : ".");
+                }
+                if (row < 8)
+                    sb.AppendLine();
+            }
+            return sb.ToString();
+        }
+
         internal void Undo()
         {
             if (undoStack.Count > 1)
@@ -225,20 +242,20 @@ namespace Sudoku
             }
         }
 
-        private RelayCommand showCountCommand;
-        public ICommand ShowCountCommand
-        {
-            get
-            {
-                if (showCountCommand == null)
-                {
-                    showCountCommand = new RelayCommand(
-                        p => MessageBox.Show($"{Cells.SelectedItems.Count} items selected")
-                        );
-                }
-                return showCountCommand;
-            }
-        }
+        //private RelayCommand showCountCommand;
+        //public ICommand ShowCountCommand
+        //{
+        //    get
+        //    {
+        //        if (showCountCommand == null)
+        //        {
+        //            showCountCommand = new RelayCommand(
+        //                p => MessageBox.Show($"{Cells.SelectedItems.Count} items selected")
+        //                );
+        //        }
+        //        return showCountCommand;
+        //    }
+        //}
 
         private int GetSquare(int row, int col)
         {
@@ -248,9 +265,7 @@ namespace Sudoku
 
         internal void Restore(string[] sdxData)
         {
-            undoStack.Clear();
-            redoStack.Clear();
-            List<CellState> list = new List<CellState>();
+            ClearBoard();
 
             int[] initial = GetPuzzle(sdxData);
 
@@ -260,6 +275,7 @@ namespace Sudoku
             if (ss.IsSolved())
             {
                 int[] solution = ss.GetSolution();
+                List<CellState> list = new List<CellState>();
 
                 for (int row = 0; row < 9; row++)
                 {
@@ -275,9 +291,9 @@ namespace Sudoku
                         }
                     }
                 }
+                undoStack.Push(list);
+                IsInProgress = true;
             }
-            undoStack.Push(list);
-            IsInProgress = true;
         }
 
         private int[] GetPuzzle(string[] sdxData)
@@ -313,8 +329,93 @@ namespace Sudoku
         //    return clone;
         //}
 
+        internal void OpenSimpleSudoku(string[] lines)
+        {
+            ClearBoard();
+
+            if (lines.Length > 9)
+            {
+                var list = new List<string>();
+                foreach (var text in lines)
+                {
+                    string line = text.Trim();
+                    if (!string.IsNullOrWhiteSpace(line) &&
+                        !line.StartsWith("*") &&
+                        !line.StartsWith("-") &&
+                        !line.StartsWith("|-") &&
+                        !char.IsLetter(line[0]))
+                    {
+                        list.Add(line.Replace("|", ""));
+                    }
+                }
+                lines = list.ToArray();
+            }
+
+            if (lines.Length != 9)
+                return;
+
+            int[] initial = new int[81];
+            for (int row = 0; row < 9; row++)
+            {
+                string line = lines[row].Replace("X", ".");
+
+                if (line.Length != 9)
+                    return;
+
+                for (int col = 0; col < 9; col++)
+                {
+                    int given = Math.Max(0, line[col] - '0');
+
+                    int cellIndex = QQWing.RowColumnToCell(row, col);
+                    initial[cellIndex] = given;
+                }
+            }
+
+            QQWing ss = new QQWing();
+            ss.SetPuzzle(initial);
+            ss.Solve();
+            if (ss.IsSolved())
+            {
+                int[] solution = ss.GetSolution();
+                int[] candidates = GetCandidates(initial);
+
+
+                undoStack.Clear();
+                List<CellState> list = new List<CellState>();
+
+                int idx = 0;
+                foreach (var cell in allCells)
+                {
+                    int given = initial[idx];
+                    int answer = solution[idx];
+
+                    var cellState = new CellState(idx, given > 0, Math.Max(0, given), GetCandiatesForCell(candidates, idx));
+                    cell.Initialize(cellState, answer);
+
+                    list.Add(cellState);
+
+                    idx++;
+                }
+
+                undoStack.Push(list);
+                IsInProgress = true;
+            }
+        }
+
+        private void ClearBoard()
+        {
+            undoStack.Clear();
+            redoStack.Clear();
+
+            foreach (var cell in allCells)
+            {
+                cell.Reset();
+            }
+        }
+
         internal async void NewPuzzle()
         {
+            ClearBoard();
             Puzzle puz = new Puzzle();
             await puz.Generate();
 
