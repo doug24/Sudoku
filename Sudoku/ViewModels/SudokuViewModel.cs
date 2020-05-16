@@ -186,23 +186,23 @@ namespace Sudoku
         private bool HasSessionFile()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            return File.Exists(Path.Combine(path, "session.sdx"));
+            return File.Exists(Path.Combine(path, "session.sudoku"));
         }
 
         private void Snapshot()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var file = Path.Combine(path, "session.sdx");
-            string state = GameBoard.ToSdxString();
+            var file = Path.Combine(path, "session.sudoku");
+            string state = GameBoard.ToSnapshotString();
             File.WriteAllText(file, state);
         }
 
         private void Restore()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var file = Path.Combine(path, "session.sdx");
-            string[] sdxData = File.ReadAllLines(file);
-            GameBoard.Restore(sdxData);
+            var file = Path.Combine(path, "session.sudoku");
+            string[] ssData = File.ReadAllLines(file);
+            GameBoard.Restore(ssData);
         }
     }
 }

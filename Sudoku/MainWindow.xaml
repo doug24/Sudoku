@@ -8,7 +8,7 @@
         d:DataContext="{d:DesignInstance Type=local:SudokuViewModel, IsDesignTimeCreatable=True}"
         Title="Sudoku" 
         KeyDown="Window_KeyDown"
-        Height="500" Width="800">
+        Height="760" Width="900">
     
     <DockPanel LastChildFill="True">
         <Menu DockPanel.Dock="Top">

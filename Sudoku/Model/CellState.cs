@@ -8,24 +8,6 @@ namespace Sudoku
     /// <summary>
     /// 
     /// </summary>
-    /// <remarks>
-    /// Sudoku Puzzle Progress (.sdx)
-    /// This format contains a line for each row in the grid.
-    /// A blank separates the cells. For unsolved cells, the 
-    /// candidates are listed without separating space. 
-    /// Solved cells are preceded by u when they are placed 
-    /// by the user, the givens have no prefix.
-    ///
-    /// 2 679 6789 1 46789 5 469 9 3
-    /// 389 5 4 69 689 68 7 1 29
-    /// 9 1 679 2 4679 3 4569 8 59
-    /// 6 9 2 8 u1 7 3 59 4
-    /// 3489 3479 3789 56 2456 46 u1 2579 2579
-    /// 1 47 5 3 24 9 8 27 6
-    /// 3459 2 39 7 3589 1 59 6 589
-    /// 359 8 1 569 3569 6 2 4 579
-    /// 7 369 369 4 35689 2 59 359 1
-    /// </remarks>
     public class CellState
     {
         public CellState(int cellIndex, bool given, int value)
@@ -101,21 +83,33 @@ namespace Sudoku
         {
             int row = QQWing.CellToRow(CellIndex) + 1;
             int col = QQWing.CellToColumn(CellIndex) + 1;
-            return $"cell[{row}, {col}] : {ToSdxString()}";
+            return $"cell[{row}, {col}] : {ToSnapshotString()}";
         }
 
-        public string ToSdxString()
+        /// <remarks>
+        /// Sudoku Snapshot
+        /// This format contains a line for each row in the grid.
+        /// A comma separates the cells. For unsolved cells, the 
+        /// candidates are listed in parenthesis without separating space. 
+        /// Solved cells are preceded by u when they are placed 
+        /// by the user, the givens have no prefix.
+        /// </remarks>
+        public string ToSnapshotString()
         {
             return Given ? Value.ToString()
                 : Value > 0 ? "u" + Value.ToString()
-                : string.Join(string.Empty, Candidates);
+                : $"c{string.Join(string.Empty, Candidates)}";
         }
 
-        public static CellState FromSdxString(int cellIndex, string text)
+        public static CellState FromSnapshotString(int cellIndex, string text)
         {
             int value;
 
-            if (text.Length == 1)
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return new CellState(cellIndex, false, 0);
+            }
+            else if (text.Length == 1)
             {
                 value = text[0] - '0';
                 return new CellState(cellIndex, true, value, new int[0]);
@@ -125,10 +119,10 @@ namespace Sudoku
                 value = text[1] - '0';
                 return new CellState(cellIndex, false, value, new int[0]);
             }
-            else if (text.Length > 1)
+            else if (text.Length > 1 && text[0] == 'c')
             {
                 List<int> list = new List<int>();
-                foreach (char ch in text)
+                foreach (char ch in text.TrimStart('c'))
                 {
                     list.Add(ch - '0');
                 }
