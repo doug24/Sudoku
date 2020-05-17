@@ -25,6 +25,7 @@ namespace Sudoku
                 OnPropertyChanged(nameof(GameBoard));
             }
         }
+
         private RelayCommand openFileCommand;
         public ICommand OpenFileCommand
         {
@@ -102,6 +103,54 @@ namespace Sudoku
             }
         }
 
+        private RelayCommand enterDesignModeCommand;
+        public ICommand EnterDesignModeCommand
+        {
+            get
+            {
+                if (enterDesignModeCommand == null)
+                {
+                    enterDesignModeCommand = new RelayCommand(
+                        p => GameBoard.EnterDesignMode(),
+                        q => !GameBoard.IsDesignMode
+                        );
+                }
+                return enterDesignModeCommand;
+            }
+        }
+
+        private RelayCommand exitDesignModeCommand;
+        public ICommand ExitDesignModeCommand
+        {
+            get
+            {
+                if (exitDesignModeCommand == null)
+                {
+                    exitDesignModeCommand = new RelayCommand(
+                        p => GameBoard.ExitDesignMode(),
+                        q => GameBoard.IsDesignMode
+                        );
+                }
+                return exitDesignModeCommand;
+            }
+        }
+
+        private RelayCommand clearBoardCommand;
+        public ICommand ClearBoardCommand
+        {
+            get
+            {
+                if (clearBoardCommand == null)
+                {
+                    clearBoardCommand = new RelayCommand(
+                        p => GameBoard.ClearBoard(),
+                        q => GameBoard.IsDesignMode
+                        );
+                }
+                return clearBoardCommand;
+            }
+        }
+
         internal void KeyDown(KeyEventArgs e)
         {
             bool ctrl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
@@ -148,6 +197,9 @@ namespace Sudoku
                 case Key.Z:
                     if (ctrl)
                         GameBoard.Undo();
+                    break;
+                case Key.Delete:
+                    GameBoard.Clear();
                     break;
             }
             e.Handled = true;

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Media;
 
@@ -73,10 +74,10 @@ namespace Sudoku
 
             Answer = answer;
 
-            SetState(state);
+            SetState(state, false);
         }
 
-        public void SetState(CellState state)
+        public void SetState(CellState state, bool colorIncorrect)
         {
             if (state.Given)
             {
@@ -89,9 +90,23 @@ namespace Sudoku
             {
                 Value = state.Value;
                 Number = state.Value <= 0 ? string.Empty : state.Value.ToString();
-                Foreground = Value == Answer ? Brushes.DarkGreen : Brushes.Red;
+                if (colorIncorrect)
+                    Foreground = Value == Answer ? Brushes.DarkGreen : Brushes.Red;
+                else
+                    Foreground = Brushes.DarkGreen;
             }
             SetCandidates(state.Candidates);
+        }
+
+        public void Redraw(bool colorIncorrect)
+        {
+            if (!Given)
+            {
+                if (colorIncorrect)
+                    Foreground = Value == Answer ? Brushes.DarkGreen : Brushes.Red;
+                else
+                    Foreground = Brushes.DarkGreen;
+            }
         }
 
         private void SetCandidates(int[] candidates)

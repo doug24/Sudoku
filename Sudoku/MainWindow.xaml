@@ -3,15 +3,40 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ToggleSwitch="clr-namespace:ToggleSwitch;assembly=ToggleSwitch"
         xmlns:local="clr-namespace:Sudoku"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:SudokuViewModel, IsDesignTimeCreatable=True}"
-        Title="Sudoku" 
+        Title="Sudoku"
         KeyDown="Window_KeyDown"
-        Height="760" Width="900">
-    
+        Height="760" Width="1000">
+
+    <Window.Resources>
+        <LinearGradientBrush x:Key="thumbBrush" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FFB3B5B7" Offset="1"/>
+            <GradientStop Color="#FFEDEEEE"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="uncheckedBrush" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FFE1E2E2"/>
+            <GradientStop Color="#FF555555"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="checkedBrush" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF6E97B7" Offset="1"/>
+            <GradientStop Color="#FF46738A"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="carbon" TargetType="ToggleSwitch:HorizontalToggleSwitch">
+            <Setter Property="ToggleSwitch:HorizontalToggleSwitch.ThumbBrush" Value="{StaticResource thumbBrush}"/>
+            <Setter Property="ToggleSwitch:HorizontalToggleSwitch.UncheckedBackground" Value="{StaticResource uncheckedBrush}"/>
+            <Setter Property="ToggleSwitch:HorizontalToggleSwitch.CheckedBackground" Value="{StaticResource checkedBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderBrush" Value="#FF6A6A6A"/>
+            <Setter Property="UncheckedForeground" Value="White"/>
+        </Style>
+    </Window.Resources>
+
     <DockPanel LastChildFill="True">
-        <Menu DockPanel.Dock="Top">
+        <Menu DockPanel.Dock="Top" FontSize="13">
             <MenuItem Header="File">
                 <MenuItem Header="Create New" Command="{Binding NewPuzzleCommand}"/>
                 <MenuItem Header="Open" Command="{Binding OpenFileCommand}"/>
@@ -20,11 +45,44 @@
                 <MenuItem Header="Snapshot" Command="{Binding SnapshotCommand}"/>
                 <MenuItem Header="Restore" Command="{Binding RestoreCommand}"/>
             </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Enter Design Mode" Command="{Binding EnterDesignModeCommand}"/>
+                <MenuItem Header="Exit Design Mode" Command="{Binding ExitDesignModeCommand}"/>
+                <Separator/>
+                <MenuItem Header="Clear Board" Command="{Binding ClearBoardCommand}"/>
+            </MenuItem>
         </Menu>
         <Border DockPanel.Dock="Left"
                 BorderBrush="Blue" BorderThickness="1">
-            <local:GameBoard DataContext="{Binding GameBoard}"/>
+            <local:GameBoard DataContext="{Binding GameBoard}" Margin="6"/>
         </Border>
-        <Border></Border>
+        <Border Padding="16,6,6,6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0">
+                    <TextBlock Text="Color incorrect answers" Margin="3" FontSize="14"/>
+                    <ToggleSwitch:HorizontalToggleSwitch 
+                            IsChecked="{Binding GameBoard.HighlightIncorrect, Mode=TwoWay}" 
+                            Style="{StaticResource carbon}"
+                            UncheckedContent="No" CheckedContent="Yes" 
+                            Margin="0,3,0,10" HorizontalAlignment="Left"/>
+
+                    <TextBlock Text="Highlight Row, Column and Square" Margin="3" FontSize="14"/>
+                    <ToggleSwitch:HorizontalToggleSwitch 
+                            IsChecked="{Binding GameBoard.HighlightRCS, Mode=TwoWay}" 
+                            Style="{StaticResource carbon}"
+                            UncheckedContent="No" CheckedContent="Yes" 
+                            Margin="0,5,0,10"  HorizontalAlignment="Left"/>
+
+                </StackPanel>
+            </Grid>
+        </Border>
     </DockPanel>
 </Window>

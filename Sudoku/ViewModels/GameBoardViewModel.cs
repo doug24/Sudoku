@@ -55,6 +55,53 @@ namespace Sudoku
                 .ToList();
         }
 
+        private bool hightlightRCS;
+        public bool HighlightRCS
+        {
+            get { return hightlightRCS; }
+            set
+            {
+                if (value == hightlightRCS)
+                    return;
+
+                hightlightRCS = value;
+                OnPropertyChanged(nameof(HighlightRCS));
+            }
+        }
+
+        private bool highlightIncorrect;
+        public bool HighlightIncorrect
+        {
+            get { return highlightIncorrect; }
+            set
+            {
+                if (value == highlightIncorrect)
+                    return;
+
+                highlightIncorrect = value;
+                OnPropertyChanged(nameof(HighlightIncorrect));
+
+                foreach (var cell in allCells)
+                {
+                    cell.Redraw(highlightIncorrect);
+                }
+            }
+        }
+
+        private bool isDesignMode;
+        public bool IsDesignMode
+        {
+            get { return isDesignMode; }
+            set
+            {
+                if (value == isDesignMode)
+                    return;
+
+                isDesignMode = value;
+                OnPropertyChanged(nameof(IsDesignMode));
+            }
+        }
+
         public bool IsInProgress { get; private set; }
 
         internal string ToSnapshotString()
@@ -105,7 +152,7 @@ namespace Sudoku
                 {
                     var state = GetCurrentCellState(c.CellIndex);
                     var cell = allCells[c.CellIndex];
-                    cell.SetState(state);
+                    cell.SetState(state, HighlightIncorrect);
                     Debug.WriteLine($"Set {state}");
                 }
 
@@ -128,7 +175,7 @@ namespace Sudoku
                 {
                     var state = GetCurrentCellState(c.CellIndex);
                     var cell = allCells[c.CellIndex];
-                    cell.SetState(state);
+                    cell.SetState(state, HighlightIncorrect);
                     Debug.WriteLine($"Set {state}");
                 }
 
@@ -138,9 +185,56 @@ namespace Sudoku
             }
         }
 
+        internal void Clear()
+        {
+            bool ctl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+            bool alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
+
+            List<CellState> list = new List<CellState>();
+            foreach (var cell in Cells.SelectedItems)
+            {
+                int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+
+                if (IsDesignMode)
+                {
+                    cell.Reset();
+                }
+                else
+                {
+                    var oldState = GetCurrentCellState(cellIndex);
+                    if (oldState.Given)
+                    {
+                        continue;
+                    }
+
+                    CellState newState = null;
+                    if (!ctl && !alt)
+                    {
+                        newState = oldState.UnsetValue();
+                    }
+
+                    if (newState != null && newState != oldState)
+                    {
+                        cell.SetState(newState, HighlightIncorrect);
+                        list.Add(newState);
+                    }
+                }
+            }
+
+            if (IsDesignMode)
+            {
+                CheckInvalid();
+            }
+            else if (list.Count > 0)
+            {
+                undoStack.Push(list);
+                redoStack.Clear();
+            }
+        }
+
         internal void KeyDown(int value)
         {
-            if (!IsInProgress) return;
+            if (!(IsInProgress || IsDesignMode)) return;
 
             bool ctl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
             bool alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
@@ -151,42 +245,56 @@ namespace Sudoku
             {
                 int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
 
-                var oldState = GetCurrentCellState(cellIndex);
-                if (oldState.Given)
+                if (IsDesignMode)
                 {
-                    continue;
-                }    
-
-                CellState newState = null;
-                if (alt)
-                {
-                    if (oldState.HasCandidate(value))
-                        newState = oldState.RemoveCandidate(value);
-                    else
-                        newState = oldState.AddCandidate(value);
+                    cell.Initialize(new CellState(cellIndex, true, value), value);
                 }
-                if (!ctl && !alt)
+                else
                 {
-                    if (oldState.HasValue(value))
-                        newState = oldState.UnsetValue();
-                    else
-                        newState = oldState.SetValue(value);
-                }
+                    var oldState = GetCurrentCellState(cellIndex);
+                    if (oldState.Given)
+                    {
+                        continue;
+                    }
 
-                if (newState != null && newState != oldState)
-                {
-                    cell.SetState(newState);
-                    list.Add(newState);
+                    CellState newState = null;
+                    if (alt)
+                    {
+                        if (oldState.HasCandidate(value))
+                            newState = oldState.RemoveCandidate(value);
+                        else
+                            newState = oldState.AddCandidate(value);
+                    }
+                    if (!ctl && !alt)
+                    {
+                        if (oldState.HasValue(value))
+                            newState = oldState.UnsetValue();
+                        else
+                            newState = oldState.SetValue(value);
+                    }
+
+                    if (newState != null && newState != oldState)
+                    {
+                        cell.SetState(newState, HighlightIncorrect);
+                        list.Add(newState);
+                    }
                 }
             }
 
-            if (list.Count > 0)
+            if (IsDesignMode)
             {
-                undoStack.Push(list);
-                redoStack.Clear();
+                CheckInvalid();
             }
+            else
+            {
+                if (list.Count > 0)
+                {
+                    undoStack.Push(list);
+                    redoStack.Clear();
+                }
 
-            CheckComplete();
+                CheckComplete();
+            }
         }
 
         private void CheckComplete()
@@ -206,6 +314,56 @@ namespace Sudoku
                 MessageBox.Show("Solved!", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 IsInProgress = false;
             }
+        }
+
+        private void CheckInvalid()
+        {
+            foreach (var cell in allCells)
+            {
+                if (cell.Value != 0 && !UniqueValue(cell))
+                {
+                    cell.Foreground = Brushes.Red;
+                }
+                else
+                {
+                    cell.Foreground = Brushes.Black;
+                }
+            }
+        }
+
+        private bool UniqueValue(CellViewModel cell)
+        {
+            if (rows.TryGetValue(cell.Row, out List<CellViewModel> cellsInRow))
+            {
+                foreach (var c in cellsInRow)
+                {
+                    if (c != cell && c.Value > 0 && c.Value == cell.Value)
+                    {
+                        return false;
+                    }
+                }
+            }
+            if (cols.TryGetValue(cell.Col, out List<CellViewModel> cellsInCol))
+            {
+                foreach (var c in cellsInCol)
+                {
+                    if (c != cell && c.Value > 0 && c.Value == cell.Value)
+                    {
+                        return false;
+                    }
+                }
+            }
+            if (sqrs.TryGetValue(cell.Square, out List<CellViewModel> cellsInSqr))
+            {
+                foreach (var c in cellsInSqr)
+                {
+                    if (c != cell && c.Value > 0 && c.Value == cell.Value)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         private CellState GetCurrentCellState(int cellIndex)
@@ -229,21 +387,27 @@ namespace Sudoku
 
             foreach (var cell in Cells.SelectedItems)
             {
-                //var cell = Cells.SelectedItems.First();
-                if (rows.TryGetValue(cell.Row, out List<CellViewModel> cellsInRow))
+                if (HighlightRCS)
                 {
-                    foreach (var c in cellsInRow)
-                        c.Background = Brushes.LightYellow;
+                    if (rows.TryGetValue(cell.Row, out List<CellViewModel> cellsInRow))
+                    {
+                        foreach (var c in cellsInRow)
+                            c.Background = Brushes.LightYellow;
+                    }
+                    if (cols.TryGetValue(cell.Col, out List<CellViewModel> cellsInCol))
+                    {
+                        foreach (var c in cellsInCol)
+                            c.Background = Brushes.LightYellow;
+                    }
+                    if (sqrs.TryGetValue(cell.Square, out List<CellViewModel> cellsInSqr))
+                    {
+                        foreach (var c in cellsInSqr)
+                            c.Background = Brushes.LightYellow;
+                    }
                 }
-                if (cols.TryGetValue(cell.Col, out List<CellViewModel> cellsInCol))
+                else
                 {
-                    foreach (var c in cellsInCol)
-                        c.Background = Brushes.LightYellow;
-                }
-                if (sqrs.TryGetValue(cell.Square, out List<CellViewModel> cellsInSqr))
-                {
-                    foreach (var c in cellsInSqr)
-                        c.Background = Brushes.LightYellow;
+                    cell.Background = Brushes.LightYellow;
                 }
             }
         }
@@ -422,7 +586,7 @@ namespace Sudoku
             }
         }
 
-        private void ClearBoard()
+        internal void ClearBoard()
         {
             undoStack.Clear();
             redoStack.Clear();
@@ -528,6 +692,61 @@ namespace Sudoku
                 return list.ToArray();
             }
             return new int[0];
+        }
+
+        internal void EnterDesignMode()
+        {
+            IsDesignMode = true;
+        }
+
+        internal void ExitDesignMode()
+        {
+            IsDesignMode = false;
+
+            if (!allCells.Any(c => c.Given))
+                return;
+
+            int[] initial = new int[81];
+            foreach (var cell in allCells)
+            {
+                if (cell.Given)
+                {
+                    int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+                    initial[cellIndex] = cell.Value;
+                }
+            }
+
+            QQWing ss = new QQWing();
+            ss.SetPuzzle(initial);
+            ss.Solve();
+            if (ss.IsSolved())
+            {
+                int[] solution = ss.GetSolution();
+                if (ss.HasMultipleSolutions())
+                    MessageBox.Show("Puzzle has multiple solutions");
+
+                int[] candidates = new int[0];// GetCandidates(initial);
+
+                undoStack.Clear();
+                List<CellState> list = new List<CellState>();
+
+                int idx = 0;
+                foreach (var cell in allCells)
+                {
+                    int given = initial[idx];
+                    int answer = solution[idx];
+
+                    var cellState = new CellState(idx, given > 0, Math.Max(0, given), GetCandiatesForCell(candidates, idx));
+                    cell.Initialize(cellState, answer);
+
+                    list.Add(cellState);
+
+                    idx++;
+                }
+
+                undoStack.Push(list);
+                IsInProgress = true;
+            }
         }
     }
 }
