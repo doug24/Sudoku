@@ -13,7 +13,7 @@
 
     <UserControl.Resources>
     </UserControl.Resources>
-    
+
     <Grid Background="DarkViolet">
         <ListBox x:Name="gameListBox"
                  ItemsSource="{Binding Cells}"
@@ -65,12 +65,17 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                <Border x:Name="selectionBorder" BorderThickness="1" BorderBrush="White" Background="White">
-                                    <ContentPresenter/>
+                                <Border x:Name="outerSelectionBorder" BorderThickness="1" BorderBrush="White" Background="White">
+                                    <Border BorderThickness="1" BorderBrush="DimGray" Background="{Binding Background}" CornerRadius="3">
+                                        <Border x:Name="innerSelectionBorder" BorderThickness="2" BorderBrush="Transparent" CornerRadius="3">
+                                            <ContentPresenter/>
+                                        </Border>
+                                    </Border>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="selectionBorder" Property="BorderBrush" Value="DarkBlue"/>
+                                        <Setter TargetName="outerSelectionBorder" Property="BorderBrush" Value="Black"/>
+                                        <Setter TargetName="innerSelectionBorder" Property="BorderBrush" Value="Yellow"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>

@@ -23,24 +23,29 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Border BorderThickness="1" BorderBrush="DimGray" Background="{Binding Background}" CornerRadius="3">
-        <Grid>
-            <Viewbox>
-                <TextBlock Text="{Binding Number}" 
+    <!--<Border BorderThickness="1" BorderBrush="DimGray" Background="{Binding Background}" CornerRadius="3">
+        <Border BorderThickness="2" BorderBrush="Yellow">
+        <Border Background="LightGreen">-->
+    <Grid>
+        <Border Background="{Binding Background}" Margin="2"/>
+        <Viewbox>
+            <TextBlock Text="{Binding Number}" 
                            FontSize="44" 
                            Foreground="{Binding Foreground}"
                            VerticalAlignment="Center"
                            HorizontalAlignment="Center"/>
-            </Viewbox>
-            <ItemsControl ItemsSource="{Binding Path=Candidates}" x:Name="Candidates"
+        </Viewbox>
+        <ItemsControl ItemsSource="{Binding Path=Candidates}" x:Name="Candidates"
                           ItemTemplate="{StaticResource CandidateTemplate}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Rows="3" Columns="3" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="3" Columns="3" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
 
-        </Grid>
-    </Border>
+    </Grid>
+    <!--</Border>
+        </Border>
+    </Border>-->
 </UserControl>
