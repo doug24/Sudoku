@@ -20,11 +20,8 @@ namespace Sudoku
         //public string Solution { get => "784629351136584297529731846645913728897246513312875964478152639953468172261397485"; }
 
 
-        public async Task Generate()
+        public async Task Generate(Difficulty difficulty, Symmetry symmetry)
         {
-            Symmetry symmetry = Symmetry.ROTATE90;
-            Difficulty difficulty = Difficulty.INTERMEDIATE;
-
             using (var cancellationTokenSource = new CancellationTokenSource())
             {
                 var token = cancellationTokenSource.Token;

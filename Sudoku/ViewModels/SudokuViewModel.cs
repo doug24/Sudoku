@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
+using QQWingLib;
 
 namespace Sudoku
 {
@@ -24,6 +25,34 @@ namespace Sudoku
 
                 gameBoard = value;
                 OnPropertyChanged(nameof(GameBoard));
+            }
+        }
+
+        private Symmetry puzzleSymmetry = Symmetry.NONE;
+        public Symmetry PuzzleSymmetry
+        {
+            get { return puzzleSymmetry; }
+            set
+            {
+                if (value == puzzleSymmetry)
+                    return;
+
+                puzzleSymmetry = value;
+                OnPropertyChanged(nameof(PuzzleSymmetry));
+            }
+        }
+
+        private Difficulty puzzleDifficulty = Difficulty.INTERMEDIATE;
+        public Difficulty PuzzleDifficulty
+        {
+            get { return puzzleDifficulty; }
+            set
+            {
+                if (value == puzzleDifficulty)
+                    return;
+
+                puzzleDifficulty = value;
+                OnPropertyChanged(nameof(PuzzleDifficulty));
             }
         }
 
@@ -65,7 +94,7 @@ namespace Sudoku
                 if (newPuzzleCommand == null)
                 {
                     newPuzzleCommand = new RelayCommand(
-                        p => GameBoard.NewPuzzle()
+                        p => GameBoard.NewPuzzle(PuzzleDifficulty, PuzzleSymmetry)
                         );
                 }
                 return newPuzzleCommand;

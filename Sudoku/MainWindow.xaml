@@ -12,6 +12,8 @@
         Height="760" Width="1000">
 
     <Window.Resources>
+        <local:EnumBooleanConverter x:Key="ebc" />
+        
         <LinearGradientBrush x:Key="thumbBrush" EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#FFB3B5B7" Offset="1"/>
             <GradientStop Color="#FFEDEEEE"/>
@@ -39,6 +41,30 @@
         <Menu DockPanel.Dock="Top" FontSize="13">
             <MenuItem Header="File">
                 <MenuItem Header="Create New" Command="{Binding NewPuzzleCommand}"/>
+                <MenuItem Header="Symmetry">
+                    <MenuItem Header="None" IsCheckable="True"
+                              IsChecked="{Binding Path=PuzzleSymmetry, Converter={StaticResource ebc}, ConverterParameter=NONE, Mode=TwoWay}" />
+                    <MenuItem Header="90" IsCheckable="True"
+                              IsChecked="{Binding Path=PuzzleSymmetry, Converter={StaticResource ebc}, ConverterParameter=ROTATE90, Mode=TwoWay}" />
+                    <MenuItem Header="180" IsCheckable="True" 
+                              IsChecked="{Binding Path=PuzzleSymmetry, Converter={StaticResource ebc}, ConverterParameter=ROTATE180, Mode=TwoWay}" />
+                    <MenuItem Header="Mirror" IsCheckable="True" 
+                              IsChecked="{Binding Path=PuzzleSymmetry, Converter={StaticResource ebc}, ConverterParameter=MIRROR, Mode=TwoWay}" />
+                    <MenuItem Header="Flip" IsCheckable="True" 
+                              IsChecked="{Binding Path=PuzzleSymmetry, Converter={StaticResource ebc}, ConverterParameter=FLIP, Mode=TwoWay}" />
+                    <MenuItem Header="Random" IsCheckable="True" 
+                              IsChecked="{Binding Path=PuzzleSymmetry, Converter={StaticResource ebc}, ConverterParameter=RANDOM, Mode=TwoWay}" />
+                </MenuItem>
+                <MenuItem Header="Difficulty">
+                    <MenuItem Header="Simple" IsCheckable="True"
+                              IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=SIMPLE, Mode=TwoWay}" />
+                    <MenuItem Header="Easy" IsCheckable="True"
+                              IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=EASY, Mode=TwoWay}" />
+                    <MenuItem Header="Intermediate" IsCheckable="True"
+                              IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=INTERMEDIATE, Mode=TwoWay}" />
+                    <MenuItem Header="Expert" IsCheckable="True"
+                              IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=EXPERT, Mode=TwoWay}" />
+                </MenuItem>
                 <MenuItem Header="Open" Command="{Binding OpenFileCommand}"/>
                 <MenuItem Header="Save As" Command="{Binding SaveAsCommand}"/>
                 <Separator/>
@@ -73,14 +99,6 @@
                             Style="{StaticResource carbon}"
                             UncheckedContent="No" CheckedContent="Yes" 
                             Margin="0,3,0,10" HorizontalAlignment="Left"/>
-
-                    <TextBlock Text="Highlight Row, Column and Square" Margin="3" FontSize="14"/>
-                    <ToggleSwitch:HorizontalToggleSwitch 
-                            IsChecked="{Binding GameBoard.HighlightRCS, Mode=TwoWay}" 
-                            Style="{StaticResource carbon}"
-                            UncheckedContent="No" CheckedContent="Yes" 
-                            Margin="0,5,0,10"  HorizontalAlignment="Left"/>
-
 
                 </StackPanel>
                 <local:KeyPadControl Grid.Row="1" VerticalAlignment="Bottom" MaxWidth="220"/>

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
 using QQWingLib;
 
@@ -27,7 +26,6 @@ namespace Sudoku
         public GameBoardViewModel()
         {
             Cells = new MultiSelectCollectionView<CellViewModel>(list);
-            //Cells.SelectionChanged += Cells_SelectionChanged;
 
             for (int row = 0; row < 9; row++)
             {
@@ -53,20 +51,6 @@ namespace Sudoku
                 .OrderBy(cell => cell.Row)
                 .ThenBy(cell => cell.Col)
                 .ToList();
-        }
-
-        private bool hightlightRCS;
-        public bool HighlightRCS
-        {
-            get { return hightlightRCS; }
-            set
-            {
-                if (value == hightlightRCS)
-                    return;
-
-                hightlightRCS = value;
-                OnPropertyChanged(nameof(HighlightRCS));
-            }
         }
 
         private bool highlightIncorrect;
@@ -190,9 +174,6 @@ namespace Sudoku
 
         internal void Clear()
         {
-            //bool ctl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
-            //bool alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
-
             List<CellState> list = new List<CellState>();
             foreach (var cell in Cells.SelectedItems)
             {
@@ -386,45 +367,6 @@ namespace Sudoku
             return null;
         }
 
-        //private void Cells_SelectionChanged(object sender, EventArgs e)
-        //{
-        //    ResetCellBackground();
-
-        //    foreach (var cell in Cells.SelectedItems)
-        //    {
-        //        if (HighlightRCS)
-        //        {
-        //            if (rows.TryGetValue(cell.Row, out List<CellViewModel> cellsInRow))
-        //            {
-        //                foreach (var c in cellsInRow)
-        //                    c.Background = Brushes.LightYellow;
-        //            }
-        //            if (cols.TryGetValue(cell.Col, out List<CellViewModel> cellsInCol))
-        //            {
-        //                foreach (var c in cellsInCol)
-        //                    c.Background = Brushes.LightYellow;
-        //            }
-        //            if (sqrs.TryGetValue(cell.Square, out List<CellViewModel> cellsInSqr))
-        //            {
-        //                foreach (var c in cellsInSqr)
-        //                    c.Background = Brushes.LightYellow;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            cell.Background = Brushes.LightYellow;
-        //        }
-        //    }
-        //}
-
-        //private void ResetCellBackground()
-        //{
-        //    foreach (var c in allCells)
-        //    {
-        //        c.Background = Brushes.White;
-        //    }
-        //}
-
         internal void SetColor(Brush br, KeyPadMode mode)
         {
             foreach (var cell in Cells.SelectedItems)
@@ -432,21 +374,6 @@ namespace Sudoku
                 cell.Background = mode == KeyPadMode.Eraser ? Brushes.White : br;
             }
         }
-
-        //private RelayCommand showCountCommand;
-        //public ICommand ShowCountCommand
-        //{
-        //    get
-        //    {
-        //        if (showCountCommand == null)
-        //        {
-        //            showCountCommand = new RelayCommand(
-        //                p => MessageBox.Show($"{Cells.SelectedItems.Count} items selected")
-        //                );
-        //        }
-        //        return showCountCommand;
-        //    }
-        //}
 
         private int GetSquare(int row, int col)
         {
@@ -517,13 +444,6 @@ namespace Sudoku
             return puzzle;
         }
 
-        //private int[] Clone(int[] input)
-        //{
-        //    int[] clone = new int[input.Length];
-        //    Array.Copy(input, clone, input.Length);
-        //    return clone;
-        //}
-
         internal void OpenSimpleSudoku(string[] lines)
         {
             ClearBoard();
@@ -576,8 +496,6 @@ namespace Sudoku
                 if (ss.HasMultipleSolutions())
                     MessageBox.Show("Puzzle has multiple solutions");
 
-                int[] candidates = new int[0];// GetCandidates(initial);
-
                 undoStack.Clear();
                 List<CellState> list = new List<CellState>();
 
@@ -587,7 +505,7 @@ namespace Sudoku
                     int given = initial[idx];
                     int answer = solution[idx];
 
-                    var cellState = new CellState(idx, given > 0, Math.Max(0, given), GetCandiatesForCell(candidates, idx));
+                    var cellState = new CellState(idx, given > 0, Math.Max(0, given));
                     cell.Initialize(cellState, answer);
 
                     list.Add(cellState);
@@ -611,16 +529,14 @@ namespace Sudoku
             }
         }
 
-        internal async void NewPuzzle()
+        internal async void NewPuzzle(Difficulty difficulty, Symmetry symmetry)
         {
             ClearBoard();
             Puzzle puz = new Puzzle();
-            await puz.Generate();
+            await puz.Generate(difficulty, symmetry);
 
             if (puz.Initial.Length == allCells.Count)
             {
-                int[] candidates = new int[0];// GetCandidates(puz.Initial);
-
                 undoStack.Clear();
                 List<CellState> list = new List<CellState>();
 
@@ -630,7 +546,7 @@ namespace Sudoku
                     int given = puz.Initial[idx];
                     int answer = puz.Solution[idx];
 
-                    var cellState = new CellState(idx, given > 0, Math.Max(0, given), GetCandiatesForCell(candidates, idx));
+                    var cellState = new CellState(idx, given > 0, Math.Max(0, given));
                     cell.Initialize(cellState, answer);
 
                     list.Add(cellState);
@@ -641,71 +557,6 @@ namespace Sudoku
                 undoStack.Push(list);
                 IsInProgress = true;
             }
-        }
-
-        //private int[] GetCandidates(int[] puzzle)
-        //{
-        //    int[] candidates = new int[81 * 9];
-        //    for (int cell = 0; cell < 81; cell++)
-        //    {
-        //        for (int idx = 0; idx < 9; idx++)
-        //        {
-        //            candidates[cell * 9 + idx] = idx + 1;
-        //        }
-        //    }
-
-        //    for (int cell = 0; cell < 81; cell++)
-        //    {
-        //        int given = Math.Max(0, puzzle[cell]);
-        //        if (given > 0)
-        //        {
-        //            int valIdx = given - 1;
-        //            int cellRow = QQWing.CellToRow(cell);
-        //            int cellCol = QQWing.CellToColumn(cell);
-        //            int cellSqr = QQWing.CellToSection(cell);
-
-        //            for (int col = 0; col < 9; col++)
-        //            {
-        //                int cellIndex = QQWing.RowColumnToCell(cellRow, col);
-        //                int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
-        //                candidates[pi] = 0;
-        //            }
-
-        //            for (int row = 0; row < 9; row++)
-        //            {
-        //                int cellIndex = QQWing.RowColumnToCell(row, cellCol);
-        //                int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
-        //                candidates[pi] = 0;
-        //            }
-
-        //            for (int off = 0; off < 9; off++)
-        //            {
-        //                int cellIndex = QQWing.SectionToCell(cellSqr, off);
-        //                int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
-        //                candidates[pi] = 0;
-        //            }
-        //        }
-        //    }
-
-        //    return candidates;
-        //}
-
-        private int[] GetCandiatesForCell(int[] candidates, int cell)
-        {
-            if (candidates.Length > 0)
-            {
-                List<int> list = new List<int>();
-
-                for (int idx = 0; idx < 9; idx++)
-                {
-                    int pi = QQWing.GetPossibilityIndex(idx, cell);
-                    int num = candidates[pi];
-                    if (num > 0)
-                        list.Add(num);
-                }
-                return list.ToArray();
-            }
-            return new int[0];
         }
 
         internal void EnterDesignMode()
@@ -739,8 +590,6 @@ namespace Sudoku
                 if (ss.HasMultipleSolutions())
                     MessageBox.Show("Puzzle has multiple solutions");
 
-                int[] candidates = new int[0];// GetCandidates(initial);
-
                 undoStack.Clear();
                 List<CellState> list = new List<CellState>();
 
@@ -750,7 +599,7 @@ namespace Sudoku
                     int given = initial[idx];
                     int answer = solution[idx];
 
-                    var cellState = new CellState(idx, given > 0, Math.Max(0, given), GetCandiatesForCell(candidates, idx));
+                    var cellState = new CellState(idx, given > 0, Math.Max(0, given));
                     cell.Initialize(cellState, answer);
 
                     list.Add(cellState);
