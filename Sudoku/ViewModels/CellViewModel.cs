@@ -98,6 +98,14 @@ namespace Sudoku
             SetCandidates(state.Candidates);
         }
 
+        public void ToggleHighlight(Brush br)
+        {
+            if (Background == br)
+                Background = Brushes.White;
+            else
+                Background = br;
+        }
+
         public void Redraw(bool colorIncorrect)
         {
             if (!Given)

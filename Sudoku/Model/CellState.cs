@@ -66,6 +66,11 @@ namespace Sudoku
                 return this;
         }
 
+        public CellState RemoveCandidates()
+        {
+            return new CellState(CellIndex, Given, Value, new int[9]);
+        }
+
         public CellState SetValue(int newValue)
         {
             return new CellState(CellIndex, Given, newValue, Candidates);

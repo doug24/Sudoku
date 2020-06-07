@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Win32;
 
 namespace Sudoku
@@ -151,6 +152,29 @@ namespace Sudoku
             }
         }
 
+        private RelayCommand numberKeyCommand;
+        public ICommand NumberKeyCommand
+        {
+            get
+            {
+                if (numberKeyCommand == null)
+                {
+                    numberKeyCommand = new RelayCommand(
+                        p => NumberKeyClick(p)
+                        );
+                }
+                return numberKeyCommand;
+            }
+        }
+
+        private void NumberKeyClick(object p)
+        {
+            if (p is string num && int.TryParse(num, out int value))
+            {
+                GameBoard.KeyDown(value, InputMode);
+            }
+        }
+
         internal void KeyDown(KeyEventArgs e)
         {
             bool ctrl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
@@ -161,31 +185,31 @@ namespace Sudoku
             {
                 case Key.D1:
                 case Key.NumPad1:
-                    GameBoard.KeyDown(1); break;
+                    GameBoard.KeyDown(1, InputMode); break;
                 case Key.D2:
                 case Key.NumPad2:
-                    GameBoard.KeyDown(2); break;
+                    GameBoard.KeyDown(2, InputMode); break;
                 case Key.D3:
                 case Key.NumPad3:
-                    GameBoard.KeyDown(3); break;
+                    GameBoard.KeyDown(3, InputMode); break;
                 case Key.D4:
                 case Key.NumPad4:
-                    GameBoard.KeyDown(4); break;
+                    GameBoard.KeyDown(4, InputMode); break;
                 case Key.D5:
                 case Key.NumPad5:
-                    GameBoard.KeyDown(5); break;
+                    GameBoard.KeyDown(5, InputMode); break;
                 case Key.D6:
                 case Key.NumPad6:
-                    GameBoard.KeyDown(6); break;
+                    GameBoard.KeyDown(6, InputMode); break;
                 case Key.D7:
                 case Key.NumPad7:
-                    GameBoard.KeyDown(7); break;
+                    GameBoard.KeyDown(7, InputMode); break;
                 case Key.D8:
                 case Key.NumPad8:
-                    GameBoard.KeyDown(8); break;
+                    GameBoard.KeyDown(8, InputMode); break;
                 case Key.D9:
                 case Key.NumPad9:
-                    GameBoard.KeyDown(9); break;
+                    GameBoard.KeyDown(9, InputMode); break;
                 case Key.S:
                     if (ctrl && GameBoard.IsInProgress)
                         Snapshot();
@@ -200,6 +224,15 @@ namespace Sudoku
                     break;
                 case Key.Delete:
                     GameBoard.Clear();
+                    break;
+                case Key.E:
+                    InputMode = KeyPadMode.Eraser;
+                    break;
+                case Key.Q:
+                    InputMode = KeyPadMode.Pencil;
+                    break;
+                case Key.A:
+                    InputMode = KeyPadMode.Pen;
                     break;
             }
             e.Handled = true;
@@ -255,6 +288,107 @@ namespace Sudoku
             var file = Path.Combine(path, "session.sudoku");
             string[] ssData = File.ReadAllLines(file);
             GameBoard.Restore(ssData);
+        }
+
+        private KeyPadMode inputMode = KeyPadMode.Pen;
+        public KeyPadMode InputMode
+        {
+            get { return inputMode; }
+            set
+            {
+                if (value == InputMode)
+                    return;
+
+                inputMode = value;
+                OnPropertyChanged(nameof(InputMode));
+                IsEraser = false;
+            }
+        }
+
+        private bool isEraser;
+        public bool IsEraser
+        {
+            get { return isEraser; }
+            set
+            {
+                if (value == isEraser)
+                    return;
+
+                isEraser = value;
+                OnPropertyChanged(nameof(IsEraser));
+                if (isEraser)
+                    InputMode = KeyPadMode.Pencil;
+            }
+        }
+
+        private RelayCommand colorKeyCommand;
+        public ICommand ColorKeyCommand
+        {
+            get
+            {
+                if (colorKeyCommand == null)
+                {
+                    colorKeyCommand = new RelayCommand(
+                        p => ColorKeyClick(p)
+                        );
+                }
+                return colorKeyCommand;
+            }
+        }
+
+        private void ColorKeyClick(object p)
+        {
+            if (p is Brush br)
+            {
+                GameBoard.SetColor(br, InputMode);
+            }
+        }
+
+        private RelayCommand undoCommand;
+        public ICommand UndoCommand
+        {
+            get
+            {
+                if (undoCommand == null)
+                {
+                    undoCommand = new RelayCommand(
+                        p => GameBoard.Undo(),
+                        q => GameBoard.CanUndo
+                        );
+                }
+                return undoCommand;
+            }
+        }
+
+        private RelayCommand redoCommand;
+        public ICommand RedoCommand
+        {
+            get
+            {
+                if (redoCommand == null)
+                {
+                    redoCommand = new RelayCommand(
+                        p => GameBoard.Redo(),
+                        q => GameBoard.CanRedo
+                        );
+                }
+                return redoCommand;
+            }
+        }
+
+        private RelayCommand clearCommand;
+        public ICommand ClearCommand
+        {
+            get
+            {
+                if (clearCommand == null)
+                {
+                    clearCommand = new RelayCommand(
+                        p => GameBoard.Clear()
+                        );
+                }
+                return clearCommand;
+            }
         }
     }
 }

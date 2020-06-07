@@ -59,8 +59,8 @@
         <Border Padding="16,6,6,6">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -81,7 +81,9 @@
                             UncheckedContent="No" CheckedContent="Yes" 
                             Margin="0,5,0,10"  HorizontalAlignment="Left"/>
 
+
                 </StackPanel>
+                <local:KeyPadControl Grid.Row="1" VerticalAlignment="Bottom" MaxWidth="220"/>
             </Grid>
         </Border>
     </DockPanel>

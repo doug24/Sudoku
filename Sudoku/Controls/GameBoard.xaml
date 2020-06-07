@@ -30,11 +30,11 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
-                            <RowDefinition Height="4"/>
+                            <RowDefinition Height="2"/>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
-                            <RowDefinition Height="4"/>
+                            <RowDefinition Height="2"/>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
@@ -43,11 +43,11 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
-                            <ColumnDefinition Width="4"/>
+                            <ColumnDefinition Width="2"/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
-                            <ColumnDefinition Width="4"/>
+                            <ColumnDefinition Width="2"/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>

@@ -58,7 +58,11 @@
     <Compile Include="Controls\GameBoard.xaml.cs">
       <DependentUpon>GameBoard.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\KeyPadControl.xaml.cs">
+      <DependentUpon>KeyPadControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\BoolToVisibilityConverter.cs" />
+    <Compile Include="Helpers\EnumToBoolConverter.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\IMultiSelectCollectionView.cs" />
     <Compile Include="Helpers\MultiSelect.cs" />
@@ -68,6 +72,7 @@
     <Compile Include="ViewModels\CandidateViewModel.cs" />
     <Compile Include="ViewModels\CellViewModel.cs" />
     <Compile Include="ViewModels\GameBoardViewModel.cs" />
+    <Compile Include="ViewModels\KeyPadMode.cs" />
     <Compile Include="ViewModels\SudokuViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Page Include="Controls\CellControl.xaml">
@@ -75,6 +80,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\GameBoard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\KeyPadControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

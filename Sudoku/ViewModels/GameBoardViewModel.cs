@@ -27,7 +27,7 @@ namespace Sudoku
         public GameBoardViewModel()
         {
             Cells = new MultiSelectCollectionView<CellViewModel>(list);
-            Cells.SelectionChanged += Cells_SelectionChanged;
+            //Cells.SelectionChanged += Cells_SelectionChanged;
 
             for (int row = 0; row < 9; row++)
             {
@@ -139,6 +139,9 @@ namespace Sudoku
             return sb.ToString();
         }
 
+        public bool CanUndo => undoStack.Count > 1;
+        public bool CanRedo => redoStack.Count > 0;
+
         internal void Undo()
         {
             if (undoStack.Count > 1)
@@ -187,8 +190,8 @@ namespace Sudoku
 
         internal void Clear()
         {
-            bool ctl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
-            bool alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
+            //bool ctl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+            //bool alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
 
             List<CellState> list = new List<CellState>();
             foreach (var cell in Cells.SelectedItems)
@@ -207,17 +210,15 @@ namespace Sudoku
                         continue;
                     }
 
-                    CellState newState = null;
-                    if (!ctl && !alt)
-                    {
-                        newState = oldState.UnsetValue();
-                    }
+                    CellState newState = oldState.UnsetValue().RemoveCandidates();
 
-                    if (newState != null && newState != oldState)
+                    if (newState != oldState)
                     {
                         cell.SetState(newState, HighlightIncorrect);
                         list.Add(newState);
                     }
+
+                    cell.Background = Brushes.White;
                 }
             }
 
@@ -232,12 +233,9 @@ namespace Sudoku
             }
         }
 
-        internal void KeyDown(int value)
+        internal void KeyDown(int value, KeyPadMode mode)
         {
             if (!(IsInProgress || IsDesignMode)) return;
-
-            bool ctl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
-            bool alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
 
             List<CellState> list = new List<CellState>();
 
@@ -258,19 +256,26 @@ namespace Sudoku
                     }
 
                     CellState newState = null;
-                    if (alt)
+                    if (mode == KeyPadMode.Pen)
+                    {
+                        if (oldState.HasValue(value))
+                        {
+                            newState = oldState.UnsetValue();
+                        }
+                        else
+                        {
+                            newState = oldState.SetValue(value);
+                        }
+                    }
+                    else if (mode == KeyPadMode.Pencil)
+                    {
+                        if (!oldState.HasCandidate(value))
+                            newState = oldState.AddCandidate(value);
+                    }
+                    else if (mode == KeyPadMode.Eraser)
                     {
                         if (oldState.HasCandidate(value))
                             newState = oldState.RemoveCandidate(value);
-                        else
-                            newState = oldState.AddCandidate(value);
-                    }
-                    if (!ctl && !alt)
-                    {
-                        if (oldState.HasValue(value))
-                            newState = oldState.UnsetValue();
-                        else
-                            newState = oldState.SetValue(value);
                     }
 
                     if (newState != null && newState != oldState)
@@ -381,42 +386,50 @@ namespace Sudoku
             return null;
         }
 
-        private void Cells_SelectionChanged(object sender, EventArgs e)
-        {
-            ResetCellBackground();
+        //private void Cells_SelectionChanged(object sender, EventArgs e)
+        //{
+        //    ResetCellBackground();
 
+        //    foreach (var cell in Cells.SelectedItems)
+        //    {
+        //        if (HighlightRCS)
+        //        {
+        //            if (rows.TryGetValue(cell.Row, out List<CellViewModel> cellsInRow))
+        //            {
+        //                foreach (var c in cellsInRow)
+        //                    c.Background = Brushes.LightYellow;
+        //            }
+        //            if (cols.TryGetValue(cell.Col, out List<CellViewModel> cellsInCol))
+        //            {
+        //                foreach (var c in cellsInCol)
+        //                    c.Background = Brushes.LightYellow;
+        //            }
+        //            if (sqrs.TryGetValue(cell.Square, out List<CellViewModel> cellsInSqr))
+        //            {
+        //                foreach (var c in cellsInSqr)
+        //                    c.Background = Brushes.LightYellow;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            cell.Background = Brushes.LightYellow;
+        //        }
+        //    }
+        //}
+
+        //private void ResetCellBackground()
+        //{
+        //    foreach (var c in allCells)
+        //    {
+        //        c.Background = Brushes.White;
+        //    }
+        //}
+
+        internal void SetColor(Brush br, KeyPadMode mode)
+        {
             foreach (var cell in Cells.SelectedItems)
             {
-                if (HighlightRCS)
-                {
-                    if (rows.TryGetValue(cell.Row, out List<CellViewModel> cellsInRow))
-                    {
-                        foreach (var c in cellsInRow)
-                            c.Background = Brushes.LightYellow;
-                    }
-                    if (cols.TryGetValue(cell.Col, out List<CellViewModel> cellsInCol))
-                    {
-                        foreach (var c in cellsInCol)
-                            c.Background = Brushes.LightYellow;
-                    }
-                    if (sqrs.TryGetValue(cell.Square, out List<CellViewModel> cellsInSqr))
-                    {
-                        foreach (var c in cellsInSqr)
-                            c.Background = Brushes.LightYellow;
-                    }
-                }
-                else
-                {
-                    cell.Background = Brushes.LightYellow;
-                }
-            }
-        }
-
-        private void ResetCellBackground()
-        {
-            foreach (var c in allCells)
-            {
-                c.Background = Brushes.White;
+                cell.Background = mode == KeyPadMode.Eraser ? Brushes.White : br;
             }
         }
 
@@ -444,6 +457,7 @@ namespace Sudoku
         internal void Restore(string[] ssData)
         {
             ClearBoard();
+            IsDesignMode = false;
 
             int[] initial = GetPuzzle(ssData);
 
@@ -629,52 +643,52 @@ namespace Sudoku
             }
         }
 
-        private int[] GetCandidates(int[] puzzle)
-        {
-            int[] candidates = new int[81 * 9];
-            for (int cell = 0; cell < 81; cell++)
-            {
-                for (int idx = 0; idx < 9; idx++)
-                {
-                    candidates[cell * 9 + idx] = idx + 1;
-                }
-            }
+        //private int[] GetCandidates(int[] puzzle)
+        //{
+        //    int[] candidates = new int[81 * 9];
+        //    for (int cell = 0; cell < 81; cell++)
+        //    {
+        //        for (int idx = 0; idx < 9; idx++)
+        //        {
+        //            candidates[cell * 9 + idx] = idx + 1;
+        //        }
+        //    }
 
-            for (int cell = 0; cell < 81; cell++)
-            {
-                int given = Math.Max(0, puzzle[cell]);
-                if (given > 0)
-                {
-                    int valIdx = given - 1;
-                    int cellRow = QQWing.CellToRow(cell);
-                    int cellCol = QQWing.CellToColumn(cell);
-                    int cellSqr = QQWing.CellToSection(cell);
+        //    for (int cell = 0; cell < 81; cell++)
+        //    {
+        //        int given = Math.Max(0, puzzle[cell]);
+        //        if (given > 0)
+        //        {
+        //            int valIdx = given - 1;
+        //            int cellRow = QQWing.CellToRow(cell);
+        //            int cellCol = QQWing.CellToColumn(cell);
+        //            int cellSqr = QQWing.CellToSection(cell);
 
-                    for (int col = 0; col < 9; col++)
-                    {
-                        int cellIndex = QQWing.RowColumnToCell(cellRow, col);
-                        int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
-                        candidates[pi] = 0;
-                    }
+        //            for (int col = 0; col < 9; col++)
+        //            {
+        //                int cellIndex = QQWing.RowColumnToCell(cellRow, col);
+        //                int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
+        //                candidates[pi] = 0;
+        //            }
 
-                    for (int row = 0; row < 9; row++)
-                    {
-                        int cellIndex = QQWing.RowColumnToCell(row, cellCol);
-                        int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
-                        candidates[pi] = 0;
-                    }
+        //            for (int row = 0; row < 9; row++)
+        //            {
+        //                int cellIndex = QQWing.RowColumnToCell(row, cellCol);
+        //                int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
+        //                candidates[pi] = 0;
+        //            }
 
-                    for (int off = 0; off < 9; off++)
-                    {
-                        int cellIndex = QQWing.SectionToCell(cellSqr, off);
-                        int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
-                        candidates[pi] = 0;
-                    }
-                }
-            }
+        //            for (int off = 0; off < 9; off++)
+        //            {
+        //                int cellIndex = QQWing.SectionToCell(cellSqr, off);
+        //                int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
+        //                candidates[pi] = 0;
+        //            }
+        //        }
+        //    }
 
-            return candidates;
-        }
+        //    return candidates;
+        //}
 
         private int[] GetCandiatesForCell(int[] candidates, int cell)
         {
