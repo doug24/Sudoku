@@ -28,7 +28,7 @@ namespace Sudoku
             }
         }
 
-        private Symmetry puzzleSymmetry = Symmetry.NONE;
+        private Symmetry puzzleSymmetry = Symmetry.RANDOM;
         public Symmetry PuzzleSymmetry
         {
             get { return puzzleSymmetry; }
@@ -42,7 +42,7 @@ namespace Sudoku
             }
         }
 
-        private Difficulty puzzleDifficulty = Difficulty.INTERMEDIATE;
+        private Difficulty puzzleDifficulty = Difficulty.EXPERT;
         public Difficulty PuzzleDifficulty
         {
             get { return puzzleDifficulty; }
