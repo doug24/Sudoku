@@ -9,6 +9,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:SudokuViewModel, IsDesignTimeCreatable=True}"
         Title="Sudoku"
+        WindowStartupLocation="CenterScreen"
         KeyDown="Window_KeyDown"
         Height="760" Width="1000">
 
