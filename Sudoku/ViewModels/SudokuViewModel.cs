@@ -42,7 +42,7 @@ namespace Sudoku
             }
         }
 
-        private Difficulty puzzleDifficulty = Difficulty.EXPERT;
+        private Difficulty puzzleDifficulty = Difficulty.INTERMEDIATE;
         public Difficulty PuzzleDifficulty
         {
             get { return puzzleDifficulty; }
