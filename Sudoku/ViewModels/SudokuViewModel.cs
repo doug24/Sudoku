@@ -252,7 +252,7 @@ namespace Sudoku
                         GameBoard.Undo();
                     break;
                 case Key.Delete:
-                    GameBoard.Clear();
+                    GameBoard.ClearColors();
                     break;
                 case Key.E:
                     InputMode = KeyPadMode.Eraser;
@@ -413,7 +413,7 @@ namespace Sudoku
                 if (clearCommand == null)
                 {
                     clearCommand = new RelayCommand(
-                        p => GameBoard.Clear()
+                        p => GameBoard.ClearColors()
                         );
                 }
                 return clearCommand;

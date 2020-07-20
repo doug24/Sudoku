@@ -103,7 +103,7 @@
 
                 <Button Content="" FontFamily="Segoe MDL2 Assets" ToolTip="Undo" Command="{Binding UndoCommand}"/>
                 <Button Content="" FontFamily="Segoe MDL2 Assets" ToolTip="Redo" Command="{Binding RedoCommand}"/>
-                <Button Content="" FontFamily="Segoe UI Symbol" Foreground="Red" ToolTip="Clear" Command="{Binding ClearCommand}"/>
+                <Button Content="❅" FontFamily="Segoe UI Symbol" ToolTip="Clear" Command="{Binding ClearCommand}"/>
             </UniformGrid>
         </Viewbox> 
     </Grid>

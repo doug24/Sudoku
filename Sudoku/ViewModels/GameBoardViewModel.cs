@@ -172,7 +172,15 @@ namespace Sudoku
             }
         }
 
-        internal void Clear()
+        internal void ClearColors()
+        {
+            foreach (var cell in allCells)
+            {
+                cell.Background = Brushes.White;
+            }
+        }
+
+        internal void ClearCell()
         {
             List<CellState> list = new List<CellState>();
             foreach (var cell in Cells.SelectedItems)
