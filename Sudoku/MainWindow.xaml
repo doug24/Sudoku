@@ -101,6 +101,13 @@
                             Style="{StaticResource carbon}"
                             UncheckedContent="No" CheckedContent="Yes" 
                             Margin="0,3,0,10" HorizontalAlignment="Left"/>
+                    
+                    <TextBlock Text="Clean pencil marks" Margin="3" FontSize="14"/>
+                    <ToggleSwitch:HorizontalToggleSwitch 
+                            IsChecked="{Binding GameBoard.CleanPencilMarks, Mode=TwoWay}" 
+                            Style="{StaticResource carbon}"
+                            UncheckedContent="No" CheckedContent="Yes" 
+                            Margin="0,3,0,10" HorizontalAlignment="Left"/>
 
                 </StackPanel>
                 <local:KeyPadControl Grid.Row="1" VerticalAlignment="Bottom" MaxWidth="220"/>

@@ -72,6 +72,25 @@ namespace Sudoku
             }
         }
 
+        private bool cleanPencilMarks;
+        public bool CleanPencilMarks
+        {
+            get { return cleanPencilMarks; }
+            set
+            {
+                if (value == cleanPencilMarks)
+                    return;
+
+                cleanPencilMarks = value;
+                OnPropertyChanged(nameof(CleanPencilMarks));
+
+                //foreach (var cell in allCells)
+                //{
+                //    cell.Redraw();
+                //}
+            }
+        }
+
         private bool isDesignMode;
         public bool IsDesignMode
         {
@@ -227,6 +246,7 @@ namespace Sudoku
             if (!(IsInProgress || IsDesignMode)) return;
 
             List<CellState> list = new List<CellState>();
+            int inkAnswerIndex = -1;
 
             foreach (var cell in Cells.SelectedItems)
             {
@@ -254,6 +274,7 @@ namespace Sudoku
                         else
                         {
                             newState = oldState.SetValue(value);
+                            inkAnswerIndex = cellIndex;
                         }
                     }
                     else if (mode == KeyPadMode.Pencil)
@@ -288,6 +309,58 @@ namespace Sudoku
                 }
 
                 CheckComplete();
+
+                if (IsInProgress && CleanPencilMarks && inkAnswerIndex > -1)
+                    DoPencilCleanup(inkAnswerIndex);
+            }
+        }
+
+        private void DoPencilCleanup(int cellIndex)
+        {
+            List<CellState> list = new List<CellState>();
+
+            var cell = allCells[cellIndex];
+            if (!cell.Given && cell.Value > 0)
+            {
+                if (rows.TryGetValue(cell.Row, out List<CellViewModel> cellsInRow))
+                {
+                    foreach (var c in cellsInRow)
+                    {
+                        ClearCanditates(list, cell.Value, c);
+                    }
+                }
+                if (cols.TryGetValue(cell.Col, out List<CellViewModel> cellsInCol))
+                {
+                    foreach (var c in cellsInCol)
+                    {
+                        ClearCanditates(list, cell.Value, c);
+                    }
+                }
+                if (sqrs.TryGetValue(cell.Square, out List<CellViewModel> cellsInSqr))
+                {
+                    foreach (var c in cellsInSqr)
+                    {
+                        ClearCanditates(list, cell.Value, c);
+                    }
+                }
+            }
+
+            if (list.Count > 0)
+            {
+                undoStack.Push(list);
+                redoStack.Clear();
+            }
+        }
+
+        private void ClearCanditates(List<CellState> list, int value, CellViewModel cell)
+        {
+            int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+            var oldState = GetCurrentCellState(cellIndex);
+            if (oldState.HasCandidate(value))
+            {
+                var newState = oldState.RemoveCandidate(value);
+                cell.SetState(newState, HighlightIncorrect);
+                list.Add(newState);
             }
         }
 
