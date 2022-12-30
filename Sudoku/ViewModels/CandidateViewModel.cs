@@ -1,39 +1,18 @@
-﻿namespace Sudoku
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace Sudoku
 {
-    public class CandidateViewModel : ViewModelBase
+    public partial class CandidateViewModel : ObservableObject
     {
         public CandidateViewModel(int num)
         {
             Number = num.ToString();
         }
 
+        [ObservableProperty]
         private string number;
-        public string Number
-        {
-            get { return number; }
-            set
-            {
-                if (number == value)
-                    return;
 
-                number = value;
-                OnPropertyChanged(nameof(Number));
-            }
-        }
-
+        [ObservableProperty]
         private bool visible;
-        public bool Visible
-        {
-            get { return visible; }
-            set
-            {
-                if (visible == value)
-                    return;
-
-                visible = value;
-                OnPropertyChanged(nameof(Visible));
-            }
-        }
-
     }
 }

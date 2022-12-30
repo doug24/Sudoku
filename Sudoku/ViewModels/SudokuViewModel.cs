@@ -1,202 +1,72 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using QQWingLib;
 
 namespace Sudoku
 {
-    public class SudokuViewModel : ViewModelBase
+    public partial class SudokuViewModel : ObservableObject
     {
         public SudokuViewModel()
         {
         }
 
+        [ObservableProperty]
         private GameBoardViewModel gameBoard = new GameBoardViewModel();
 
-        public GameBoardViewModel GameBoard
-        {
-            get { return gameBoard; }
-            set
-            {
-                if (value == gameBoard)
-                    return;
+        [ObservableProperty]
+        private Symmetry puzzleSymmetry = Symmetry.MIRROR;
 
-                gameBoard = value;
-                OnPropertyChanged(nameof(GameBoard));
-            }
-        }
-
-        private Symmetry puzzleSymmetry = Symmetry.RANDOM;
-        public Symmetry PuzzleSymmetry
-        {
-            get { return puzzleSymmetry; }
-            set
-            {
-                if (value == puzzleSymmetry)
-                    return;
-
-                puzzleSymmetry = value;
-                OnPropertyChanged(nameof(PuzzleSymmetry));
-            }
-        }
-
+        [ObservableProperty]
         private Difficulty puzzleDifficulty = Difficulty.INTERMEDIATE;
-        public Difficulty PuzzleDifficulty
-        {
-            get { return puzzleDifficulty; }
-            set
-            {
-                if (value == puzzleDifficulty)
-                    return;
 
-                puzzleDifficulty = value;
-                OnPropertyChanged(nameof(PuzzleDifficulty));
+        [ObservableProperty]
+        private KeyPadMode inputMode = KeyPadMode.Pen;
+
+        [ObservableProperty]
+        private bool isEraser;
+
+
+        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(InputMode))
+            {
+                IsEraser = false;
             }
+            else if (e.PropertyName == nameof(IsEraser) && IsEraser)
+            {
+                InputMode = KeyPadMode.Pencil;
+            }
+
+            base.OnPropertyChanged(e);
         }
 
-        private RelayCommand openFileCommand;
-        public ICommand OpenFileCommand
-        {
-            get
-            {
-                if (openFileCommand == null)
-                {
-                    openFileCommand = new RelayCommand(
-                        p => OpenFile()
-                        );
-                }
-                return openFileCommand;
-            }
-        }
+        public ICommand NewPuzzleCommand => new RelayCommand(
+            p => GameBoard.NewPuzzle(PuzzleDifficulty, PuzzleSymmetry));
 
-        private RelayCommand saveAsCommand;
-        public ICommand SaveAsCommand
-        {
-            get
-            {
-                if (saveAsCommand == null)
-                {
-                    saveAsCommand = new RelayCommand(
-                        p => SaveAs()
-                        );
-                }
-                return saveAsCommand;
-            }
-        }
+        public ICommand SnapshotCommand => new RelayCommand(
+            p => Snapshot(),
+            q => GameBoard.IsInProgress);
 
-        private RelayCommand newPuzzleCommand;
-        public ICommand NewPuzzleCommand
-        {
-            get
-            {
-                if (newPuzzleCommand == null)
-                {
-                    newPuzzleCommand = new RelayCommand(
-                        p => GameBoard.NewPuzzle(PuzzleDifficulty, PuzzleSymmetry)
-                        );
-                }
-                return newPuzzleCommand;
-            }
-        }
+        public ICommand EnterDesignModeCommand => new RelayCommand(
+            p => GameBoard.EnterDesignMode(),
+            q => !GameBoard.IsDesignMode);
 
-        private RelayCommand snapshotCommand;
-        public ICommand SnapshotCommand
-        {
-            get
-            {
-                if (snapshotCommand == null)
-                {
-                    snapshotCommand = new RelayCommand(
-                        p => Snapshot(),
-                        q => GameBoard.IsInProgress
-                        );
-                }
-                return snapshotCommand;
-            }
-        }
+        public ICommand ExitDesignModeCommand => new RelayCommand(
+            p => GameBoard.ExitDesignMode(),
+            q => GameBoard.IsDesignMode);
 
-        private RelayCommand restoreCommand;
-        public ICommand RestoreCommand
-        {
-            get
-            {
-                if (restoreCommand == null)
-                {
-                    restoreCommand = new RelayCommand(
-                        p => Restore(),
-                        q => HasSessionFile()
-                        );
-                }
-                return restoreCommand;
-            }
-        }
+        public ICommand ClearBoardCommand => new RelayCommand(
+            p => GameBoard.ClearBoard(),
+            q => GameBoard.IsDesignMode);
 
-        private RelayCommand enterDesignModeCommand;
-        public ICommand EnterDesignModeCommand
-        {
-            get
-            {
-                if (enterDesignModeCommand == null)
-                {
-                    enterDesignModeCommand = new RelayCommand(
-                        p => GameBoard.EnterDesignMode(),
-                        q => !GameBoard.IsDesignMode
-                        );
-                }
-                return enterDesignModeCommand;
-            }
-        }
-
-        private RelayCommand exitDesignModeCommand;
-        public ICommand ExitDesignModeCommand
-        {
-            get
-            {
-                if (exitDesignModeCommand == null)
-                {
-                    exitDesignModeCommand = new RelayCommand(
-                        p => GameBoard.ExitDesignMode(),
-                        q => GameBoard.IsDesignMode
-                        );
-                }
-                return exitDesignModeCommand;
-            }
-        }
-
-        private RelayCommand clearBoardCommand;
-        public ICommand ClearBoardCommand
-        {
-            get
-            {
-                if (clearBoardCommand == null)
-                {
-                    clearBoardCommand = new RelayCommand(
-                        p => GameBoard.ClearBoard(),
-                        q => GameBoard.IsDesignMode
-                        );
-                }
-                return clearBoardCommand;
-            }
-        }
-
-        private RelayCommand numberKeyCommand;
-        public ICommand NumberKeyCommand
-        {
-            get
-            {
-                if (numberKeyCommand == null)
-                {
-                    numberKeyCommand = new RelayCommand(
-                        p => NumberKeyClick(p)
-                        );
-                }
-                return numberKeyCommand;
-            }
-        }
-
-        private void NumberKeyClick(object p)
+        [RelayCommand]
+        private void NumberKey(object p)
         {
             if (p is string num && int.TryParse(num, out int value))
             {
@@ -267,6 +137,7 @@ namespace Sudoku
             e.Handled = true;
         }
 
+        [RelayCommand]
         private void OpenFile()
         {
             OpenFileDialog dlg = new OpenFileDialog
@@ -282,6 +153,7 @@ namespace Sudoku
             }
         }
 
+        [RelayCommand]
         private void SaveAs()
         {
             SaveFileDialog dlg = new SaveFileDialog
@@ -297,12 +169,6 @@ namespace Sudoku
             }
         }
 
-        private bool HasSessionFile()
-        {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            return File.Exists(Path.Combine(path, "session.sudoku"));
-        }
-
         private void Snapshot()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -311,6 +177,7 @@ namespace Sudoku
             File.WriteAllText(file, state);
         }
 
+        [RelayCommand(CanExecute = nameof(HasSessionFile))]
         private void Restore()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -319,53 +186,14 @@ namespace Sudoku
             GameBoard.Restore(ssData);
         }
 
-        private KeyPadMode inputMode = KeyPadMode.Pen;
-        public KeyPadMode InputMode
+        private bool HasSessionFile()
         {
-            get { return inputMode; }
-            set
-            {
-                if (value == InputMode)
-                    return;
-
-                inputMode = value;
-                OnPropertyChanged(nameof(InputMode));
-                IsEraser = false;
-            }
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            return File.Exists(Path.Combine(path, "session.sudoku"));
         }
 
-        private bool isEraser;
-        public bool IsEraser
-        {
-            get { return isEraser; }
-            set
-            {
-                if (value == isEraser)
-                    return;
-
-                isEraser = value;
-                OnPropertyChanged(nameof(IsEraser));
-                if (isEraser)
-                    InputMode = KeyPadMode.Pencil;
-            }
-        }
-
-        private RelayCommand colorKeyCommand;
-        public ICommand ColorKeyCommand
-        {
-            get
-            {
-                if (colorKeyCommand == null)
-                {
-                    colorKeyCommand = new RelayCommand(
-                        p => ColorKeyClick(p)
-                        );
-                }
-                return colorKeyCommand;
-            }
-        }
-
-        private void ColorKeyClick(object p)
+        [RelayCommand]
+        private void ColorKey(object p)
         {
             if (p is Brush br)
             {
@@ -373,51 +201,15 @@ namespace Sudoku
             }
         }
 
-        private RelayCommand undoCommand;
-        public ICommand UndoCommand
-        {
-            get
-            {
-                if (undoCommand == null)
-                {
-                    undoCommand = new RelayCommand(
-                        p => GameBoard.Undo(),
-                        q => GameBoard.CanUndo
-                        );
-                }
-                return undoCommand;
-            }
-        }
+        public ICommand UndoCommand => new RelayCommand(
+            p => GameBoard.Undo(),
+            q => GameBoard.CanUndo);
 
-        private RelayCommand redoCommand;
-        public ICommand RedoCommand
-        {
-            get
-            {
-                if (redoCommand == null)
-                {
-                    redoCommand = new RelayCommand(
-                        p => GameBoard.Redo(),
-                        q => GameBoard.CanRedo
-                        );
-                }
-                return redoCommand;
-            }
-        }
+        public ICommand RedoCommand => new RelayCommand(
+            p => GameBoard.Redo(),
+            q => GameBoard.CanRedo);
 
-        private RelayCommand clearCommand;
-        public ICommand ClearCommand
-        {
-            get
-            {
-                if (clearCommand == null)
-                {
-                    clearCommand = new RelayCommand(
-                        p => GameBoard.ClearColors()
-                        );
-                }
-                return clearCommand;
-            }
-        }
+        public ICommand ClearCommand => new RelayCommand(
+            p => GameBoard.ClearColors());
     }
 }

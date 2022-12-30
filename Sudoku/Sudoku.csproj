@@ -19,6 +19,7 @@
     <Resource Include="Images\Sudoku.ico" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
     <PackageReference Include="ToggleSwitch" Version="1.2.0">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>

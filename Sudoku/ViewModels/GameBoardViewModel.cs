@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 using QQWingLib;
 
 namespace Sudoku
 {
-    public class GameBoardViewModel : ViewModelBase
+    public partial class GameBoardViewModel : ObservableObject
     {
         private readonly Stack<List<CellState>> undoStack = new Stack<List<CellState>>();
         private readonly Stack<List<CellState>> redoStack = new Stack<List<CellState>>();
@@ -53,57 +55,27 @@ namespace Sudoku
                 .ToList();
         }
 
-        private bool highlightIncorrect;
-        public bool HighlightIncorrect
+        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
         {
-            get { return highlightIncorrect; }
-            set
+            if (e.PropertyName == nameof(HighlightIncorrect))
             {
-                if (value == highlightIncorrect)
-                    return;
-
-                highlightIncorrect = value;
-                OnPropertyChanged(nameof(HighlightIncorrect));
-
                 foreach (var cell in allCells)
                 {
                     cell.Redraw(highlightIncorrect);
                 }
             }
+
+            base.OnPropertyChanged(e);
         }
 
+        [ObservableProperty]
+        private bool highlightIncorrect;
+
+        [ObservableProperty]
         private bool cleanPencilMarks;
-        public bool CleanPencilMarks
-        {
-            get { return cleanPencilMarks; }
-            set
-            {
-                if (value == cleanPencilMarks)
-                    return;
 
-                cleanPencilMarks = value;
-                OnPropertyChanged(nameof(CleanPencilMarks));
-
-                //foreach (var cell in allCells)
-                //{
-                //    cell.Redraw();
-                //}
-            }
-        }
-
+        [ObservableProperty]
         private bool isDesignMode;
-        public bool IsDesignMode
-        {
-            get { return isDesignMode; }
-            set
-            {
-                if (value == isDesignMode)
-                    return;
-
-                isDesignMode = value;
-                OnPropertyChanged(nameof(IsDesignMode));
-            }
-        }
 
         public bool IsInProgress { get; private set; }
 

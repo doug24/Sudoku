@@ -2,10 +2,11 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Sudoku
 {
-    public class CellViewModel : ViewModelBase
+    public partial class CellViewModel : ObservableObject
     {
         public CellViewModel()
         {
@@ -125,60 +126,16 @@ namespace Sudoku
             }
         }
 
+        [ObservableProperty]
         private bool given;
-        public bool Given
-        {
-            get { return given; }
-            set
-            {
-                if (given == value)
-                    return;
 
-                given = value;
-                OnPropertyChanged(nameof(Given));
-            }
-        }
-
+        [ObservableProperty]
         private string number;
-        public string Number
-        {
-            get { return number; }
-            set
-            {
-                if (number == value)
-                    return;
 
-                number = value;
-                OnPropertyChanged(nameof(Number));
-            }
-        }
-
+        [ObservableProperty]
         public Brush background = Brushes.White;
-        public Brush Background
-        {
-            get { return background; }
-            set
-            {
-                if (background == value)
-                    return;
 
-                background = value;
-                OnPropertyChanged(nameof(Background));
-            }
-        }
-
+        [ObservableProperty]
         public Brush foreground = Brushes.DarkGreen;
-        public Brush Foreground
-        {
-            get { return foreground; }
-            set
-            {
-                if (foreground == value)
-                    return;
-
-                foreground = value;
-                OnPropertyChanged(nameof(Foreground));
-            }
-        }
     }
 }
