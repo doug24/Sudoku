@@ -22,27 +22,25 @@ namespace Sudoku
 
         public async Task Generate(Difficulty difficulty, Symmetry symmetry)
         {
-            using (var cancellationTokenSource = new CancellationTokenSource())
+            using CancellationTokenSource cancellationTokenSource = new();
+            var token = cancellationTokenSource.Token;
+            try
             {
-                var token = cancellationTokenSource.Token;
-                try
+                List<Task<PuzzleData>> tasks = new();
+                for (int idx = 0; idx < 4; idx++)
                 {
-                    List<Task<PuzzleData>> tasks = new List<Task<PuzzleData>>();
-                    for (int idx = 0; idx < 4; idx++)
-                    {
-                        tasks.Add(Task.Run(() => GenerateInternal(symmetry, difficulty, token), token));
-                    }
-
-                    Task<PuzzleData> completedTask = await Task.WhenAny(tasks);
-                    cancellationTokenSource.Cancel();
-
-                    Initial = completedTask.Result.Initial;
-                    Solution = completedTask.Result.Solution;
+                    tasks.Add(Task.Run(() => GenerateInternal(symmetry, difficulty, token), token));
                 }
-                catch (Exception e)
-                {
-                    MessageBox.Show("Error generating puzzle: " + e.Message);
-                }
+
+                Task<PuzzleData> completedTask = await Task.WhenAny(tasks);
+                cancellationTokenSource.Cancel();
+
+                Initial = completedTask.Result.Initial;
+                Solution = completedTask.Result.Solution;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Error generating puzzle: " + e.Message);
             }
         }
         private static PuzzleData GenerateInternal(Symmetry symmetry, Difficulty difficulty, CancellationToken token)
@@ -50,7 +48,7 @@ namespace Sudoku
             PuzzleData result = null;
             bool done = false;
 
-            QQWing ss = new QQWing();
+            QQWing ss = new();
             ss.SetRecordHistory(true);
             //ss.SetLogHistory(true);
             ss.SetPrintStyle(PrintStyle.ONE_LINE);

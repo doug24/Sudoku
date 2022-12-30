@@ -14,10 +14,10 @@ namespace Sudoku
 {
     public partial class GameBoardViewModel : ObservableObject
     {
-        private readonly Stack<List<CellState>> undoStack = new Stack<List<CellState>>();
-        private readonly Stack<List<CellState>> redoStack = new Stack<List<CellState>>();
+        private readonly Stack<List<CellState>> undoStack = new();
+        private readonly Stack<List<CellState>> redoStack = new();
 
-        private readonly ObservableCollection<CellViewModel> list = new ObservableCollection<CellViewModel>();
+        private readonly ObservableCollection<CellViewModel> list = new();
         public MultiSelectCollectionView<CellViewModel> Cells { get; private set; }
 
         private readonly Dictionary<int, List<CellViewModel>> rows;
@@ -69,10 +69,10 @@ namespace Sudoku
         }
 
         [ObservableProperty]
-        private bool highlightIncorrect;
+        private bool highlightIncorrect = true;
 
         [ObservableProperty]
-        private bool cleanPencilMarks;
+        private bool cleanPencilMarks = true;
 
         [ObservableProperty]
         private bool isDesignMode;
@@ -81,7 +81,7 @@ namespace Sudoku
 
         internal string ToSnapshotString()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             for (int row = 0; row < 9; row++)
             {
                 for (int col = 0; col < 9; col++)
@@ -89,7 +89,7 @@ namespace Sudoku
                     int cellIndex = QQWing.RowColumnToCell(row, col);
                     var state = GetCurrentCellState(cellIndex);
                     if (col < 8)
-                        sb.Append(state.ToSnapshotString()).Append(",");
+                        sb.Append(state.ToSnapshotString()).Append(',');
                     else
                         sb.AppendLine(state.ToSnapshotString());
                 }
@@ -99,7 +99,7 @@ namespace Sudoku
 
         internal string ToSimpleSudokuString()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             for (int row = 0; row < 9; row++)
             {
                 for (int col = 0; col < 9; col++)
@@ -173,7 +173,7 @@ namespace Sudoku
 
         internal void ClearCell()
         {
-            List<CellState> list = new List<CellState>();
+            List<CellState> list = new();
             foreach (var cell in Cells.SelectedItems)
             {
                 int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
@@ -217,7 +217,7 @@ namespace Sudoku
         {
             if (!(IsInProgress || IsDesignMode)) return;
 
-            List<CellState> list = new List<CellState>();
+            List<CellState> list = new();
             int inkAnswerIndex = -1;
 
             foreach (var cell in Cells.SelectedItems)
@@ -226,7 +226,7 @@ namespace Sudoku
 
                 if (IsDesignMode)
                 {
-                    cell.Initialize(new CellState(cellIndex, true, value), value);
+                    cell.Initialize(new(cellIndex, true, value), value);
                 }
                 else
                 {
@@ -289,7 +289,7 @@ namespace Sudoku
 
         private void DoPencilCleanup(int cellIndex)
         {
-            List<CellState> list = new List<CellState>();
+            List<CellState> list = new();
 
             var cell = allCells[cellIndex];
             if (!cell.Given && cell.Value > 0)
@@ -428,7 +428,7 @@ namespace Sudoku
             }
         }
 
-        private int GetSquare(int row, int col)
+        private static int GetSquare(int row, int col)
         {
             int cell = QQWing.RowColumnToCell(row, col);
             return QQWing.CellToSection(cell);
@@ -441,7 +441,7 @@ namespace Sudoku
 
             int[] initial = GetPuzzle(ssData);
 
-            QQWing ss = new QQWing();
+            QQWing ss = new();
             ss.SetPuzzle(initial);
             ss.Solve();
             if (ss.IsSolved())
@@ -450,7 +450,7 @@ namespace Sudoku
                 if (ss.HasMultipleSolutions())
                     MessageBox.Show("Puzzle has multiple solutions");
 
-                List<CellState> list = new List<CellState>();
+                List<CellState> list = new ();
 
                 for (int row = 0; row < 9; row++)
                 {
@@ -471,17 +471,17 @@ namespace Sudoku
             }
         }
 
-        private int[] GetPuzzle(string[] ssData)
+        private static int[] GetPuzzle(string[] ssData)
         {
             if (ssData.Length != 9)
-                return new int[0];
+                return Array.Empty<int>();
 
             int[] puzzle = new int[81];
             for (int row = 0; row < 9; row++)
             {
                 string[] parts = ssData[row].Split(',');
                 if (parts.Length != 9)
-                    return new int[0];
+                    return Array.Empty<int>();
 
                 for (int col = 0; col < 9; col++)
                 {
@@ -540,7 +540,7 @@ namespace Sudoku
                 }
             }
 
-            QQWing ss = new QQWing();
+            QQWing ss = new();
             ss.SetPuzzle(initial);
             ss.Solve();
             if (ss.IsSolved())
@@ -550,7 +550,7 @@ namespace Sudoku
                     MessageBox.Show("Puzzle has multiple solutions");
 
                 undoStack.Clear();
-                List<CellState> list = new List<CellState>();
+                List<CellState> list = new();
 
                 int idx = 0;
                 foreach (var cell in allCells)
@@ -558,7 +558,7 @@ namespace Sudoku
                     int given = initial[idx];
                     int answer = solution[idx];
 
-                    var cellState = new CellState(idx, given > 0, Math.Max(0, given));
+                    CellState cellState = new(idx, given > 0, Math.Max(0, given));
                     cell.Initialize(cellState, answer);
 
                     list.Add(cellState);
@@ -585,13 +585,13 @@ namespace Sudoku
         internal async void NewPuzzle(Difficulty difficulty, Symmetry symmetry)
         {
             ClearBoard();
-            Puzzle puz = new Puzzle();
+            Puzzle puz = new();
             await puz.Generate(difficulty, symmetry);
 
             if (puz.Initial.Length == allCells.Count)
             {
                 undoStack.Clear();
-                List<CellState> list = new List<CellState>();
+                List<CellState> list = new();
 
                 int idx = 0;
                 foreach (var cell in allCells)
@@ -599,7 +599,7 @@ namespace Sudoku
                     int given = puz.Initial[idx];
                     int answer = puz.Solution[idx];
 
-                    var cellState = new CellState(idx, given > 0, Math.Max(0, given));
+                    CellState cellState = new(idx, given > 0, Math.Max(0, given));
                     cell.Initialize(cellState, answer);
 
                     list.Add(cellState);
@@ -634,7 +634,7 @@ namespace Sudoku
                 }
             }
 
-            QQWing ss = new QQWing();
+            QQWing ss = new();
             ss.SetPuzzle(initial);
             ss.Solve();
             if (ss.IsSolved())
@@ -644,7 +644,7 @@ namespace Sudoku
                     MessageBox.Show("Puzzle has multiple solutions");
 
                 undoStack.Clear();
-                List<CellState> list = new List<CellState>();
+                List<CellState> list = new();
 
                 int idx = 0;
                 foreach (var cell in allCells)
@@ -652,7 +652,7 @@ namespace Sudoku
                     int given = initial[idx];
                     int answer = solution[idx];
 
-                    var cellState = new CellState(idx, given > 0, Math.Max(0, given));
+                    CellState cellState = new(idx, given > 0, Math.Max(0, given));
                     cell.Initialize(cellState, answer);
 
                     list.Add(cellState);

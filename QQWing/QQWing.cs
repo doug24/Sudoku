@@ -48,7 +48,7 @@ namespace QQWingLib
 
         private static readonly int POSSIBILITY_SIZE = BOARD_SIZE * ROW_COL_SEC_SIZE;
 
-        private static readonly Random random = new Random();
+        private static readonly Random random = new();
 
         /// <summary>
         /// The last round of solving
@@ -111,14 +111,14 @@ namespace QQWingLib
         /// A list of moves used to solve the puzzle. This list contains all moves,
         /// even on solve branches that did not lead to a solution.
         /// </summary>
-        private readonly List<LogItem> solveHistory = new List<LogItem>();
+        private readonly List<LogItem> solveHistory = new();
 
         /// <summary>
         /// A list of moves used to solve the puzzle. This list contains only the
         /// moves needed to solve the puzzle, but doesn't contain information about
         /// bad guesses.
         /// </summary>
-        private readonly List<LogItem> solveInstructions = new List<LogItem>();
+        private readonly List<LogItem> solveInstructions = new();
 
         /// <summary>
         /// The style with which to print puzzles and solutions
@@ -479,7 +479,7 @@ namespace QQWingLib
 
         private string HistoryToString(List<LogItem> v)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             if (!recordHistory)
             {
                 sb.Append("History was not recorded.").Append(NL);
@@ -507,7 +507,7 @@ namespace QQWingLib
             }
             if (printStyle == PrintStyle.CSV)
             {
-                sb.Append(",").Append(NL);
+                sb.Append(',').Append(NL);
             }
             else
             {
@@ -708,7 +708,7 @@ namespace QQWingLib
                     possibilities[i] = 0;
                 }
             }
-            while (solveInstructions.Count > 0 && solveInstructions[solveInstructions.Count - 1].GetRound() == round)
+            while (solveInstructions.Count > 0 && solveInstructions[^1].GetRound() == round)
             {
                 int i = solveInstructions.Count - 1;
                 solveInstructions.RemoveAt(i);
@@ -1658,12 +1658,12 @@ namespace QQWingLib
 
         private string PuzzleToString(int[] sudoku)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             for (int i = 0; i < BOARD_SIZE; i++)
             {
                 if (printStyle == PrintStyle.READABLE)
                 {
-                    sb.Append(" ");
+                    sb.Append(' ');
                 }
                 if (sudoku[i] == 0)
                 {
@@ -1677,7 +1677,7 @@ namespace QQWingLib
                 {
                     if (printStyle == PrintStyle.CSV)
                     {
-                        sb.Append(",");
+                        sb.Append(',');
                     }
                     else
                     {
@@ -1757,7 +1757,7 @@ namespace QQWingLib
         /// Given a vector of LogItems, determine how many log items in the vector
         /// are of the specified type.
         /// </summary>
-        private int GetLogCount(List<LogItem> v, LogType type)
+        private static int GetLogCount(List<LogItem> v, LogType type)
         {
             int count = 0;
             for (int i = 0; i < v.Count; i++)
@@ -1776,9 +1776,7 @@ namespace QQWingLib
             {
                 int tailSize = size - i;
                 int randTailPos = random.Next() % tailSize + i;
-                int temp = array[i];
-                array[i] = array[randTailPos];
-                array[randTailPos] = temp;
+                (array[randTailPos], array[i]) = (array[i], array[randTailPos]);
             }
         }
 

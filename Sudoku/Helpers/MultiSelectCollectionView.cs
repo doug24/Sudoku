@@ -15,14 +15,13 @@ namespace Sudoku
     public class MultiSelectCollectionView<T> : ListCollectionView, IMultiSelectCollectionView
     {
         private bool ignoreSelectionChanged;
-        private readonly List<Selector> controls = new List<Selector>();
+        private readonly List<Selector> controls = new();
 
         public event EventHandler SelectionChanged;
 
         public MultiSelectCollectionView(IList list)
             : base(list)
         {
-            SelectedItems = new ObservableCollection<T>();
         }
 
         void IMultiSelectCollectionView.AddControl(Selector selector)
@@ -40,7 +39,7 @@ namespace Sudoku
             }
         }
 
-        public ObservableCollection<T> SelectedItems { get; private set; }
+        public ObservableCollection<T> SelectedItems { get; private set; } = new();
 
         private void SetSelection(Selector selector)
         {

@@ -17,7 +17,7 @@ namespace Sudoku
         }
 
         [ObservableProperty]
-        private GameBoardViewModel gameBoard = new GameBoardViewModel();
+        private GameBoardViewModel gameBoard = new();
 
         [ObservableProperty]
         private Symmetry puzzleSymmetry = Symmetry.MIRROR;
@@ -66,9 +66,9 @@ namespace Sudoku
             q => GameBoard.IsDesignMode);
 
         [RelayCommand]
-        private void NumberKey(object p)
+        private void NumberKey(string num)
         {
-            if (p is string num && int.TryParse(num, out int value))
+            if (int.TryParse(num, out int value))
             {
                 GameBoard.KeyDown(value, InputMode);
             }
@@ -140,7 +140,7 @@ namespace Sudoku
         [RelayCommand]
         private void OpenFile()
         {
-            OpenFileDialog dlg = new OpenFileDialog
+            OpenFileDialog dlg = new()
             {
                 DefaultExt = ".ss",
                 Filter = "Sudoku Files (.ss)|*.ss"
@@ -156,7 +156,7 @@ namespace Sudoku
         [RelayCommand]
         private void SaveAs()
         {
-            SaveFileDialog dlg = new SaveFileDialog
+            SaveFileDialog dlg = new()
             {
                 DefaultExt = ".ss",
                 Filter = "Sudoku Files (.ss)|*.ss"
@@ -186,19 +186,16 @@ namespace Sudoku
             GameBoard.Restore(ssData);
         }
 
-        private bool HasSessionFile()
+        private static bool HasSessionFile()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             return File.Exists(Path.Combine(path, "session.sudoku"));
         }
 
         [RelayCommand]
-        private void ColorKey(object p)
+        private void ColorKey(Brush br)
         {
-            if (p is Brush br)
-            {
-                GameBoard.SetColor(br, InputMode);
-            }
+            GameBoard.SetColor(br, InputMode);
         }
 
         public ICommand UndoCommand => new RelayCommand(

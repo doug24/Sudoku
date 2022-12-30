@@ -11,7 +11,7 @@ namespace Sudoku
     public class CellState
     {
         public CellState(int cellIndex, bool given, int value)
-            : this(cellIndex, given, value, new int[0])
+            : this(cellIndex, given, value, Array.Empty<int>())
         {
         }
 
@@ -23,7 +23,7 @@ namespace Sudoku
             Candidates = candidates;
         }
 
-        public static CellState Empty => new CellState(-1, false, 0);
+        public static CellState Empty => new(-1, false, 0);
 
         public int CellIndex { get; private set; }
         public bool Given { get; private set; }
@@ -123,17 +123,17 @@ namespace Sudoku
                 else
                 {
                     value = text[0] - '0';
-                    return new CellState(cellIndex, true, value, new int[0]);
+                    return new CellState(cellIndex, true, value);
                 }
             }
             else if (text.Length == 2 && text[0] == 'u')
             {
                 value = text[1] - '0';
-                return new CellState(cellIndex, false, value, new int[0]);
+                return new CellState(cellIndex, false, value);
             }
             else if (text.Length > 1 && text[0] == 'c')
             {
-                List<int> list = new List<int>();
+                List<int> list = new();
                 foreach (char ch in text.TrimStart('c'))
                 {
                     list.Add(ch - '0');

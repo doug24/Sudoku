@@ -9,7 +9,7 @@ namespace Sudoku
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(parameter is string parameterString))
+            if (parameter is not string parameterString)
                 return DependencyProperty.UnsetValue;
 
             if (Enum.IsDefined(value.GetType(), value) == false)
@@ -24,7 +24,7 @@ namespace Sudoku
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(parameter is string parameterString))
+            if (parameter is not string parameterString)
                 return DependencyProperty.UnsetValue;
 
             return Enum.Parse(targetType, parameterString);

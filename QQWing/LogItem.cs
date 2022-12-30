@@ -127,7 +127,7 @@ namespace QQWingLib
         /// </summary>
         public string GetDescription()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append("Round: ").Append(GetRound());
             sb.Append(" - ");
             sb.Append(GetLogType().GetDescription());
@@ -143,7 +143,7 @@ namespace QQWingLib
                     if (position > -1) sb.Append(" - ");
                     sb.Append("Value: ").Append(GetValue());
                 }
-                sb.Append(")");
+                sb.Append(')');
             }
             return sb.ToString();
         }
