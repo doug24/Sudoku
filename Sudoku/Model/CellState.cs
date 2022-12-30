@@ -116,8 +116,15 @@ namespace Sudoku
             }
             else if (text.Length == 1)
             {
-                value = text[0] - '0';
-                return new CellState(cellIndex, true, value, new int[0]);
+                if (text[0] == 'c') // empty candidates
+                {
+                    return new CellState(cellIndex, false, 0);
+                }
+                else
+                {
+                    value = text[0] - '0';
+                    return new CellState(cellIndex, true, value, new int[0]);
+                }
             }
             else if (text.Length == 2 && text[0] == 'u')
             {
