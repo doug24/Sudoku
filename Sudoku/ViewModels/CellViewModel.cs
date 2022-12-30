@@ -52,7 +52,7 @@ namespace Sudoku
         public int Value { get; private set; }
         public int Answer { get; private set; }
 
-        public ObservableCollection<CandidateViewModel> Candidates { get; } = new ObservableCollection<CandidateViewModel>();
+        public ObservableCollection<CandidateViewModel> Candidates { get; } = new();
 
         public void Reset()
         {
@@ -130,7 +130,7 @@ namespace Sudoku
         private bool given;
 
         [ObservableProperty]
-        private string number;
+        private string number = string.Empty;
 
         [ObservableProperty]
         public Brush background = Brushes.White;

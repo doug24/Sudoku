@@ -13,14 +13,14 @@ namespace Sudoku
     /// </summary>
     public class RelayCommand : ICommand
     {
-        private readonly Action<object> execute;
-        private readonly Predicate<object> canExecute;
+        private readonly Action<object?> execute;
+        private readonly Predicate<object?>? canExecute;
 
         /// <summary>
         /// Creates a new command that can always execute.
         /// </summary>
         /// <param name="execute">The execution logic.</param>
-        public RelayCommand(Action<object> execute)
+        public RelayCommand(Action<object?> execute)
             : this(execute, null)
         {
         }
@@ -30,28 +30,25 @@ namespace Sudoku
         /// </summary>
         /// <param name="execute">The execution logic.</param>
         /// <param name="canExecute">The execution status logic.</param>
-        public RelayCommand(Action<object> execute, Predicate<object> canExecute)
+        public RelayCommand(Action<object?> execute, Predicate<object?>? canExecute)
         {
-            if (execute == null)
-                throw new ArgumentNullException("execute");
-
             this.execute = execute;
             this.canExecute = canExecute;
         }
 
         [DebuggerStepThrough]
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object? parameter)
         {
-            return canExecute == null ? true : canExecute(parameter);
+            return canExecute == null || canExecute(parameter);
         }
 
-        public event EventHandler CanExecuteChanged
+        public event EventHandler? CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
         }
 
-        public void Execute(object parameter)
+        public void Execute(object? parameter)
         {
             execute(parameter);
         }

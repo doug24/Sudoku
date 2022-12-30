@@ -236,7 +236,7 @@ namespace Sudoku
                         continue;
                     }
 
-                    CellState newState = null;
+                    CellState? newState = null;
                     if (mode == KeyPadMode.Pen)
                     {
                         if (oldState.HasValue(value))
@@ -294,21 +294,21 @@ namespace Sudoku
             var cell = allCells[cellIndex];
             if (!cell.Given && cell.Value > 0)
             {
-                if (rows.TryGetValue(cell.Row, out List<CellViewModel> cellsInRow))
+                if (rows.TryGetValue(cell.Row, out List<CellViewModel>? cellsInRow))
                 {
                     foreach (var c in cellsInRow)
                     {
                         ClearCanditates(list, cell.Value, c);
                     }
                 }
-                if (cols.TryGetValue(cell.Col, out List<CellViewModel> cellsInCol))
+                if (cols.TryGetValue(cell.Col, out List<CellViewModel>? cellsInCol))
                 {
                     foreach (var c in cellsInCol)
                     {
                         ClearCanditates(list, cell.Value, c);
                     }
                 }
-                if (sqrs.TryGetValue(cell.Square, out List<CellViewModel> cellsInSqr))
+                if (sqrs.TryGetValue(cell.Square, out List<CellViewModel>? cellsInSqr))
                 {
                     foreach (var c in cellsInSqr)
                     {
@@ -372,7 +372,7 @@ namespace Sudoku
 
         private bool UniqueValue(CellViewModel cell)
         {
-            if (rows.TryGetValue(cell.Row, out List<CellViewModel> cellsInRow))
+            if (rows.TryGetValue(cell.Row, out List<CellViewModel>? cellsInRow))
             {
                 foreach (var c in cellsInRow)
                 {
@@ -382,7 +382,7 @@ namespace Sudoku
                     }
                 }
             }
-            if (cols.TryGetValue(cell.Col, out List<CellViewModel> cellsInCol))
+            if (cols.TryGetValue(cell.Col, out List<CellViewModel>? cellsInCol))
             {
                 foreach (var c in cellsInCol)
                 {
@@ -392,7 +392,7 @@ namespace Sudoku
                     }
                 }
             }
-            if (sqrs.TryGetValue(cell.Square, out List<CellViewModel> cellsInSqr))
+            if (sqrs.TryGetValue(cell.Square, out List<CellViewModel>? cellsInSqr))
             {
                 foreach (var c in cellsInSqr)
                 {
@@ -417,7 +417,7 @@ namespace Sudoku
                     }
                 }
             }
-            return null;
+            return CellState.Empty;
         }
 
         internal void SetColor(Brush br, KeyPadMode mode)

@@ -13,8 +13,8 @@ namespace Sudoku
         {
         }
 
-        public int[] Initial { get; private set; }
-        public int[] Solution { get; private set; }
+        public int[] Initial { get; private set; } = Array.Empty<int>();
+        public int[] Solution { get; private set; } = Array.Empty<int>();
 
         //public string Initial  { get => ".....9.5.1.....2...2.7..8.6.45.1....89..4.51............8..2..9.5.4.8.....1..7..."; }
         //public string Solution { get => "784629351136584297529731846645913728897246513312875964478152639953468172261397485"; }
@@ -45,7 +45,6 @@ namespace Sudoku
         }
         private static PuzzleData GenerateInternal(Symmetry symmetry, Difficulty difficulty, CancellationToken token)
         {
-            PuzzleData result = null;
             bool done = false;
 
             QQWing ss = new();
@@ -85,7 +84,7 @@ namespace Sudoku
                 {
                     if (ss.IsSolved())
                     {
-                        result = new PuzzleData(
+                        return new PuzzleData(
                             ss.GetPuzzle(),
                             ss.GetSolution());
                     }
@@ -96,7 +95,7 @@ namespace Sudoku
                 }
             }
 
-            return result;
+            return PuzzleData.Empty;
         }
     }
 
@@ -110,6 +109,8 @@ namespace Sudoku
 
         public int[] Initial { get; private set; }
         public int[] Solution { get; private set; }
+
+        public static PuzzleData Empty => new(Array.Empty<int>(), Array.Empty<int>());
 
         public override string ToString()
         {

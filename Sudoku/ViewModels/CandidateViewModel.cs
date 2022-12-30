@@ -10,7 +10,7 @@ namespace Sudoku
         }
 
         [ObservableProperty]
-        private string number;
+        private string number = string.Empty;
 
         [ObservableProperty]
         private bool visible;

@@ -17,7 +17,7 @@ namespace Sudoku
         private bool ignoreSelectionChanged;
         private readonly List<Selector> controls = new();
 
-        public event EventHandler SelectionChanged;
+        public event EventHandler? SelectionChanged;
 
         public MultiSelectCollectionView(IList list)
             : base(list)

@@ -141,7 +141,8 @@ namespace Sudoku
                 list.Sort();
                 return new CellState(cellIndex, false, 0, list.ToArray());
             }
-            return null;
+
+            return Empty;
         }
     }
 }
