@@ -18,7 +18,7 @@
         <ListBox x:Name="gameListBox"
                  ItemsSource="{Binding Cells}"
                  SelectionMode="Extended"
-                 PreviewTouchDown="ListBox_PreviewTouchDown"
+                 IsSynchronizedWithCurrentItem="True"
                  local:MultiSelect.IsEnabled="True"
                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
                  Background="DarkViolet"
