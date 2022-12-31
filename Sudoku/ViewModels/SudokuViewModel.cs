@@ -4,7 +4,6 @@ using System.IO;
 using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using QQWingLib;
 
@@ -65,12 +64,46 @@ namespace Sudoku
             p => GameBoard.ClearBoard(),
             q => GameBoard.IsDesignMode);
 
-        [RelayCommand]
-        private void NumberKey(string num)
+        public ICommand NumberKeyCommand => new RelayCommand(
+            p => NumberKey(p));
+
+        public ICommand ColorKeyCommand => new RelayCommand(
+            p => ColorKey(p));
+
+        public ICommand OpenFileCommand => new RelayCommand(
+            p => OpenFile());
+
+        public ICommand SaveAsCommand => new RelayCommand(
+            p => SaveAs());
+
+        public ICommand RestoreCommand => new RelayCommand(
+            p => Restore(),
+            q => HasSessionFile());
+
+        public ICommand UndoCommand => new RelayCommand(
+            p => GameBoard.Undo(),
+            q => GameBoard.CanUndo);
+
+        public ICommand RedoCommand => new RelayCommand(
+            p => GameBoard.Redo(),
+            q => GameBoard.CanRedo);
+
+        public ICommand ClearCommand => new RelayCommand(
+            p => GameBoard.ClearColors());
+
+        private void NumberKey(object p)
         {
-            if (int.TryParse(num, out int value))
+            if (p is string num && int.TryParse(num, out int value))
             {
                 GameBoard.KeyDown(value, InputMode);
+            }
+        }
+
+        private void ColorKey(object p)
+        {
+            if (p is Brush br)
+            {
+                GameBoard.SetColor(br, InputMode);
             }
         }
 
@@ -137,7 +170,6 @@ namespace Sudoku
             e.Handled = true;
         }
 
-        [RelayCommand]
         private void OpenFile()
         {
             OpenFileDialog dlg = new()
@@ -153,7 +185,6 @@ namespace Sudoku
             }
         }
 
-        [RelayCommand]
         private void SaveAs()
         {
             SaveFileDialog dlg = new()
@@ -177,7 +208,6 @@ namespace Sudoku
             File.WriteAllText(file, state);
         }
 
-        [RelayCommand(CanExecute = nameof(HasSessionFile))]
         private void Restore()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -191,22 +221,5 @@ namespace Sudoku
             var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             return File.Exists(Path.Combine(path, "session.sudoku"));
         }
-
-        [RelayCommand]
-        private void ColorKey(Brush br)
-        {
-            GameBoard.SetColor(br, InputMode);
-        }
-
-        public ICommand UndoCommand => new RelayCommand(
-            p => GameBoard.Undo(),
-            q => GameBoard.CanUndo);
-
-        public ICommand RedoCommand => new RelayCommand(
-            p => GameBoard.Redo(),
-            q => GameBoard.CanRedo);
-
-        public ICommand ClearCommand => new RelayCommand(
-            p => GameBoard.ClearColors());
     }
 }
