@@ -26,14 +26,14 @@ namespace Sudoku
 
         void IMultiSelectCollectionView.AddControl(Selector selector)
         {
-            this.controls.Add(selector);
+            controls.Add(selector);
             SetSelection(selector);
             selector.SelectionChanged += OnSelectionChanged;
         }
 
         void IMultiSelectCollectionView.RemoveControl(Selector selector)
         {
-            if (this.controls.Remove(selector))
+            if (controls.Remove(selector))
             {
                 selector.SelectionChanged -= OnSelectionChanged;
             }
@@ -65,7 +65,7 @@ namespace Sudoku
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!this.ignoreSelectionChanged)
+            if (!ignoreSelectionChanged)
             {
                 bool changed = false;
 
@@ -92,7 +92,7 @@ namespace Sudoku
 
                     if (changed)
                     {
-                        foreach (Selector control in this.controls)
+                        foreach (Selector control in controls)
                         {
                             if (control != sender)
                             {
