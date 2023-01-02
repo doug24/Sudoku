@@ -23,9 +23,6 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <!--<Border BorderThickness="1" BorderBrush="DimGray" Background="{Binding Background}" CornerRadius="3">
-        <Border BorderThickness="2" BorderBrush="Yellow">
-        <Border Background="LightGreen">-->
     <Grid>
         <Border Background="{Binding Background}" Margin="2"/>
         <Viewbox>
@@ -43,9 +40,7 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
+        <Border x:Name="brdr" Background="White" Opacity=".01" />
 
     </Grid>
-    <!--</Border>
-        </Border>
-    </Border>-->
 </UserControl>
