@@ -40,7 +40,6 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
-        <Border x:Name="brdr" Background="White" Opacity=".01" />
 
     </Grid>
 </UserControl>
