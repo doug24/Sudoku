@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30011.22
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sudoku", "Sudoku\Sudoku.csproj", "{EC8FF21B-0CD3-4230-923A-D67F3EF20D3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sudoku", "Sudoku\Sudoku.csproj", "{EC8FF21B-0CD3-4230-923A-D67F3EF20D3B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQWing", "QQWing\QQWing.csproj", "{6481DBB3-06F2-4105-910F-9483B85CCCEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QQWing", "QQWing\QQWing.csproj", "{6481DBB3-06F2-4105-910F-9483B85CCCEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQWingTest", "QQWingTest\QQWingTest.csproj", "{21ADDF2A-DF9B-43F5-A968-ADF219579D53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{6481DBB3-06F2-4105-910F-9483B85CCCEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6481DBB3-06F2-4105-910F-9483B85CCCEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6481DBB3-06F2-4105-910F-9483B85CCCEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21ADDF2A-DF9B-43F5-A968-ADF219579D53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21ADDF2A-DF9B-43F5-A968-ADF219579D53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21ADDF2A-DF9B-43F5-A968-ADF219579D53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21ADDF2A-DF9B-43F5-A968-ADF219579D53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

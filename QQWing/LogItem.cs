@@ -148,6 +148,24 @@ namespace QQWingLib
             return sb.ToString();
         }
 
+        public string GetCompactString()
+        {
+            StringBuilder sb = new();
+            sb.Append($"R{round}|");
+            sb.Append(type.ToString()).Append('|');
+            if (value > 0 || position > -1)
+            {
+                sb.Append($"({GetRow()},{GetColumn()})");
+                if (value > 0)
+                {
+                    if (position > -1)
+                        sb.Append('=');
+                    sb.Append(GetValue());
+                }
+            }
+            return sb.ToString();
+        }
+
         public override string ToString()
         {
             return GetDescription();

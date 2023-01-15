@@ -490,38 +490,16 @@ namespace QQWingLib
 
         private string HistoryToString(List<LogItem> v)
         {
-            StringBuilder sb = new();
             if (!recordHistory)
             {
-                sb.Append("History was not recorded.").Append(NL);
-                if (printStyle == PrintStyle.CSV)
-                {
-                    sb.Append(" -- ").Append(NL);
-                }
-                else
-                {
-                    sb.Append(NL);
-                }
+                return "History was not recorded.";
             }
+
+            StringBuilder sb = new();
             for (int i = 0; i < v.Count; i++)
             {
-                sb.Append(i + 1 + ". ").Append(NL);
-                v[i].Print();
-                if (printStyle == PrintStyle.CSV)
-                {
-                    sb.Append(" -- ").Append(NL);
-                }
-                else
-                {
-                    sb.Append(NL);
-                }
-            }
-            if (printStyle == PrintStyle.CSV)
-            {
-                sb.Append(',').Append(NL);
-            }
-            else
-            {
+                sb.Append($"{i + 1}.".PadLeft(4)).Append(' ');
+                sb.Append(v[i].GetDescription());
                 sb.Append(NL);
             }
             return sb.ToString();
@@ -541,6 +519,28 @@ namespace QQWingLib
             else
             {
                 return "No solve instructions - Puzzle is not possible to solve.";
+            }
+        }
+
+        public string[] GetCompactSolveInstructions()
+        {
+            if (IsSolved())
+            {
+                if (!recordHistory)
+                {
+                    return new string[] { "History was not recorded." };
+                }
+
+                List<string> result = new();
+                for (int i = 0; i < solveInstructions.Count; i++)
+                {
+                    result.Add(solveInstructions[i].GetCompactString());
+                }
+                return result.ToArray();
+            }
+            else
+            {
+                return new string[] { "No solve instructions - Puzzle is not possible to solve." };
             }
         }
 
@@ -1725,6 +1725,21 @@ namespace QQWingLib
         }
 
         /// <summary>
+        /// Creates a string for an int array initializer: { 0, 1, 0, 0, 5 ...}
+        /// </summary>
+        private static string ToIntArrayString(int[] array)
+        {
+            StringBuilder sb = new();
+            sb.Append("{ ");
+            for (int idx = 0; idx < array.Length; idx++)
+            {
+                sb.Append(array[idx]).Append(", ");
+            }
+            sb.Append('}');
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// Print the sudoku puzzle.
         /// </summary>
         public void PrintPuzzle()
@@ -1735,6 +1750,11 @@ namespace QQWingLib
         public string GetPuzzleString()
         {
             return PuzzleToString(puzzle);
+        }
+
+        public string GetPuzzleArray()
+        {
+            return ToIntArrayString(puzzle);
         }
 
         public int[] GetPuzzle()
@@ -1755,6 +1775,11 @@ namespace QQWingLib
         public string GetSolutionString()
         {
             return PuzzleToString(solution);
+        }
+
+        public string GetSolutionArray()
+        {
+            return ToIntArrayString(solution);
         }
 
         public int[] GetSolution()
