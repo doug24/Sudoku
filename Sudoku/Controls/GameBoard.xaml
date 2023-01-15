@@ -21,38 +21,11 @@
                  IsSynchronizedWithCurrentItem="True"
                  local:MultiSelect.IsEnabled="True"
                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                 Background="DarkViolet"
+                 Background="White"
                  Margin="3">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition Height="2"/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition Height="2"/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="2"/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="2"/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                    </Grid>
+                    <UniformGrid/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
@@ -65,13 +38,19 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                <Border x:Name="outerSelectionBorder" BorderThickness="1" BorderBrush="White" Background="White">
-                                    <Border BorderThickness="1" BorderBrush="DimGray" Background="{Binding Background}" CornerRadius="3">
-                                        <Border x:Name="innerSelectionBorder" BorderThickness="2" BorderBrush="Transparent" CornerRadius="3">
-                                            <ContentPresenter/>
+                                <Grid>
+                                    <Border BorderThickness="0,0,2.5,0" BorderBrush="{Binding RightBrush}" Margin="0"/>
+                                    <Border BorderThickness="0,0,0,2.5" BorderBrush="{Binding BottomBrush}" Margin="0"/>
+                                    <Border x:Name="outerSelectionBorder" BorderThickness="1" BorderBrush="Transparent" Background="White" Margin="0,0,2.5,2.5" CornerRadius="4">
+                                        <Border BorderThickness="1" BorderBrush="DimGray" Background="{Binding Background}" CornerRadius="3">
+                                            <Border x:Name="innerSelectionBorder" BorderThickness="2" BorderBrush="Transparent" CornerRadius="3">
+                                                <ContentPresenter/>
+                                            </Border>
                                         </Border>
                                     </Border>
-                                </Border>
+
+
+                                </Grid>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsSelected" Value="True">
                                         <Setter TargetName="outerSelectionBorder" Property="BorderBrush" Value="Black"/>
@@ -81,8 +60,6 @@
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
-                    <Setter Property="Grid.Row" Value="{Binding LayoutRow}"/>
-                    <Setter Property="Grid.Column" Value="{Binding LayoutCol}"/>
                     <Setter Property="Margin" Value="0"/>
                 </Style>
             </ListBox.ItemContainerStyle>

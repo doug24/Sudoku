@@ -22,7 +22,7 @@ namespace Sudoku
 
         private readonly Dictionary<int, List<CellViewModel>> rows;
         private readonly Dictionary<int, List<CellViewModel>> cols;
-        private readonly Dictionary<int, List<CellViewModel>> sqrs;
+        private readonly Dictionary<int, List<CellViewModel>> sects;
         private readonly List<CellViewModel> allCells;
 
         public GameBoardViewModel()
@@ -33,7 +33,7 @@ namespace Sudoku
             {
                 for (int col = 0; col < 9; col++)
                 {
-                    list.Add(new CellViewModel(row, col, GetSquare(row, col)));
+                    list.Add(new CellViewModel(row, col));
                 }
             }
 
@@ -45,7 +45,7 @@ namespace Sudoku
                 .OrderBy(v => v.Key)
                 .ToDictionary(v => v.Key, v => v.OrderBy(c => c.Row).ToList());
 
-            sqrs = list.GroupBy(cell => cell.Square)
+            sects = list.GroupBy(cell => cell.Section)
                 .OrderBy(v => v.Key)
                 .ToDictionary(v => v.Key, v => v.OrderBy(c => c.Row).ThenBy(c => c.Col).ToList());
 
@@ -308,9 +308,9 @@ namespace Sudoku
                         ClearCanditates(list, cell.Value, c);
                     }
                 }
-                if (sqrs.TryGetValue(cell.Square, out List<CellViewModel>? cellsInSqr))
+                if (sects.TryGetValue(cell.Section, out List<CellViewModel>? cellsInSect))
                 {
-                    foreach (var c in cellsInSqr)
+                    foreach (var c in cellsInSect)
                     {
                         ClearCanditates(list, cell.Value, c);
                     }
@@ -392,9 +392,9 @@ namespace Sudoku
                     }
                 }
             }
-            if (sqrs.TryGetValue(cell.Square, out List<CellViewModel>? cellsInSqr))
+            if (sects.TryGetValue(cell.Section, out List<CellViewModel>? cellsInSect))
             {
-                foreach (var c in cellsInSqr)
+                foreach (var c in cellsInSect)
                 {
                     if (c != cell && c.Value > 0 && c.Value == cell.Value)
                     {
@@ -428,12 +428,6 @@ namespace Sudoku
             }
         }
 
-        private static int GetSquare(int row, int col)
-        {
-            int cell = QQWing.RowColumnToCell(row, col);
-            return QQWing.CellToSection(cell);
-        }
-
         internal void Restore(string[] ssData)
         {
             ClearBoard();
@@ -450,7 +444,7 @@ namespace Sudoku
                 if (ss.HasMultipleSolutions())
                     MessageBox.Show("Puzzle has multiple solutions");
 
-                List<CellState> list = new ();
+                List<CellState> list = new();
 
                 for (int row = 0; row < 9; row++)
                 {

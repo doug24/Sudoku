@@ -32,6 +32,7 @@
                            VerticalAlignment="Center"
                            HorizontalAlignment="Center"/>
         </Viewbox>
+        <!--<TextBlock Text="{Binding CellIndex}" FontSize="9" Foreground="Red"/>-->
         <ItemsControl ItemsSource="{Binding Path=Candidates}" x:Name="Candidates"
                           ItemTemplate="{StaticResource CandidateTemplate}">
             <ItemsControl.ItemsPanel>

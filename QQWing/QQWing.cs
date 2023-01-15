@@ -38,15 +38,20 @@ namespace QQWingLib
 
         private static readonly string NL = Environment.NewLine;
 
-        private static readonly int GRID_SIZE = 3;
+        /// <summary>nominal value = 3</summary>
+        internal static readonly int GRID_SIZE = 3;
 
-        private static readonly int ROW_COL_SEC_SIZE = GRID_SIZE * GRID_SIZE;
+        /// <summary>nominal value = 9</summary>
+        internal static readonly int ROW_COL_SEC_SIZE = GRID_SIZE * GRID_SIZE;
 
-        private static readonly int SEC_GROUP_SIZE = ROW_COL_SEC_SIZE * GRID_SIZE;
+        /// <summary>nominal value = 27</summary>
+        internal static readonly int SEC_GROUP_SIZE = ROW_COL_SEC_SIZE * GRID_SIZE;
 
-        private static readonly int BOARD_SIZE = ROW_COL_SEC_SIZE * ROW_COL_SEC_SIZE;
+        /// <summary>nominal value = 81</summary>
+        internal static readonly int BOARD_SIZE = ROW_COL_SEC_SIZE * ROW_COL_SEC_SIZE;
 
-        private static readonly int POSSIBILITY_SIZE = BOARD_SIZE * ROW_COL_SEC_SIZE;
+        /// <summary>nominal value = 729</summary>
+        internal static readonly int POSSIBILITY_SIZE = BOARD_SIZE * ROW_COL_SEC_SIZE;
 
         private static readonly Random random = new();
 
@@ -54,6 +59,12 @@ namespace QQWingLib
         /// The last round of solving
         /// </summary>
         private int lastSolveRound;
+
+        /// <summary>
+        /// The section layout for this sudoku: classic 3x3 or an irregular pattern.
+        /// Made static to avoid changing the class interface.
+        /// </summary>
+        public static ISectionLayout SectionLayout { get; set; } = new RegularLayout();
 
         /// <summary>
         /// The 81 integers that make up a sudoku puzzle. Givens are 1-9, unknowns

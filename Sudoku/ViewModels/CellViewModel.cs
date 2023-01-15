@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using QQWingLib;
 
 namespace Sudoku
 {
@@ -22,14 +23,22 @@ namespace Sudoku
             Number = "8";
         }
 
-        public CellViewModel(int row, int col, int sqr)
+        public CellViewModel(int row, int col)
         {
             Row = row;
             Col = col;
-            Square = sqr;
+            CellIndex = QQWing.RowColumnToCell(row, col);
+            Section = QQWing.CellToSection(CellIndex);
 
-            LayoutRow = row < 3 ? row : row < 6 ? row + 1 : row + 2;
-            LayoutCol = col < 3 ? col : col < 6 ? col + 1 : col + 2;
+            var sectionLayout = QQWing.SectionLayout;
+            if (sectionLayout.RightBoundaries.Contains(cellIndex))
+            {
+                RightBrush = Brushes.DarkViolet;
+            }
+            if (sectionLayout.BottomBoundaries.Contains(cellIndex))
+            {
+                BottomBrush = Brushes.DarkViolet;
+            }
 
             for (int idx = 1; idx <= 9; idx++)
             {
@@ -39,15 +48,15 @@ namespace Sudoku
 
         public override string ToString()
         {
-            return $"r{Row} c{Col} s{Square}";
+            return $"r{Row} c{Col} s{Section}";
         }
 
         public int Row { get; private set; }
         public int Col { get; private set; }
-        public int Square { get; private set; }
+        public int Section { get; private set; }
 
-        public int LayoutRow { get; private set; }
-        public int LayoutCol { get; private set; }
+        [ObservableProperty]
+        private int cellIndex;
 
         public int Value { get; private set; }
         public int Answer { get; private set; }
@@ -137,5 +146,11 @@ namespace Sudoku
 
         [ObservableProperty]
         public Brush foreground = Brushes.DarkGreen;
+
+        [ObservableProperty]
+        private Brush rightBrush = Brushes.Transparent;
+
+        [ObservableProperty]
+        private Brush bottomBrush = Brushes.Transparent;
     }
 }
