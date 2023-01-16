@@ -1,12 +1,56 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using QQWingLib;
-using static System.Collections.Specialized.BitVector32;
+﻿using QQWingLib;
 
 namespace QQWingTest
 {
     [TestClass]
     public class SectionUnitTests
     {
+        [TestMethod]
+        public void TestCellToSection()
+        {
+            int[] expected = new int[]
+            {
+                0, 0, 0, 1, 1, 1, 2, 2, 2,
+                0, 0, 0, 1, 1, 1, 2, 2, 2,
+                0, 0, 0, 1, 1, 1, 2, 2, 2,
+                3, 3, 3, 4, 4, 4, 5, 5, 5,
+                3, 3, 3, 4, 4, 4, 5, 5, 5,
+                3, 3, 3, 4, 4, 4, 5, 5, 5,
+                6, 6, 6, 7, 7, 7, 8, 8, 8,
+                6, 6, 6, 7, 7, 7, 8, 8, 8,
+                6, 6, 6, 7, 7, 7, 8, 8, 8,
+            };
+
+            ISectionLayout layout = new RegularLayout();
+            for (int cell = 0; cell < QQWing.BOARD_SIZE; cell++)
+            {
+                Assert.AreEqual(expected[cell], layout.CellToSection(cell));
+            }
+        }
+
+        [TestMethod]
+        public void TestCellToSectionStartCell()
+        {
+            int[] expected = new int[]
+            {
+                0, 0, 0, 3, 3, 3, 6, 6, 6,
+                0, 0, 0, 3, 3, 3, 6, 6, 6,
+                0, 0, 0, 3, 3, 3, 6, 6, 6,
+                27, 27, 27, 30, 30, 30, 33, 33, 33,
+                27, 27, 27, 30, 30, 30, 33, 33, 33,
+                27, 27, 27, 30, 30, 30, 33, 33, 33,
+                54, 54, 54, 57, 57, 57, 60, 60, 60,
+                54, 54, 54, 57, 57, 57, 60, 60, 60,
+                54, 54, 54, 57, 57, 57, 60, 60, 60,
+            };
+
+            ISectionLayout layout = new RegularLayout();
+            for (int cell = 0; cell < QQWing.BOARD_SIZE; cell++)
+            {
+                Assert.AreEqual(expected[cell], layout.CellToSectionStartCell(cell));
+            }
+        }
+
         [TestMethod]
         public void TestSectionToSectionRows()
         {
