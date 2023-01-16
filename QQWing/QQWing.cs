@@ -1053,22 +1053,21 @@ namespace QQWingLib
                 // check in each of the nine sections
                 for (int section = 0; section < ROW_COL_SEC_SIZE; section++)
                 {
-                    int secStart = SectionToFirstCell(section);
                     bool inOneCol = true;
                     int boxCol = -1;
                     // for each column in the section
-                    for (int i = 0; i < GRID_SIZE; i++)
+                    foreach (int col in SectionLayout.SectionToSectionCols(section))
                     {
                         // for each row in the section
-                        for (int j = 0; j < GRID_SIZE; j++)
+                        foreach (int row in SectionLayout.SectionToSectionRowsByCol(section, col))
                         {
-                            int cell = secStart + i + (ROW_COL_SEC_SIZE * j);
+                            int cell = RowColumnToCell(row, col);
                             int valPos = GetPossibilityIndex(valIndex, cell);
                             if (possibilities[valPos] == 0)
                             {
-                                if (boxCol == -1 || boxCol == i)
+                                if (boxCol == -1 || boxCol == col)
                                 {
-                                    boxCol = i;
+                                    boxCol = col;
                                 }
                                 else
                                 {
@@ -1080,9 +1079,9 @@ namespace QQWingLib
                     if (inOneCol && boxCol != -1)
                     {
                         bool doneSomething = false;
-                        int col = CellToColumn(secStart) + boxCol;
-                        int colStart = ColumnToFirstCell(col);
+                        int colStart = ColumnToFirstCell(boxCol);
 
+                        // down all the cells in this column
                         for (int i = 0; i < ROW_COL_SEC_SIZE; i++)
                         {
                             int position = colStart + (ROW_COL_SEC_SIZE * i);
