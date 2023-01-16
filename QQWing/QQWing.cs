@@ -920,21 +920,20 @@ namespace QQWingLib
                     bool inOneBox = true;
                     int rowBox = -1;
                     // for each section (box) intersecting the row
-                    for (int i = 0; i < GRID_SIZE; i++)
+                    foreach (int section in SectionLayout.RowToSections(row))
                     {
                         // for each column within the section
-                        for (int j = 0; j < GRID_SIZE; j++)
+                        foreach (int col in SectionLayout.SectionToSectionColsByRow(section, row))
                         {
-                            int column = i * GRID_SIZE + j;
-                            int position = RowColumnToCell(row, column);
+                            int position = RowColumnToCell(row, col);
                             int valPos = GetPossibilityIndex(valIndex, position);
                             // if the possibility has not been eliminated
                             // see if it is in the same section as the same possibility in another section
                             if (possibilities[valPos] == 0)
                             {
-                                if (rowBox == -1 || rowBox == i)
+                                if (rowBox == -1 || rowBox == section)
                                 {
-                                    rowBox = i;
+                                    rowBox = section;
                                 }
                                 else
                                 {
@@ -946,23 +945,15 @@ namespace QQWingLib
                     if (inOneBox && rowBox != -1)
                     {
                         bool doneSomething = false;
-                        int column = GRID_SIZE * rowBox;
-                        int secStart = CellToSectionStartCell(RowColumnToCell(row, column));
-                        int secStartRow = CellToRow(secStart);
-                        int secStartCol = CellToColumn(secStart);
-                        for (int i = 0; i < GRID_SIZE; i++)
+                        // for each cell in the section
+                        foreach (int position in SectionLayout.SectionToSectionCells(rowBox))
                         {
-                            for (int j = 0; j < GRID_SIZE; j++)
+                            int row2 = CellToRow(position);
+                            int valPos = GetPossibilityIndex(valIndex, position);
+                            if (row != row2 && possibilities[valPos] == 0)
                             {
-                                int row2 = secStartRow + i;
-                                int col2 = secStartCol + j;
-                                int position = RowColumnToCell(row2, col2);
-                                int valPos = GetPossibilityIndex(valIndex, position);
-                                if (row != row2 && possibilities[valPos] == 0)
-                                {
-                                    possibilities[valPos] = round;
-                                    doneSomething = true;
-                                }
+                                possibilities[valPos] = round;
+                                doneSomething = true;
                             }
                         }
                         if (doneSomething)
