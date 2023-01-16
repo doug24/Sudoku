@@ -1215,13 +1215,16 @@ namespace QQWingLib
 
         private bool HiddenPairInSection(int round)
         {
+            // for each section in the puzzle
             for (int section = 0; section < ROW_COL_SEC_SIZE; section++)
             {
+                // valIndex: index to possibilities in a cell (0 - 8) for the values (1 - 9) 
                 for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
                 {
                     int si1 = -1;
                     int si2 = -1;
                     int valCount = 0;
+                    // for each position (cell) in the section
                     for (int secInd = 0; secInd < ROW_COL_SEC_SIZE; secInd++)
                     {
                         int position = SectionToCell(section, secInd);
@@ -1626,7 +1629,7 @@ namespace QQWingLib
             {
                 int rowVal = rowStart + col;
                 int valPos = GetPossibilityIndex(valIndex, rowVal);
-                // System.out.println("Row Start: "+rowStart+" Row Value: "+rowVal+" Value Position: "+valPos);
+                // Debug.WriteLine("Row Start: "+rowStart+" Row Value: "+rowVal+" Value Position: "+valPos);
                 if (possibilities[valPos] == 0)
                 {
                     possibilities[valPos] = round;
@@ -1639,7 +1642,7 @@ namespace QQWingLib
             {
                 int colVal = colStart + (ROW_COL_SEC_SIZE * i);
                 int valPos = GetPossibilityIndex(valIndex, colVal);
-                // System.out.println("Col Start: "+colStart+" Col Value: "+colVal+" Value Position: "+valPos);
+                // Debug.WriteLine("Col Start: "+colStart+" Col Value: "+colVal+" Value Position: "+valPos);
                 if (possibilities[valPos] == 0)
                 {
                     possibilities[valPos] = round;
@@ -1647,18 +1650,14 @@ namespace QQWingLib
             }
 
             // Take this value out of the possibilities for everything in section
-            int secStart = CellToSectionStartCell(position);
-            for (int i = 0; i < GRID_SIZE; i++)
+            int section = CellToSection(position);
+            foreach (int secVal in SectionLayout.SectionToSectionCells(section))
             {
-                for (int j = 0; j < GRID_SIZE; j++)
+                int valPos = GetPossibilityIndex(valIndex, secVal);
+                // Debug.WriteLine("Sec Start: "+secStart+" Sec Value: "+secVal+" Value Position: "+valPos);
+                if (possibilities[valPos] == 0)
                 {
-                    int secVal = secStart + i + (ROW_COL_SEC_SIZE * j);
-                    int valPos = GetPossibilityIndex(valIndex, secVal);
-                    // System.out.println("Sec Start: "+secStart+" Sec Value: "+secVal+" Value Position: "+valPos);
-                    if (possibilities[valPos] == 0)
-                    {
-                        possibilities[valPos] = round;
-                    }
+                    possibilities[valPos] = round;
                 }
             }
 
