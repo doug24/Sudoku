@@ -989,22 +989,21 @@ namespace QQWingLib
                 // check in each of the nine sections
                 for (int section = 0; section < ROW_COL_SEC_SIZE; section++)
                 {
-                    int secStart = SectionToFirstCell(section);
                     bool inOneRow = true;
                     int boxRow = -1;
                     // for each row in the section
-                    for (int j = 0; j < GRID_SIZE; j++)
+                    foreach (int row in SectionLayout.SectionToSectionRows(section))
                     {
-                        // for each column in the section
-                        for (int i = 0; i < GRID_SIZE; i++)
+                        // for each column in the section-row
+                        foreach (int col in SectionLayout.SectionToSectionColsByRow(section, row))
                         {
-                            int cell = secStart + i + (ROW_COL_SEC_SIZE * j);
+                            int cell = RowColumnToCell(row, col);
                             int valPos = GetPossibilityIndex(valIndex, cell);
                             if (possibilities[valPos] == 0)
                             {
-                                if (boxRow == -1 || boxRow == j)
+                                if (boxRow == -1 || boxRow == row)
                                 {
-                                    boxRow = j;
+                                    boxRow = row;
                                 }
                                 else
                                 {
@@ -1016,9 +1015,9 @@ namespace QQWingLib
                     if (inOneRow && boxRow != -1)
                     {
                         bool doneSomething = false;
-                        int row = CellToRow(secStart) + boxRow;
-                        int rowStart = RowToFirstCell(row);
+                        int rowStart = RowToFirstCell(boxRow);
 
+                        // across all the cells in the row
                         for (int i = 0; i < ROW_COL_SEC_SIZE; i++)
                         {
                             int position = rowStart + i;
