@@ -8,6 +8,66 @@ namespace QQWingLib
     {
         IEnumerable<int> BottomBoundaries { get; }
         IEnumerable<int> RightBoundaries { get; }
+
+        /// <summary>
+        /// Given the index of a cell (0-80) return the section (0-8) in which it
+        /// resides.
+        /// </summary>
+        int CellToSection(int cell);
+
+        /// <summary>
+        /// Given the index of a cell (0-80) return the cell (0-80) that is the
+        /// upper left start cell of that section.
+        /// </summary>
+        int CellToSectionStartCell(int cell);
+
+        /// <summary>
+        /// Given a section (0-8) and an offset into that section (0-8) return the
+        /// cell (0-80)
+        /// </summary>
+        int SectionToCell(int section, int offset);
+
+        /// <summary>
+        /// Given a section (0-8) return the first cell (0-80) of that section.
+        /// </summary>
+        int SectionToFirstCell(int section);
+
+        /// <summary>
+        /// Given a column (0-8) return the sections that intersect that column
+        /// </summary>
+        IEnumerable<int> ColumnToSections(int col);
+
+        /// <summary>
+        /// Given a row (0-8) return the sections that intersect that row
+        /// </summary>
+        IEnumerable<int> RowToSections(int row);
+
+        /// <summary>
+        /// Given a section (0-8), iterate over all cells in the section
+        /// </summary>
+        IEnumerable<int> SectionToSectionCells(int section);
+
+        /// <summary>
+        /// Given a section (0-8), return the rows in the section
+        /// </summary>
+        IEnumerable<int> SectionToSectionRows(int section);
+
+        /// <summary>
+        /// Given a section (0-8), return the columns in the section
+        /// </summary>
+        IEnumerable<int> SectionToSectionCols(int section);
+
+        /// <summary>
+        /// Given a section (0-8), return the rows in the section
+        /// that fall in the given column
+        /// </summary>
+        IEnumerable<int> SectionToSectionRowsByCol(int section, int col);
+
+        /// <summary>
+        /// Given a section (0-8), return the columns in the section 
+        /// that fall in the given row
+        /// </summary>
+        IEnumerable<int> SectionToSectionColsByRow(int section, int row);
     }
 
     public class RegularLayout : ISectionLayout
@@ -23,6 +83,125 @@ namespace QQWingLib
             2, 11, 20, 29, 38, 47, 56, 65, 74,
             5, 14, 23, 32, 41, 50, 59, 68, 77
         };
+
+        /// <summary>
+        /// Given the index of a cell (0-80) calculate the section (0-8) in which it
+        /// resides.
+        /// </summary>
+        public int CellToSection(int cell)
+        {
+            return (cell / QQWing.SEC_GROUP_SIZE * QQWing.GRID_SIZE)
+                + (QQWing.CellToColumn(cell) / QQWing.GRID_SIZE);
+        }
+
+        /// <summary>
+        /// Given the index of a cell (0-80) calculate the cell (0-80) that is the
+        /// upper left start cell of that section.
+        /// </summary>
+        public int CellToSectionStartCell(int cell)
+        {
+            return (cell / QQWing.SEC_GROUP_SIZE * QQWing.SEC_GROUP_SIZE)
+                + (QQWing.CellToColumn(cell) / QQWing.GRID_SIZE * QQWing.GRID_SIZE);
+        }
+
+        /// <summary>
+        /// Given a section (0-8) and an offset into that section (0-8) calculate the
+        /// cell (0-80)
+        /// </summary>
+        public int SectionToCell(int section, int offset)
+        {
+            return SectionToFirstCell(section)
+                + (offset / QQWing.GRID_SIZE * QQWing.ROW_COL_SEC_SIZE)
+                + (offset % QQWing.GRID_SIZE);
+        }
+
+        /// <summary>
+        /// Given a section (0-8) calculate the first cell (0-80) of that section.
+        /// </summary>
+        public int SectionToFirstCell(int section)
+        {
+            return (section % QQWing.GRID_SIZE * QQWing.GRID_SIZE)
+                + (section / QQWing.GRID_SIZE * QQWing.SEC_GROUP_SIZE);
+        }
+
+        /// <summary>
+        /// Given a column (0-8) return the sections that intersect that column
+        /// </summary>
+        public IEnumerable<int> ColumnToSections(int col)
+        {
+            for (int idx = 0; idx < QQWing.GRID_SIZE; idx++) 
+            {
+                yield return col % QQWing.GRID_SIZE + idx * QQWing.GRID_SIZE;
+            }
+        }
+
+        /// <summary>
+        /// Given a row (0-8) return the sections that intersect that row
+        /// </summary>
+        public IEnumerable<int> RowToSections(int row)
+        {
+            for (int idx = 0; idx < QQWing.GRID_SIZE; idx++)
+            {
+                yield return row % QQWing.GRID_SIZE + idx;
+            }
+        }
+
+        /// <summary>
+        /// Given the index of a section (0-8), iterate over all cells in the section
+        /// </summary>
+        public IEnumerable<int> SectionToSectionCells(int section)
+        {
+            int sectionStart = SectionToFirstCell(section);
+            for (int idx = 0; idx < QQWing.GRID_SIZE; idx++)
+            {
+                for (int jdx = 0; jdx < QQWing.GRID_SIZE; jdx++)
+                {
+                    yield return sectionStart + idx + (QQWing.ROW_COL_SEC_SIZE * jdx);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Given a section (0-8), return the rows in the section
+        /// </summary>
+        public IEnumerable<int> SectionToSectionRows(int section)
+        {
+            int secStart = SectionToFirstCell(section);
+            int firstRow = QQWing.CellToRow(secStart);
+            return Enumerable.Range(firstRow, QQWing.GRID_SIZE);
+        }
+
+        /// <summary>
+        /// Given a section (0-8), return the columns in the section
+        /// </summary>
+        public IEnumerable<int> SectionToSectionCols(int section)
+        {
+            int secStart = SectionToFirstCell(section);
+            int firstCol = QQWing.CellToColumn(secStart);
+            return Enumerable.Range(firstCol, QQWing.GRID_SIZE);
+        }
+
+        /// <summary>
+        /// Given a section (0-8), return the rows in the section
+        /// that fall in the given column
+        /// </summary>
+        public IEnumerable<int> SectionToSectionRowsByCol(int section, int col)
+        {
+            int secStart = SectionToFirstCell(section);
+            int firstRow = QQWing.CellToRow(secStart);
+            return Enumerable.Range(firstRow, QQWing.GRID_SIZE);
+        }
+
+        /// <summary>
+        /// Given a section (0-8), return the columns in the section 
+        /// that fall in the given row
+        /// </summary>
+        public IEnumerable<int> SectionToSectionColsByRow(int section, int row)
+        {
+            int secStart = SectionToFirstCell(section);
+            int firstCol = QQWing.CellToColumn(secStart);
+            return Enumerable.Range(firstCol, QQWing.GRID_SIZE);
+        }
     }
 
     public class IrregularLayout : ISectionLayout
@@ -71,6 +250,112 @@ namespace QQWingLib
                 }
             }
         }
+
+        public int CellToSection(int cell)
+        {
+            if (cell >= QQWing.BOARD_SIZE)
+                throw new ArgumentOutOfRangeException(nameof(cell));
+
+            // dictionary of cell, section
+            if (cellToSectionMap.TryGetValue(cell, out IrregularSection section))
+            {
+                return section.Index;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(cell));
+        }
+
+        public int CellToSectionStartCell(int cell)
+        {
+            if (cell >= QQWing.BOARD_SIZE)
+                throw new ArgumentOutOfRangeException(nameof(cell));
+
+            // dictionary of cell, section
+            if (cellToSectionMap.TryGetValue(cell, out IrregularSection section))
+            {
+                return section.GetCell(0);
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(cell));
+        }
+
+        public int SectionToCell(int section, int offset)
+        {
+            if (section < 0 || section >= QQWing.ROW_COL_SEC_SIZE)
+                throw new ArgumentOutOfRangeException(nameof(section));
+
+            if (offset < 0 || offset >= QQWing.ROW_COL_SEC_SIZE)
+                throw new ArgumentOutOfRangeException(nameof(section));
+
+            return sectionList[section].GetCell(offset);
+        }
+
+        public int SectionToFirstCell(int section)
+        {
+            if (section < 0 || section >= QQWing.ROW_COL_SEC_SIZE)
+                throw new ArgumentOutOfRangeException(nameof(section));
+
+            return sectionList[section].GetCell(0);
+        }
+
+        /// <summary>
+        /// Given a column (0-8) return the sections that intersect that column
+        /// </summary>
+        public IEnumerable<int> ColumnToSections(int col)
+        {
+            return sectionList.Where(s => s.Cols.Contains(col))
+                .OrderBy(s => s.Index)
+                .Select(s => s.Index);
+        }
+
+        /// <summary>
+        /// Given a row (0-8) return the sections that intersect that row
+        /// </summary>
+        public IEnumerable<int> RowToSections(int row)
+        {
+            return sectionList.Where(s => s.Rows.Contains(row))
+                .OrderBy(s => s.Index)
+                .Select(s => s.Index);
+        }
+
+        public IEnumerable<int> SectionToSectionCells(int section)
+        {
+            return sectionList[section].Cells;
+        }
+
+        /// <summary>
+        /// Given a section (0-8), return the rows in the section
+        /// </summary>
+        public IEnumerable<int> SectionToSectionRows(int section)
+        {
+            return sectionList[section].Rows;
+        }
+
+        /// <summary>
+        /// Given a section (0-8), return the columns in the section
+        /// </summary>
+        public IEnumerable<int> SectionToSectionCols(int section)
+        {
+            return sectionList[section].Cols;
+        }
+
+        /// <summary>
+        /// Given a section (0-8), return the rows in the section
+        /// that fall in the given row
+        /// </summary>
+        public IEnumerable<int> SectionToSectionRowsByCol(int section, int col)
+        {
+            return sectionList[section].RowsByCol(col);
+        }
+
+        /// <summary>
+        /// Given a section (0-8), return the columns in the section 
+        /// that fall in the given column
+        /// </summary>
+        public IEnumerable<int> SectionToSectionColsByRow(int section, int row)
+        {
+            return sectionList[section].ColsByRow(row);
+        }
     }
 
     internal class IrregularSection
@@ -96,6 +381,15 @@ namespace QQWingLib
 
                 MinRow = Math.Min(row, MinRow);
                 MinCol = Math.Min(col, MinCol);
+                //}
+
+                //// the rows and cols are indexes within the section
+                //for (int idx = 0; idx < cells.Length; idx++)
+                //{
+                //    int cell = cells[idx];
+
+                //    int row = QQWing.CellToRow(cell);
+                //    int col = QQWing.CellToColumn(cell);
 
                 if (!rowColumnMap.ContainsKey(row))
                 {

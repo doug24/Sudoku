@@ -1565,24 +1565,21 @@ namespace QQWingLib
         /// </summary>
         private bool OnlyValueInSection(int round)
         {
+            // check each section in the puzzle
             for (int sec = 0; sec < ROW_COL_SEC_SIZE; sec++)
             {
-                int secPos = SectionToFirstCell(sec);
+                // valIndex: index to possibilities in a cell (0 - 8) for the values (1 - 9) 
                 for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
                 {
                     int count = 0;
                     int lastPosition = 0;
-                    for (int i = 0; i < GRID_SIZE; i++)
+                    foreach (int position in SectionLayout.SectionToSectionCells(sec))
                     {
-                        for (int j = 0; j < GRID_SIZE; j++)
+                        int valPos = GetPossibilityIndex(valIndex, position);
+                        if (possibilities[valPos] == 0)
                         {
-                            int position = secPos + i + ROW_COL_SEC_SIZE * j;
-                            int valPos = GetPossibilityIndex(valIndex, position);
-                            if (possibilities[valPos] == 0)
-                            {
-                                count++;
-                                lastPosition = position;
-                            }
+                            count++;
+                            lastPosition = position;
                         }
                     }
                     if (count == 1)
@@ -1890,8 +1887,7 @@ namespace QQWingLib
         /// </summary>
         public static int CellToSection(int cell)
         {
-            return (cell / SEC_GROUP_SIZE * GRID_SIZE)
-            + (CellToColumn(cell) / GRID_SIZE);
+            return SectionLayout.CellToSection(cell);
         }
 
         /// <summary>
@@ -1900,8 +1896,16 @@ namespace QQWingLib
         /// </summary>
         public static int CellToSectionStartCell(int cell)
         {
-            return (cell / SEC_GROUP_SIZE * SEC_GROUP_SIZE)
-            + (CellToColumn(cell) / GRID_SIZE * GRID_SIZE);
+            return SectionLayout.CellToSectionStartCell(cell);
+        }
+
+        /// <summary>
+        /// Given a cell (0-80), iterate over all cells in the section
+        /// </summary>
+        private static IEnumerable<int> CellToSectionCells(int cell)
+        {
+            int section = SectionLayout.CellToSection(cell);
+            return SectionLayout.SectionToSectionCells(section);
         }
 
         /// <summary>
@@ -1925,8 +1929,7 @@ namespace QQWingLib
         /// </summary>
         public static int SectionToFirstCell(int section)
         {
-            return (section % GRID_SIZE * GRID_SIZE)
-            + (section / GRID_SIZE * SEC_GROUP_SIZE);
+            return SectionLayout.SectionToFirstCell(section);
         }
 
         /// <summary>
@@ -1952,9 +1955,7 @@ namespace QQWingLib
         /// </summary>
         public static int SectionToCell(int section, int offset)
         {
-            return SectionToFirstCell(section)
-                + (offset / GRID_SIZE * ROW_COL_SEC_SIZE)
-                + (offset % GRID_SIZE);
+            return SectionLayout.SectionToCell(section, offset);
         }
     }
 }

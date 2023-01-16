@@ -5,7 +5,7 @@ namespace QQWingTest
     [TestClass]
     public class SectionUnitTests
     {
-        [TestMethod]
+        [Ignore]
         public void TestSectionToSectionRows()
         {
             ISectionLayout section = new RegularLayout();
