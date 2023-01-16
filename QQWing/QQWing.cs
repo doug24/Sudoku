@@ -1459,16 +1459,11 @@ namespace QQWingLib
                                 if (section == CellToSectionStartCell(position2))
                                 {
                                     bool doneSomething = false;
-                                    int secStart = CellToSectionStartCell(position);
-                                    for (int i = 0; i < 3; i++)
+                                    foreach (int position3 in CellToSectionCells(position))
                                     {
-                                        for (int j = 0; j < 3; j++)
+                                        if (position3 != position && position3 != position2 && RemovePossibilitiesInOneFromTwo(position, position3, round))
                                         {
-                                            int position3 = secStart + i + (ROW_COL_SEC_SIZE * j);
-                                            if (position3 != position && position3 != position2 && RemovePossibilitiesInOneFromTwo(position, position3, round))
-                                            {
-                                                doneSomething = true;
-                                            }
+                                            doneSomething = true;
                                         }
                                     }
                                     if (doneSomething)
