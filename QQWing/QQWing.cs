@@ -848,19 +848,18 @@ namespace QQWingLib
                     bool inOneBox = true;
                     int colBox = -1;
                     // for each section (box) intersecting the column
-                    for (int i = 0; i < GRID_SIZE; i++)
+                    foreach (int section in SectionLayout.ColumnToSections(col))
                     {
                         // for each row in this section
-                        for (int j = 0; j < GRID_SIZE; j++)
+                        foreach (var row in SectionLayout.SectionToSectionRowsByCol(section, col))
                         {
-                            int row = i * GRID_SIZE + j;
                             int position = RowColumnToCell(row, col);
                             int valPos = GetPossibilityIndex(valIndex, position);
                             if (possibilities[valPos] == 0)
                             {
-                                if (colBox == -1 || colBox == i)
+                                if (colBox == -1 || colBox == section)
                                 {
-                                    colBox = i;
+                                    colBox = section;
                                 }
                                 else
                                 {
@@ -872,23 +871,15 @@ namespace QQWingLib
                     if (inOneBox && colBox != -1)
                     {
                         bool doneSomething = false;
-                        int row = GRID_SIZE * colBox;
-                        int secStart = CellToSectionStartCell(RowColumnToCell(row, col));
-                        int secStartRow = CellToRow(secStart);
-                        int secStartCol = CellToColumn(secStart);
-                        for (int i = 0; i < GRID_SIZE; i++)
+                        // for each cell in the section
+                        foreach (int position in SectionLayout.SectionToSectionCells(colBox))
                         {
-                            for (int j = 0; j < GRID_SIZE; j++)
+                            int col2 = CellToColumn(position);
+                            int valPos = GetPossibilityIndex(valIndex, position);
+                            if (col != col2 && possibilities[valPos] == 0)
                             {
-                                int row2 = secStartRow + i;
-                                int col2 = secStartCol + j;
-                                int position = RowColumnToCell(row2, col2);
-                                int valPos = GetPossibilityIndex(valIndex, position);
-                                if (col != col2 && possibilities[valPos] == 0)
-                                {
-                                    possibilities[valPos] = round;
-                                    doneSomething = true;
-                                }
+                                possibilities[valPos] = round;
+                                doneSomething = true;
                             }
                         }
                         if (doneSomething)

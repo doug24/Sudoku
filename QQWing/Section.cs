@@ -131,7 +131,7 @@ namespace QQWingLib
         {
             for (int idx = 0; idx < QQWing.GRID_SIZE; idx++) 
             {
-                yield return col % QQWing.GRID_SIZE + idx * QQWing.GRID_SIZE;
+                yield return col / QQWing.GRID_SIZE + idx * QQWing.GRID_SIZE;
             }
         }
 

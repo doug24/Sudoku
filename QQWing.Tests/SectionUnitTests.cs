@@ -1,4 +1,5 @@
-﻿using QQWingLib;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using QQWingLib;
 using static System.Collections.Specialized.BitVector32;
 
 namespace QQWingTest
@@ -97,18 +98,18 @@ namespace QQWingTest
         }
 
         [TestMethod]
-        public void TestColToSections()
+        public void TestColumnToSections()
         {
             Dictionary<int, List<int>> expected = new()
             {
                 { 0, new() {0,3,6} },
-                { 1, new() {1,4,7} },
-                { 2, new() {2,5,8} },
-                { 3, new() {0,3,6} },
+                { 1, new() {0,3,6} },
+                { 2, new() {0,3,6} },
+                { 3, new() {1,4,7} },
                 { 4, new() {1,4,7} },
-                { 5, new() {2,5,8} },
-                { 6, new() {0,3,6} },
-                { 7, new() {1,4,7} },
+                { 5, new() {1,4,7} },
+                { 6, new() {2,5,8} },
+                { 7, new() {2,5,8} },
                 { 8, new() {2,5,8} },
             };
 
@@ -122,6 +123,40 @@ namespace QQWingTest
                 for (int idx = 0; idx < 3; idx++)
                 {
                     Assert.AreEqual(expectedSections[idx], sections[idx]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void TestSectionToSectionRowsByCol()
+        {
+            Dictionary<int, List<int>> expected = new()
+            {
+                { 0, new() {0,1,2} },
+                { 1, new() {0,1,2} },
+                { 2, new() {0,1,2} },
+                { 3, new() {3,4,5} },
+                { 4, new() {3,4,5} },
+                { 5, new() {3,4,5} },
+                { 6, new() {6,7,8} },
+                { 7, new() {6,7,8} },
+                { 8, new() {6,7,8} },
+            };
+
+            ISectionLayout layout = new RegularLayout();
+            for (int sec = 0; sec < QQWing.ROW_COL_SEC_SIZE; sec++)
+            {
+                var cols = layout.SectionToSectionCols(sec);
+                foreach (var col in cols)
+                {
+                    var rows = layout.SectionToSectionRowsByCol(sec, col).ToList();
+
+                    Assert.AreEqual(3, rows.Count);
+                    var expectedRows = expected[sec];
+                    for (int idx = 0; idx < 3; idx++)
+                    {
+                        Assert.AreEqual(expectedRows[idx], rows[idx]);
+                    }
                 }
             }
         }
