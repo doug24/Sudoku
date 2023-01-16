@@ -24,7 +24,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+
+[assembly: InternalsVisibleTo("QQWing.Tests")]
 
 namespace QQWingLib
 {
@@ -827,17 +830,27 @@ namespace QQWingLib
             return false;
         }
 
+        /// <summary>
+        /// Looking at columns, if a value in found only in one section (box),
+        /// then that candidate value is eliminated from the other cells in 
+        /// the other columns in that section.
+        /// </summary>
         private bool ColBoxReduction(int round)
         {
+            // valIndex: index to possibilities in a cell (0 - 8) for the values (1 - 9) 
             for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
             {
+                // check each column in the puzzle
                 for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
                 {
+                    // cell at the top of the column
                     int colStart = ColumnToFirstCell(col);
                     bool inOneBox = true;
                     int colBox = -1;
+                    // for each section (box) intersecting the column
                     for (int i = 0; i < GRID_SIZE; i++)
                     {
+                        // for each row in this section
                         for (int j = 0; j < GRID_SIZE; j++)
                         {
                             int row = i * GRID_SIZE + j;
@@ -889,22 +902,34 @@ namespace QQWingLib
             return false;
         }
 
+        /// <summary>
+        /// Looking at rows, if a value in found only in one section (box),
+        /// then that possibility value is eliminated from the other cells in 
+        /// other rows in that section.
+        /// </summary>
         private bool RowBoxReduction(int round)
         {
+            // valIndex: index to possibilities in a cell (0 - 8) for the values (1 - 9) 
             for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
             {
+                // check each row in the puzzle
                 for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
                 {
+                    // cell index of the first cell in the row
                     int rowStart = RowToFirstCell(row);
                     bool inOneBox = true;
                     int rowBox = -1;
+                    // for each section (box) intersecting the row
                     for (int i = 0; i < GRID_SIZE; i++)
                     {
+                        // for each column within the section
                         for (int j = 0; j < GRID_SIZE; j++)
                         {
                             int column = i * GRID_SIZE + j;
                             int position = RowColumnToCell(row, column);
                             int valPos = GetPossibilityIndex(valIndex, position);
+                            // if the possibility has not been eliminated
+                            // see if it is in the same section as the same possibility in another section
                             if (possibilities[valPos] == 0)
                             {
                                 if (rowBox == -1 || rowBox == i)
@@ -951,21 +976,30 @@ namespace QQWingLib
             return false;
         }
 
+        /// <summary>
+        /// Pointing pairs and pointing triples across rows.  If a section contains
+        /// a possibility value only in a single row, then that possibility value is
+        /// eliminated from the other cells in that row. 
+        /// </summary>
         private bool PointingRowReduction(int round)
         {
+            // valIndex: index to possibilities in a cell (0 - 8) for the values (1 - 9) 
             for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
             {
+                // check in each of the nine sections
                 for (int section = 0; section < ROW_COL_SEC_SIZE; section++)
                 {
                     int secStart = SectionToFirstCell(section);
                     bool inOneRow = true;
                     int boxRow = -1;
+                    // for each row in the section
                     for (int j = 0; j < GRID_SIZE; j++)
                     {
+                        // for each column in the section
                         for (int i = 0; i < GRID_SIZE; i++)
                         {
-                            int secVal = secStart + i + (ROW_COL_SEC_SIZE * j);
-                            int valPos = GetPossibilityIndex(valIndex, secVal);
+                            int cell = secStart + i + (ROW_COL_SEC_SIZE * j);
+                            int valPos = GetPossibilityIndex(valIndex, cell);
                             if (possibilities[valPos] == 0)
                             {
                                 if (boxRow == -1 || boxRow == j)
@@ -1007,21 +1041,30 @@ namespace QQWingLib
             return false;
         }
 
+        /// <summary>
+        /// Pointing pairs and pointing triples down columns.  If a section contains
+        /// a possibility value only in a single column, then that possibility value is
+        /// eliminated from the other cells in that column. 
+        /// </summary>
         private bool PointingColumnReduction(int round)
         {
+            // valIndex: index to possibilities in a cell (0 - 8) for the values (1 - 9) 
             for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
             {
+                // check in each of the nine sections
                 for (int section = 0; section < ROW_COL_SEC_SIZE; section++)
                 {
                     int secStart = SectionToFirstCell(section);
                     bool inOneCol = true;
                     int boxCol = -1;
+                    // for each column in the section
                     for (int i = 0; i < GRID_SIZE; i++)
                     {
+                        // for each row in the section
                         for (int j = 0; j < GRID_SIZE; j++)
                         {
-                            int secVal = secStart + i + (ROW_COL_SEC_SIZE * j);
-                            int valPos = GetPossibilityIndex(valIndex, secVal);
+                            int cell = secStart + i + (ROW_COL_SEC_SIZE * j);
+                            int valPos = GetPossibilityIndex(valIndex, cell);
                             if (possibilities[valPos] == 0)
                             {
                                 if (boxCol == -1 || boxCol == i)
