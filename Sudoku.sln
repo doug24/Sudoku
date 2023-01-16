@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sudoku", "Sudoku\Sudoku.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QQWing", "QQWing\QQWing.csproj", "{6481DBB3-06F2-4105-910F-9483B85CCCEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQWingTest", "QQWingTest\QQWingTest.csproj", "{21ADDF2A-DF9B-43F5-A968-ADF219579D53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QQWing.Tests", "QQWing.Tests\QQWing.Tests.csproj", "{21ADDF2A-DF9B-43F5-A968-ADF219579D53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
