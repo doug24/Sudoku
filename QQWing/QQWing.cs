@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 
 [assembly: InternalsVisibleTo("QQWing.Tests")]
 
@@ -67,7 +68,7 @@ namespace QQWingLib
         /// The section layout for this sudoku: classic 3x3 or an irregular pattern.
         /// Made static to avoid changing the class interface.
         /// </summary>
-        public static ISectionLayout SectionLayout { get; set; } = new RegularLayout();
+        public static ISectionLayout SectionLayout { get; set; } = new IrregularLayout();
 
         /// <summary>
         /// The 81 integers that make up a sudoku puzzle. Givens are 1-9, unknowns
@@ -325,12 +326,12 @@ namespace QQWingLib
             Reset();
         }
 
-        public bool GeneratePuzzle()
+        public bool GeneratePuzzle(CancellationToken token)
         {
-            return GeneratePuzzleSymmetry(Symmetry.NONE);
+            return GeneratePuzzleSymmetry(Symmetry.NONE, token);
         }
 
-        public bool GeneratePuzzleSymmetry(Symmetry symmetry)
+        public bool GeneratePuzzleSymmetry(Symmetry symmetry, CancellationToken token)
         {
             if (symmetry == Symmetry.RANDOM) symmetry = GetRandomSymmetry();
 
@@ -350,7 +351,7 @@ namespace QQWingLib
             // uses random algorithms, so we should have a
             // really randomly totally filled sudoku
             // Even when starting from an empty grid
-            Solve();
+            Solve(token);
 
             if (symmetry == Symmetry.NONE)
             {
@@ -378,6 +379,8 @@ namespace QQWingLib
             // it is not needed.
             for (int i = 0; i < BOARD_SIZE; i++)
             {
+                token.ThrowIfCancellationRequested();
+
                 // check all the positions, but in shuffled order
                 int position = randomBoardArray[i];
                 if (puzzle[position] > 0)
@@ -574,16 +577,20 @@ namespace QQWingLib
             return new ReadOnlyCollection<LogItem>(solveHistory);
         }
 
-        public bool Solve()
+        public bool Solve(CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+     
             Reset();
             ShuffleRandomArrays();
-            return Solve(2);
+            return Solve(2, token);
         }
 
-        private bool Solve(int round)
+        private bool Solve(int round, CancellationToken token)
         {
             lastSolveRound = round;
+
+            token.ThrowIfCancellationRequested();
 
             while (SingleSolveMove(round))
             {
@@ -595,7 +602,7 @@ namespace QQWingLib
             int nextRound = round + 2;
             for (int guessNumber = 0; Guess(nextGuessRound, guessNumber); guessNumber++)
             {
-                if (IsImpossible() || !Solve(nextRound))
+                if (IsImpossible() || !Solve(nextRound, token))
                 {
                     RollbackRound(nextRound);
                     RollbackRound(nextGuessRound);

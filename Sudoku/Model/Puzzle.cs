@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using QQWingLib;
 
 namespace Sudoku
@@ -22,77 +24,98 @@ namespace Sudoku
 
         public async Task Generate(Difficulty difficulty, Symmetry symmetry)
         {
-            using CancellationTokenSource cancellationTokenSource = new();
+            Mouse.OverrideCursor = Cursors.Wait;
+
+            var timeout = TimeSpan.FromSeconds(20);
+            using CancellationTokenSource cancellationTokenSource = new(timeout);
             var token = cancellationTokenSource.Token;
-            try
+            List<Task<PuzzleData>> tasks = new();
+            for (int idx = 0; idx < 4; idx++)
             {
-                List<Task<PuzzleData>> tasks = new();
-                for (int idx = 0; idx < 4; idx++)
-                {
-                    tasks.Add(Task.Run(() => GenerateInternal(symmetry, difficulty, token), token));
-                }
-
-                Task<PuzzleData> completedTask = await Task.WhenAny(tasks);
-                cancellationTokenSource.Cancel();
-
-                Initial = completedTask.Result.Initial;
-                Solution = completedTask.Result.Solution;
+                tasks.Add(Task.Run(() => GenerateInternal(symmetry, difficulty, token), token));
             }
-            catch (Exception e)
+
+            Task<PuzzleData> completedTask = await Task.WhenAny(tasks);
+            cancellationTokenSource.Cancel();
+
+            Initial = completedTask.Result.Initial;
+            Solution = completedTask.Result.Solution;
+
+            await Task.WhenAll(tasks);
+
+            if (Initial.Length == 0)
             {
-                MessageBox.Show("Error generating puzzle: " + e.Message);
+                MessageBox.Show($"Could not generate a new puzzle in {timeout.TotalSeconds} seconds:" + 
+                    Environment.NewLine + "Try again with different settings.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+
+            Mouse.OverrideCursor = Cursors.Arrow;
         }
         private static PuzzleData GenerateInternal(Symmetry symmetry, Difficulty difficulty, CancellationToken token)
         {
-            bool done = false;
-
-            QQWing ss = new();
-            ss.SetRecordHistory(true);
-            //ss.SetLogHistory(true);
-            ss.SetPrintStyle(PrintStyle.ONE_LINE);
-
-            // Solve puzzle or generate puzzles
-            // until end of input for solving, or
-            // until we have generated the specified number.
-            while (!done && !token.IsCancellationRequested)
+            try
             {
-                // Record whether the puzzle was possible or not,
-                // so that we don't try to solve impossible givens.
-                bool havePuzzle = ss.GeneratePuzzleSymmetry(symmetry);
+                bool done = false;
 
-                if (token.IsCancellationRequested) break;
+                QQWing ss = new();
+                ss.SetRecordHistory(true);
+                //ss.SetLogHistory(true);
+                ss.SetPrintStyle(PrintStyle.ONE_LINE);
 
-                if (havePuzzle)
+                // Solve puzzle or generate puzzles
+                // until end of input for solving, or
+                // until we have generated the specified number.
+                while (!done && !token.IsCancellationRequested)
                 {
-                    // Solve the puzzle
-                    ss.Solve();
+                    // Record whether the puzzle was possible or not,
+                    // so that we don't try to solve impossible givens.
+                    bool havePuzzle = ss.GeneratePuzzleSymmetry(symmetry, token);
 
-                    // Bail out if it didn't meet the difficulty standards for generation
-                    if (difficulty != Difficulty.UNKNOWN && difficulty != ss.GetDifficulty())
+                    token.ThrowIfCancellationRequested();
+
+                    if (havePuzzle)
                     {
-                        havePuzzle = false;
+                        // Solve the puzzle
+                        ss.Solve(token);
+
+                        // Bail out if it didn't meet the difficulty standards for generation
+                        if (difficulty != Difficulty.UNKNOWN && difficulty != ss.GetDifficulty())
+                        {
+                            Debug.WriteLine($"Discard solution, difficulty is {ss.GetDifficulty()}");
+                            havePuzzle = false;
+                        }
+                        else
+                        {
+                            done = true;
+                        }
                     }
-                    else
+
+                    token.ThrowIfCancellationRequested();
+
+                    // Check havePuzzle again, it may have changed based on difficulty
+                    if (havePuzzle)
                     {
-                        done = true;
+                        if (ss.IsSolved())
+                        {
+                            Debug.WriteLine($"Puzzle GenerateInternal returning {ss.GetDifficulty()} puzzle");
+                            return new PuzzleData(
+                                ss.GetPuzzle(),
+                                ss.GetSolution());
+                        }
+                        else
+                        {
+                            done = false;
+                        }
                     }
                 }
-
-                // Check havePuzzle again, it may have changed based on difficulty
-                if (havePuzzle)
-                {
-                    if (ss.IsSolved())
-                    {
-                        return new PuzzleData(
-                            ss.GetPuzzle(),
-                            ss.GetSolution());
-                    }
-                    else
-                    {
-                        done = false;
-                    }
-                }
+            }
+            catch (OperationCanceledException ce)
+            {
+                Debug.WriteLine("Puzzle GenerateInternal was canceled");
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                MessageBox.Show("Error generating puzzle: " + e.Message, "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             return PuzzleData.Empty;

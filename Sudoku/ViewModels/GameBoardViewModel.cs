@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -437,7 +438,7 @@ namespace Sudoku
 
             QQWing ss = new();
             ss.SetPuzzle(initial);
-            ss.Solve();
+            ss.Solve(CancellationToken.None);
             if (ss.IsSolved())
             {
                 int[] solution = ss.GetSolution();
@@ -536,7 +537,7 @@ namespace Sudoku
 
             QQWing ss = new();
             ss.SetPuzzle(initial);
-            ss.Solve();
+            ss.Solve(CancellationToken.None);
             if (ss.IsSolved())
             {
                 int[] solution = ss.GetSolution();
@@ -576,9 +577,20 @@ namespace Sudoku
             }
         }
 
+        private void UpdateLayout()
+        {
+            foreach (var cell in allCells)
+            {
+                cell.ShowLayoutBoundaries();
+            }
+        }
+
         internal async void NewPuzzle(Difficulty difficulty, Symmetry symmetry)
         {
             ClearBoard();
+            QQWing.SectionLayout.SetRandomLayout();
+            UpdateLayout();
+
             Puzzle puz = new();
             await puz.Generate(difficulty, symmetry);
 
@@ -630,7 +642,7 @@ namespace Sudoku
 
             QQWing ss = new();
             ss.SetPuzzle(initial);
-            ss.Solve();
+            ss.Solve(CancellationToken.None);
             if (ss.IsSolved())
             {
                 int[] solution = ss.GetSolution();

@@ -44,12 +44,12 @@ namespace QQWingTest
                 {
                     // Record whether the puzzle was possible or not,
                     // so that we don't try to solve impossible givens.
-                    bool havePuzzle = ss.GeneratePuzzleSymmetry(symmetry);
+                    bool havePuzzle = ss.GeneratePuzzleSymmetry(symmetry, CancellationToken.None);
 
                     if (havePuzzle)
                     {
                         // Solve the puzzle
-                        ss.Solve();
+                        ss.Solve(CancellationToken.None);
 
                         // Bail out if it didn't meet the difficulty standards for generation
                         if (difficulty != Difficulty.UNKNOWN && difficulty != ss.GetDifficulty())
@@ -125,12 +125,13 @@ namespace QQWingTest
         [DynamicData(nameof(TestData))]
         public void TestSolveAll(string name, TestPuzzle data)
         {
+            QQWing.SectionLayout = new RegularLayout();
             QQWing ss = new();
             ss.SetRecordHistory(true);
             ss.SetPuzzle(data.Puzzle);
 
             Assert.IsNotNull(name);
-            Assert.IsTrue(ss.Solve());
+            Assert.IsTrue(ss.Solve(CancellationToken.None));
 
             var solution = ss.GetSolution();
             Assert.AreEqual(data.Solution.Length, solution.Length);

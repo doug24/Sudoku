@@ -1,12 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace QQWingLib
 {
     public interface ISectionLayout
     {
+        int LayoutCount { get; }
+
+        int Layout { get; set; }
+
+        void SetRandomLayout();
+
         IEnumerable<int> BottomBoundaries { get; }
+
         IEnumerable<int> RightBoundaries { get; }
 
         /// <summary>
@@ -72,6 +80,13 @@ namespace QQWingLib
 
     public class RegularLayout : ISectionLayout
     {
+        public int LayoutCount => 1;
+
+        public int Layout { get; set; } = 0;
+
+        public void SetRandomLayout() { }
+
+
         public IEnumerable<int> BottomBoundaries { get; } = new int[]
         {
             18, 19, 20, 21, 22, 23, 24, 25, 26,
@@ -129,7 +144,7 @@ namespace QQWingLib
         /// </summary>
         public IEnumerable<int> ColumnToSections(int col)
         {
-            for (int idx = 0; idx < QQWing.GRID_SIZE; idx++) 
+            for (int idx = 0; idx < QQWing.GRID_SIZE; idx++)
             {
                 yield return col / QQWing.GRID_SIZE + idx * QQWing.GRID_SIZE;
             }
@@ -204,39 +219,134 @@ namespace QQWingLib
         }
     }
 
+    internal class IrregularSection
+    {
+        private readonly int[] cells;
+        private readonly Dictionary<int, List<int>> rowColumnMap = new();
+        private readonly Dictionary<int, List<int>> columnRowMap = new();
+
+        public IrregularSection(int sectionIndex, int[] cells)
+        {
+            if (cells.Length != QQWing.ROW_COL_SEC_SIZE)
+                throw new ArgumentOutOfRangeException(nameof(cells));
+
+            Index = sectionIndex;
+            this.cells = cells;
+
+            for (int idx = 0; idx < cells.Length; idx++)
+            {
+                int cell = cells[idx];
+
+                int row = QQWing.CellToRow(cell);
+                int col = QQWing.CellToColumn(cell);
+
+                MinRow = Math.Min(row, MinRow);
+                MinCol = Math.Min(col, MinCol);
+
+                if (!rowColumnMap.ContainsKey(row))
+                {
+                    rowColumnMap.Add(row, new());
+                }
+                if (!rowColumnMap[row].Contains(col))
+                {
+                    rowColumnMap[row].Add(col);
+                }
+
+                if (!columnRowMap.ContainsKey(col))
+                {
+                    columnRowMap.Add(col, new());
+                }
+                if (!columnRowMap[col].Contains(row))
+                {
+                    columnRowMap[col].Add(row);
+                }
+            }
+        }
+
+        public int Index { get; private set; }
+
+        public IEnumerable<int> Cells => cells;
+
+        public int MinRow { get; private set; } = QQWing.ROW_COL_SEC_SIZE;
+
+        public int MinCol { get; private set; } = QQWing.ROW_COL_SEC_SIZE;
+
+        public IEnumerable<int> Rows => rowColumnMap.Keys.OrderBy(x => x);
+
+        public IEnumerable<int> Cols => columnRowMap.Keys.OrderBy(x => x);
+
+        public IEnumerable<int> ColsByRow(int row)
+        {
+            return rowColumnMap[row].OrderBy(x => x);
+        }
+
+        public IEnumerable<int> RowsByCol(int col)
+        {
+            return columnRowMap[col].OrderBy(x => x);
+        }
+
+        public int GetCell(int offset)
+        {
+            if (offset < 0 || offset >= cells.Length)
+                throw new ArgumentOutOfRangeException(nameof(offset));
+
+            return cells[offset];
+        }
+    }
+
     public class IrregularLayout : ISectionLayout
     {
-        private readonly int[][] sections = new int[][]
-        {
-            new int[] {  0,  1,  2,  3, 12, 21, 30, 39, 48 },
-            new int[] {  4,  5,  6,  7,  8, 14, 15, 16, 17 },
-            new int[] {  9, 10, 11, 18, 19, 20, 28, 29, 38 },
-            new int[] { 13, 22, 23, 31, 40, 49, 57, 58, 67 },
-            new int[] { 24, 25, 26, 33, 34, 35, 43, 44, 53 },
-            new int[] { 27, 36, 37, 45, 46, 47, 54, 55, 56 },
-            new int[] { 32, 41, 50, 59, 68, 77, 78, 79, 80 },
-            new int[] { 42, 51, 52, 60, 61, 62, 69, 70, 71 },
-            new int[] { 63, 64, 65, 66, 72, 73, 74, 75, 76 }
-        };
-
-        public IEnumerable<int> BottomBoundaries { get; } = new List<int>
-        {
-            0, 1, 2, 4, 14, 15, 16, 17, 18, 23, 28,
-            33, 38, 43, 48, 53, 54, 55, 56, 57, 67,
-            69, 70, 71
-        };
-        public IEnumerable<int> RightBoundaries { get; } = new List<int>
-        {
-            3, 11, 12, 13, 20, 21, 23, 27, 29, 30,
-            31, 32, 37, 38, 39, 40, 41, 42, 47, 48, 49, 50,
-            52, 56, 58, 59, 66, 67, 68, 76
-        };
+        private readonly static Random rand;
+        private readonly static List<int[][]> layouts = new();
 
         private readonly List<IrregularSection> sectionList = new();
         private readonly Dictionary<int, IrregularSection> cellToSectionMap = new();
+        private int layoutIndex = -1;
 
         public IrregularLayout()
         {
+            //Layout = rand.Next(0, layouts.Count - 1);
+            Layout = layouts.Count - 1;
+        }
+
+        public int Layout
+        {
+            get { return layoutIndex; }
+            set
+            {
+                if (layoutIndex == value)
+                    return;
+
+                layoutIndex = value;
+
+                if (layoutIndex < 0 || layoutIndex > layouts.Count - 1)
+                {
+                    layoutIndex = rand.Next(0, layouts.Count - 1);
+                }
+                Initialize();
+            }
+        }
+
+        public void SetRandomLayout()
+        {
+            Layout = rand.Next(0, layouts.Count);
+        }
+
+        private void Initialize()
+        {
+            if (layoutIndex < 0 || layoutIndex > layouts.Count - 1)
+            {
+                return;
+            }
+            Debug.WriteLine($"Irregular layout index {Layout}");
+
+            sectionList.Clear();
+            cellToSectionMap.Clear();
+            RightBoundaries = Enumerable.Empty<int>();
+            BottomBoundaries = Enumerable.Empty<int>();
+
+            var sections = layouts[layoutIndex];
+
             for (int idx = 0; idx < sections.Length; idx++)
             {
                 int[] sectionCells = sections[idx];
@@ -249,7 +359,54 @@ namespace QQWingLib
                     cellToSectionMap.Add(cell, section);
                 }
             }
+
+            SetBoundaries();
         }
+
+        private void SetBoundaries()
+        {
+            List<int> right = new();
+            List<int> bottom = new();
+            for (int row = 0; row < QQWing.ROW_COL_SEC_SIZE; row++)
+            {
+                for (int col = 0; col < QQWing.ROW_COL_SEC_SIZE; col++)
+                {
+                    int cell = QQWing.RowColumnToCell(row, col);
+                    int section = CellToSection(cell);
+
+                    if (col + 1 < QQWing.ROW_COL_SEC_SIZE)
+                    {
+                        int cellRight = QQWing.RowColumnToCell(row, col + 1);
+                        int section2 = CellToSection(cellRight);
+                        if (section != section2)
+                        {
+                            right.Add(cell);
+                        }
+                    }
+
+                    if (row + 1 < QQWing.ROW_COL_SEC_SIZE)
+                    {
+                        int cellBelow = QQWing.RowColumnToCell(row + 1, col);
+                        int section3 = CellToSection(cellBelow);
+                        if (section != section3)
+                        {
+                            bottom.Add(cell);
+                        }
+                    }
+                }
+            }
+            right.Sort();
+            bottom.Sort();
+
+            RightBoundaries = right;
+            BottomBoundaries = bottom;
+        }
+
+        public int LayoutCount => layouts.Count;
+
+        public IEnumerable<int> BottomBoundaries { get; private set; }
+
+        public IEnumerable<int> RightBoundaries { get; private set; }
 
         public int CellToSection(int cell)
         {
@@ -304,8 +461,8 @@ namespace QQWingLib
         public IEnumerable<int> ColumnToSections(int col)
         {
             return sectionList.Where(s => s.Cols.Contains(col))
-                .OrderBy(s => s.Index)
-                .Select(s => s.Index);
+            .OrderBy(s => s.Index)
+            .Select(s => s.Index);
         }
 
         /// <summary>
@@ -314,8 +471,8 @@ namespace QQWingLib
         public IEnumerable<int> RowToSections(int row)
         {
             return sectionList.Where(s => s.Rows.Contains(row))
-                .OrderBy(s => s.Index)
-                .Select(s => s.Index);
+            .OrderBy(s => s.Index)
+            .Select(s => s.Index);
         }
 
         public IEnumerable<int> SectionToSectionCells(int section)
@@ -345,7 +502,8 @@ namespace QQWingLib
         /// </summary>
         public IEnumerable<int> SectionToSectionRowsByCol(int section, int col)
         {
-            return sectionList[section].RowsByCol(col);
+            var sec = sectionList[section];
+            return sec.RowsByCol(col);
         }
 
         /// <summary>
@@ -354,92 +512,65 @@ namespace QQWingLib
         /// </summary>
         public IEnumerable<int> SectionToSectionColsByRow(int section, int row)
         {
-            return sectionList[section].ColsByRow(row);
+            var sec = sectionList[section];
+            return sec.ColsByRow(row);
         }
-    }
 
-    internal class IrregularSection
-    {
-        private readonly int[] cells;
-        private readonly Dictionary<int, List<int>> rowColumnMap = new();
-        private readonly Dictionary<int, List<int>> columnRowMap = new();
-
-        public IrregularSection(int sectionIndex, int[] cells)
+        static IrregularLayout()
         {
-            if (cells.Length != QQWing.ROW_COL_SEC_SIZE)
-                throw new ArgumentOutOfRangeException(nameof(cells));
+            rand = new Random();
 
-            Index = sectionIndex;
-            this.cells = cells;
-
-            for (int idx = 0; idx < cells.Length; idx++)
+            layouts.Add(new int[][]
             {
-                int cell = cells[idx];
+                new int[] {  0,  1,  2,  3, 12, 21, 30, 39, 48 },
+                new int[] {  4,  5,  6,  7,  8, 14, 15, 16, 17 },
+                new int[] {  9, 10, 11, 18, 19, 20, 28, 29, 38 },
+                new int[] { 13, 22, 23, 31, 40, 49, 57, 58, 67 },
+                new int[] { 24, 25, 26, 33, 34, 35, 43, 44, 53 },
+                new int[] { 27, 36, 37, 45, 46, 47, 54, 55, 56 },
+                new int[] { 32, 41, 50, 59, 68, 77, 78, 79, 80 },
+                new int[] { 42, 51, 52, 60, 61, 62, 69, 70, 71 },
+                new int[] { 63, 64, 65, 66, 72, 73, 74, 75, 76 }
+            });
 
-                int row = QQWing.CellToRow(cell);
-                int col = QQWing.CellToColumn(cell);
+            layouts.Add(new int[][]
+            {
+                new int[] {  0,  1,  2,  3,  4, 10, 11, 12, 19 },
+                new int[] {  5,  6,  7, 13, 14, 15, 16, 23, 25 },
+                new int[] {  8, 17, 26, 35, 43, 44, 53, 62, 71 },
+                new int[] {  9, 18, 27, 36, 37, 45, 54, 63, 72 },
+                new int[] { 20, 21, 28, 29, 30, 38, 46, 47, 56 },
+                new int[] { 22, 31, 32, 39, 40, 41, 48, 49, 58 },
+                new int[] { 24, 33, 34, 42, 50, 51, 52, 59, 60 },
+                new int[] { 55, 57, 64, 65, 66, 67, 73, 74, 75 },
+                new int[] { 61, 68, 69, 70, 76, 77, 78, 79, 80 }
+            });
 
-                MinRow = Math.Min(row, MinRow);
-                MinCol = Math.Min(col, MinCol);
-                //}
+            layouts.Add(new int[][]
+            {
+                new int[] {  0,  1,  9, 10, 11, 18, 20, 21, 22 },
+                new int[] {  2,  3,  4,  5,  6,  7,  8, 17, 26 },
+                new int[] { 12, 13, 14, 15, 16, 23, 24, 31, 32 },
+                new int[] { 19, 27, 28, 37, 38, 46, 47, 48, 55 },
+                new int[] { 25, 33, 34, 35, 43, 44, 52, 61, 70 },
+                new int[] { 29, 30, 39, 40, 41, 42, 50, 51, 59 },
+                new int[] { 36, 45, 54, 56, 63, 64, 65, 66, 72 },
+                new int[] { 49, 57, 58, 67, 68, 73, 74, 75, 76 },
+                new int[] { 53, 60, 62, 69, 71, 77, 78, 79, 80 }
+            });
 
-                //// the rows and cols are indexes within the section
-                //for (int idx = 0; idx < cells.Length; idx++)
-                //{
-                //    int cell = cells[idx];
-
-                //    int row = QQWing.CellToRow(cell);
-                //    int col = QQWing.CellToColumn(cell);
-
-                if (!rowColumnMap.ContainsKey(row))
-                {
-                    rowColumnMap.Add(row, new());
-                }
-                if (!rowColumnMap[row].Contains(col))
-                {
-                    rowColumnMap[row].Add(col);
-                }
-
-                if (!columnRowMap.ContainsKey(col))
-                {
-                    columnRowMap.Add(col, new());
-                }
-                if (!columnRowMap[col].Contains(row))
-                {
-                    columnRowMap[col].Add(row);
-                }
-            }
-        }
-
-        public int Index { get; private set; }
-
-        public IEnumerable<int> Cells => cells;
-
-        public int MinRow { get; private set; } = QQWing.ROW_COL_SEC_SIZE;
-
-        public int MinCol { get; private set; } = QQWing.ROW_COL_SEC_SIZE;
-
-        public IEnumerable<int> Rows => rowColumnMap.Keys.OrderBy(x => x);
-
-        public IEnumerable<int> Cols => columnRowMap.Keys.OrderBy(x => x);
-
-        public IEnumerable<int> ColsByRow(int row)
-        {
-            return rowColumnMap[row].OrderBy(x => x);
-        }
-
-        public IEnumerable<int> RowsByCol(int col)
-        {
-            return columnRowMap[col].OrderBy(x => x);
-        }
-
-        public int GetCell(int offset)
-        {
-            if (offset < 0 || offset >= cells.Length)
-                throw new ArgumentOutOfRangeException(nameof(offset));
-
-            return cells[offset];
+            layouts.Add(new int[][]
+            {
+                new int[] {  0,  9, 18, 27, 28, 29, 36, 37, 38 },
+                new int[] {  1,  2,  3, 10, 11, 12, 19, 20, 21 },
+                new int[] {  4, 13, 22, 31, 40, 49, 58, 67, 76 },
+                new int[] {  5,  6,  7, 14, 15, 16, 23, 24, 25 },
+                new int[] {  8, 17, 26, 32, 33, 34, 35, 41, 50 },
+                new int[] { 30, 39, 45, 46, 47, 48, 54, 63, 72 },
+                new int[] { 42, 43, 44, 51, 52, 53, 62, 71, 80 },
+                new int[] { 55, 56, 57, 64, 65, 66, 73, 74, 75 },
+                new int[] { 59, 60, 61, 68, 69, 70, 77, 78, 79 }
+            });
         }
     }
-
 }

@@ -30,20 +30,19 @@ namespace Sudoku
             CellIndex = QQWing.RowColumnToCell(row, col);
             Section = QQWing.CellToSection(CellIndex);
 
-            var sectionLayout = QQWing.SectionLayout;
-            if (sectionLayout.RightBoundaries.Contains(cellIndex))
-            {
-                RightBrush = Brushes.DarkViolet;
-            }
-            if (sectionLayout.BottomBoundaries.Contains(cellIndex))
-            {
-                BottomBrush = Brushes.DarkViolet;
-            }
+            ShowLayoutBoundaries();
 
             for (int idx = 1; idx <= 9; idx++)
             {
                 Candidates.Add(new CandidateViewModel(idx));
             }
+        }
+
+        public void ShowLayoutBoundaries()
+        {
+            var sectionLayout = QQWing.SectionLayout;
+            RightBrush = sectionLayout.RightBoundaries.Contains(cellIndex) ? Brushes.DarkViolet : RightBrush = Brushes.Transparent;
+            BottomBrush = sectionLayout.BottomBoundaries.Contains(cellIndex) ? Brushes.DarkViolet : BottomBrush = Brushes.Transparent;
         }
 
         public override string ToString()
