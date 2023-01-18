@@ -29,6 +29,9 @@ namespace Sudoku
 
         public GameBoardViewModel()
         {
+            HighlightIncorrect = Properties.Settings.Default.HighlightIncorrect;
+            CleanPencilMarks = Properties.Settings.Default.CleanPencilMarks;
+
             Cells = new MultiSelectCollectionView<CellViewModel>(list);
 
             for (int row = 0; row < 9; row++)
@@ -57,13 +60,19 @@ namespace Sudoku
                 .ToList();
         }
 
+        internal void SaveSettings()
+        {
+            Properties.Settings.Default.HighlightIncorrect = HighlightIncorrect;
+            Properties.Settings.Default.CleanPencilMarks = CleanPencilMarks;
+        }
+
         protected override void OnPropertyChanged(PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(HighlightIncorrect))
+            if (e.PropertyName is nameof(HighlightIncorrect) && allCells != null)
             {
                 foreach (var cell in allCells)
                 {
-                    cell.Redraw(highlightIncorrect);
+                    cell.Redraw(HighlightIncorrect);
                 }
             }
 

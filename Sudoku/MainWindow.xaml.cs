@@ -16,10 +16,7 @@ namespace Sudoku
             viewModel = new SudokuViewModel();
             DataContext = viewModel;
 
-            //Loaded += (s, e) =>
-            //{
-            //    viewModel.GameBoard.NewPuzzle();
-            //};
+            Closing += (s, e) => viewModel.SaveSettings();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e) => viewModel.KeyDown(e);

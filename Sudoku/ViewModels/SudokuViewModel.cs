@@ -13,6 +13,27 @@ namespace Sudoku
     {
         public SudokuViewModel()
         {
+            SectionLayout = Properties.Settings.Default.SectionLayout;
+
+            if (Enum.TryParse(Properties.Settings.Default.PuzzleDifficulty, out Difficulty diff))
+            {
+                PuzzleDifficulty = diff;
+            }
+            if (Enum.TryParse(Properties.Settings.Default.PuzzleSymmetry, out Symmetry symm))
+            {
+                PuzzleSymmetry = symm;
+            }
+        }
+
+        internal void SaveSettings()
+        {
+            Properties.Settings.Default.SectionLayout = SectionLayout;
+            Properties.Settings.Default.PuzzleDifficulty = PuzzleDifficulty.ToString();
+            Properties.Settings.Default.PuzzleSymmetry = PuzzleSymmetry.ToString();
+
+            GameBoard.SaveSettings();
+
+            Properties.Settings.Default.Save();
         }
 
         [ObservableProperty]

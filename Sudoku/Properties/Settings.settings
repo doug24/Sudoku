@@ -1,7 +1,21 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Sudoku.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="SectionLayout" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-1</Value>
+    </Setting>
+    <Setting Name="PuzzleSymmetry" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MIRROR</Value>
+    </Setting>
+    <Setting Name="PuzzleDifficulty" Type="System.String" Scope="User">
+      <Value Profile="(Default)">INTERMEDIATE</Value>
+    </Setting>
+    <Setting Name="HighlightIncorrect" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CleanPencilMarks" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

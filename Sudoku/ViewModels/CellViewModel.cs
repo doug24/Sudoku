@@ -43,8 +43,8 @@ namespace Sudoku
             Section = QQWing.CellToSection(CellIndex);
 
             var sectionLayout = QQWing.SectionLayout;
-            RightBrush = sectionLayout.RightBoundaries.Contains(cellIndex) ? Brushes.DarkViolet : RightBrush = Brushes.Transparent;
-            BottomBrush = sectionLayout.BottomBoundaries.Contains(cellIndex) ? Brushes.DarkViolet : BottomBrush = Brushes.Transparent;
+            RightBrush = sectionLayout.RightBoundaries.Contains(CellIndex) ? Brushes.DarkViolet : RightBrush = Brushes.Transparent;
+            BottomBrush = sectionLayout.BottomBoundaries.Contains(CellIndex) ? Brushes.DarkViolet : BottomBrush = Brushes.Transparent;
 
             Background = defaultBackground = brushes[Section];
         }
