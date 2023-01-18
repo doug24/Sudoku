@@ -84,6 +84,7 @@ namespace Sudoku
         internal string ToSnapshotString()
         {
             StringBuilder sb = new();
+            sb.AppendLine($"L{QQWing.SectionLayout.Layout}");
             for (int row = 0; row < 9; row++)
             {
                 for (int col = 0; col < 9; col++)
@@ -102,6 +103,10 @@ namespace Sudoku
         internal string ToSimpleSudokuString()
         {
             StringBuilder sb = new();
+            if (QQWing.SectionLayout.Layout != QQWing.ClassicLayout)
+            {
+                sb.AppendLine($"L{QQWing.SectionLayout.Layout}");
+            }
             for (int row = 0; row < 9; row++)
             {
                 for (int col = 0; col < 9; col++)
@@ -442,6 +447,16 @@ namespace Sudoku
             ClearBoard();
             IsDesignMode = false;
 
+            if (ssData.Length > 0 && ssData[0].StartsWith("L"))
+            {
+                var numString = ssData[0][1..];
+                if (int.TryParse(numString, out var num))
+                {
+                    ChangeLayout(num);
+                }
+                ssData = ssData.Skip(1).ToArray();
+            }
+
             int[] initial = GetPuzzle(ssData);
 
             QQWing ss = new();
@@ -503,6 +518,20 @@ namespace Sudoku
         internal void OpenSimpleSudoku(string[] lines)
         {
             ClearBoard();
+
+            if (lines.Length > 0 && lines[0].StartsWith("L"))
+            {
+                var numString = lines[0][1..];
+                if (int.TryParse(numString, out var num))
+                {
+                    ChangeLayout(num);
+                }
+                lines = lines.Skip(1).ToArray();
+            }
+            else
+            {
+                ChangeLayout(QQWing.ClassicLayout);
+            }
 
             if (lines.Length > 9)
             {
