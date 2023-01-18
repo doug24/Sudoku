@@ -51,15 +51,15 @@ namespace Sudoku
 
         private readonly static Brush[] brushes = new Brush[]
         {
-            Brushes.Snow,//0
-            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFBF5")),//80
-            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFF9ED")),//40
-            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEDF9FF")),//200
-            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEDFFED")),//120
-            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEDEDFF")),//240
-            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFEDF9")),//320
-            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEDFFF9")),//160
-            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF9EDFF")),//280
+            Brushes.Snow,
+            Brushes.MintCream,
+            Brushes.AliceBlue,
+            Brushes.LavenderBlush,
+            Brushes.WhiteSmoke,
+            Brushes.Azure,
+            Brushes.Cornsilk,
+            Brushes.Honeydew,
+            Brushes.Lavender,
         };
 
         public override string ToString()
