@@ -25,6 +25,7 @@ namespace Sudoku
         private readonly Dictionary<int, List<CellViewModel>> rows;
         private readonly Dictionary<int, List<CellViewModel>> cols;
         private Dictionary<int, List<CellViewModel>> sections;
+        private int sectionLayout = QQWing.ClassicLayout;
 
         public GameBoardViewModel()
         {
@@ -592,15 +593,47 @@ namespace Sudoku
             }
         }
 
-        internal async void NewPuzzle(Difficulty difficulty, Symmetry symmetry)
+        internal void ChangeLayout(int layout)
         {
+            sectionLayout = layout;
             ClearBoard();
-            QQWing.SectionLayout.SetRandomLayout();
+            if (layout == QQWing.ClassicLayout)
+            {
+                if (!QQWing.IsClassicLayout)
+                {
+                    QQWing.SectionLayout = new RegularLayout();
+                }
+            }
+            else
+            {
+                if (QQWing.IsClassicLayout)
+                {
+                    QQWing.SectionLayout = new IrregularLayout();
+                }
+                QQWing.SectionLayout.Layout = layout;
+            }
+
             UpdateLayout();
             sections = list.GroupBy(cell => cell.Section)
                 .OrderBy(v => v.Key)
                 .ToDictionary(v => v.Key, v => v.OrderBy(c => c.Row).ThenBy(c => c.Col).ToList());
+        }
 
+        internal async void NewPuzzle(Difficulty difficulty, Symmetry symmetry)
+        {
+            ClearBoard();
+            if (sectionLayout == QQWing.RandomLayout)
+            {
+                if (sectionLayout == QQWing.ClassicLayout)
+                {
+                    QQWing.SectionLayout = new IrregularLayout();
+                }
+                QQWing.SectionLayout.SetRandomLayout();
+                UpdateLayout();
+                sections = list.GroupBy(cell => cell.Section)
+                    .OrderBy(v => v.Key)
+                    .ToDictionary(v => v.Key, v => v.OrderBy(c => c.Row).ThenBy(c => c.Col).ToList());
+            }
 
             Puzzle puz = new();
             await puz.Generate(difficulty, symmetry);

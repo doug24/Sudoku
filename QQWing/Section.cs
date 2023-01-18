@@ -82,7 +82,7 @@ namespace QQWingLib
     {
         public int LayoutCount => 1;
 
-        public int Layout { get; set; } = 0;
+        public int Layout { get { return -1; } set { /* do nothing */ } }
 
         public void SetRandomLayout() { }
 
@@ -305,7 +305,7 @@ namespace QQWingLib
 
         public IrregularLayout()
         {
-            //Layout = rand.Next(0, layouts.Count - 1);
+            //Layout = rand.Next(0, layouts.Count);
             Layout = layouts.Count - 1;
         }
 
@@ -319,9 +319,9 @@ namespace QQWingLib
 
                 layoutIndex = value;
 
-                if (layoutIndex < 0 || layoutIndex > layouts.Count - 1)
+                if (layoutIndex < 0 || layoutIndex >= layouts.Count)
                 {
-                    layoutIndex = rand.Next(0, layouts.Count - 1);
+                    layoutIndex = rand.Next(0, layouts.Count);
                 }
                 Initialize();
             }
@@ -334,7 +334,7 @@ namespace QQWingLib
 
         private void Initialize()
         {
-            if (layoutIndex < 0 || layoutIndex > layouts.Count - 1)
+            if (layoutIndex < 0 || layoutIndex >= layouts.Count)
             {
                 return;
             }

@@ -38,26 +38,26 @@ namespace QQWingLib
     /// </summary>
     public class QQWing
     {
-        public static readonly string QQWING_VERSION = "n1.3.4";
+        public readonly static string QQWING_VERSION = "n1.3.4";
 
-        private static readonly string NL = Environment.NewLine;
+        private readonly static string NL = Environment.NewLine;
 
         /// <summary>nominal value = 3</summary>
-        internal static readonly int GRID_SIZE = 3;
+        internal readonly static int GRID_SIZE = 3;
 
         /// <summary>nominal value = 9</summary>
-        internal static readonly int ROW_COL_SEC_SIZE = GRID_SIZE * GRID_SIZE;
+        internal readonly static int ROW_COL_SEC_SIZE = GRID_SIZE * GRID_SIZE;
 
         /// <summary>nominal value = 27</summary>
-        internal static readonly int SEC_GROUP_SIZE = ROW_COL_SEC_SIZE * GRID_SIZE;
+        internal readonly static int SEC_GROUP_SIZE = ROW_COL_SEC_SIZE * GRID_SIZE;
 
         /// <summary>nominal value = 81</summary>
-        internal static readonly int BOARD_SIZE = ROW_COL_SEC_SIZE * ROW_COL_SEC_SIZE;
+        internal readonly static int BOARD_SIZE = ROW_COL_SEC_SIZE * ROW_COL_SEC_SIZE;
 
         /// <summary>nominal value = 729</summary>
-        internal static readonly int POSSIBILITY_SIZE = BOARD_SIZE * ROW_COL_SEC_SIZE;
+        internal readonly static int POSSIBILITY_SIZE = BOARD_SIZE * ROW_COL_SEC_SIZE;
 
-        private static readonly Random random = new();
+        private readonly static Random random = new();
 
         /// <summary>
         /// The last round of solving
@@ -68,7 +68,15 @@ namespace QQWingLib
         /// The section layout for this sudoku: classic 3x3 or an irregular pattern.
         /// Made static to avoid changing the class interface.
         /// </summary>
-        public static ISectionLayout SectionLayout { get; set; } = new IrregularLayout();
+        public static ISectionLayout SectionLayout { get; set; } = new RegularLayout();
+        
+        /// <summary>value = -1</summary>
+        public readonly static int ClassicLayout = -1;
+
+        public static bool IsClassicLayout => SectionLayout.Layout == ClassicLayout;
+
+        /// <summary>value = 999</summary>
+        public readonly static int RandomLayout = 999;
 
         /// <summary>
         /// The 81 integers that make up a sudoku puzzle. Givens are 1-9, unknowns

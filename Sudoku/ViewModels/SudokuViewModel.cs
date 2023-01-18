@@ -19,6 +19,9 @@ namespace Sudoku
         private GameBoardViewModel gameBoard = new();
 
         [ObservableProperty]
+        private int sectionLayout = QQWing.ClassicLayout;
+
+        [ObservableProperty]
         private Symmetry puzzleSymmetry = Symmetry.MIRROR;
 
         [ObservableProperty]
@@ -33,13 +36,17 @@ namespace Sudoku
 
         protected override void OnPropertyChanged(PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(InputMode))
+            if (e.PropertyName is nameof(InputMode))
             {
                 IsEraser = false;
             }
-            else if (e.PropertyName == nameof(IsEraser) && IsEraser)
+            else if (e.PropertyName is nameof(IsEraser) && IsEraser)
             {
                 InputMode = KeyPadMode.Pencil;
+            }
+            else if (e.PropertyName is nameof(SectionLayout))
+            {
+                GameBoard.ChangeLayout(SectionLayout);
             }
 
             base.OnPropertyChanged(e);

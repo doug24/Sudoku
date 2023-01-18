@@ -15,7 +15,8 @@
 
     <Window.Resources>
         <local:EnumBooleanConverter x:Key="ebc" />
-        
+        <local:NumToBooleanConverter x:Key="nbc"/>
+
         <LinearGradientBrush x:Key="thumbBrush" EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#FFB3B5B7" Offset="1"/>
             <GradientStop Color="#FFEDEEEE"/>
@@ -43,6 +44,20 @@
         <Menu DockPanel.Dock="Top" FontSize="13">
             <MenuItem Header="File">
                 <MenuItem Header="Create New" Command="{Binding NewPuzzleCommand}"/>
+                <MenuItem Header="Layout">
+                    <MenuItem Header="Classic" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=-1, Mode=TwoWay}"/>
+                    <MenuItem Header="Random" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=999, Mode=TwoWay}"/>
+                    <MenuItem Header="Irregular 1" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=0, Mode=TwoWay}"/>
+                    <MenuItem Header="Irregular 2" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=1, Mode=TwoWay}"/>
+                    <MenuItem Header="Irregular 3" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=2, Mode=TwoWay}"/>
+                    <MenuItem Header="Irregular 4" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=3, Mode=TwoWay}"/>
+                </MenuItem>
                 <MenuItem Header="Symmetry">
                     <MenuItem Header="None" IsCheckable="True"
                               IsChecked="{Binding Path=PuzzleSymmetry, Converter={StaticResource ebc}, ConverterParameter=NONE, Mode=TwoWay}" />
@@ -58,8 +73,6 @@
                               IsChecked="{Binding Path=PuzzleSymmetry, Converter={StaticResource ebc}, ConverterParameter=RANDOM, Mode=TwoWay}" />
                 </MenuItem>
                 <MenuItem Header="Difficulty">
-                    <MenuItem Header="Simple" IsCheckable="True"
-                              IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=SIMPLE, Mode=TwoWay}" />
                     <MenuItem Header="Easy" IsCheckable="True"
                               IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=EASY, Mode=TwoWay}" />
                     <MenuItem Header="Intermediate" IsCheckable="True"

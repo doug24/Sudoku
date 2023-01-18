@@ -109,7 +109,7 @@ namespace Sudoku
                     }
                 }
             }
-            catch (OperationCanceledException ce)
+            catch (OperationCanceledException)
             {
                 Debug.WriteLine("Puzzle GenerateInternal was canceled");
             }
