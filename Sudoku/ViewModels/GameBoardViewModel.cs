@@ -21,10 +21,10 @@ namespace Sudoku
         private readonly ObservableCollection<CellViewModel> list = new();
         public MultiSelectCollectionView<CellViewModel> Cells { get; private set; }
 
+        private readonly List<CellViewModel> allCells;
         private readonly Dictionary<int, List<CellViewModel>> rows;
         private readonly Dictionary<int, List<CellViewModel>> cols;
-        private readonly Dictionary<int, List<CellViewModel>> sects;
-        private readonly List<CellViewModel> allCells;
+        private Dictionary<int, List<CellViewModel>> sections;
 
         public GameBoardViewModel()
         {
@@ -46,7 +46,7 @@ namespace Sudoku
                 .OrderBy(v => v.Key)
                 .ToDictionary(v => v.Key, v => v.OrderBy(c => c.Row).ToList());
 
-            sects = list.GroupBy(cell => cell.Section)
+            sections = list.GroupBy(cell => cell.Section)
                 .OrderBy(v => v.Key)
                 .ToDictionary(v => v.Key, v => v.OrderBy(c => c.Row).ThenBy(c => c.Col).ToList());
 
@@ -168,7 +168,7 @@ namespace Sudoku
         {
             foreach (var cell in allCells)
             {
-                cell.Background = Brushes.White;
+                cell.ResetBackground();
             }
         }
 
@@ -199,7 +199,7 @@ namespace Sudoku
                         list.Add(newState);
                     }
 
-                    cell.Background = Brushes.White;
+                    cell.ResetBackground();
                 }
             }
 
@@ -309,7 +309,7 @@ namespace Sudoku
                         ClearCanditates(list, cell.Value, c);
                     }
                 }
-                if (sects.TryGetValue(cell.Section, out List<CellViewModel>? cellsInSect))
+                if (sections.TryGetValue(cell.Section, out List<CellViewModel>? cellsInSect))
                 {
                     foreach (var c in cellsInSect)
                     {
@@ -393,7 +393,7 @@ namespace Sudoku
                     }
                 }
             }
-            if (sects.TryGetValue(cell.Section, out List<CellViewModel>? cellsInSect))
+            if (sections.TryGetValue(cell.Section, out List<CellViewModel>? cellsInSect))
             {
                 foreach (var c in cellsInSect)
                 {
@@ -425,7 +425,14 @@ namespace Sudoku
         {
             foreach (var cell in Cells.SelectedItems)
             {
-                cell.Background = mode == KeyPadMode.Eraser ? Brushes.White : br;
+                if (mode == KeyPadMode.Eraser)
+                {
+                    cell.ResetBackground();
+                }
+                else
+                {
+                    cell.Background = br;
+                }
             }
         }
 
@@ -590,6 +597,10 @@ namespace Sudoku
             ClearBoard();
             QQWing.SectionLayout.SetRandomLayout();
             UpdateLayout();
+            sections = list.GroupBy(cell => cell.Section)
+                .OrderBy(v => v.Key)
+                .ToDictionary(v => v.Key, v => v.OrderBy(c => c.Row).ThenBy(c => c.Col).ToList());
+
 
             Puzzle puz = new();
             await puz.Generate(difficulty, symmetry);

@@ -40,10 +40,27 @@ namespace Sudoku
 
         public void ShowLayoutBoundaries()
         {
+            Section = QQWing.CellToSection(CellIndex);
+
             var sectionLayout = QQWing.SectionLayout;
             RightBrush = sectionLayout.RightBoundaries.Contains(cellIndex) ? Brushes.DarkViolet : RightBrush = Brushes.Transparent;
             BottomBrush = sectionLayout.BottomBoundaries.Contains(cellIndex) ? Brushes.DarkViolet : BottomBrush = Brushes.Transparent;
+
+            Background = defaultBackground = brushes[Section];
         }
+
+        private readonly static Brush[] brushes = new Brush[]
+        {
+            Brushes.Snow,//0
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFBF5")),//80
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFF9ED")),//40
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEDF9FF")),//200
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEDFFED")),//120
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEDEDFF")),//240
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFEDF9")),//320
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFEDFFF9")),//160
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFF9EDFF")),//280
+        };
 
         public override string ToString()
         {
@@ -57,6 +74,8 @@ namespace Sudoku
         [ObservableProperty]
         private int cellIndex;
 
+        private Brush defaultBackground = Brushes.Cyan;
+
         public int Value { get; private set; }
         public int Answer { get; private set; }
 
@@ -65,7 +84,7 @@ namespace Sudoku
         public void Reset()
         {
             Given = false;
-            Background = Brushes.White;
+            Background = defaultBackground;
             Foreground = Brushes.DarkGreen;
             Number = string.Empty;
             Value = 0;
@@ -107,12 +126,9 @@ namespace Sudoku
             SetCandidates(state.Candidates);
         }
 
-        public void ToggleHighlight(Brush br)
+        public void ResetBackground()
         {
-            if (Background == br)
-                Background = Brushes.White;
-            else
-                Background = br;
+            Background = defaultBackground;
         }
 
         public void Redraw(bool colorIncorrect)
@@ -141,10 +157,10 @@ namespace Sudoku
         private string number = string.Empty;
 
         [ObservableProperty]
-        public Brush background = Brushes.White;
+        private Brush background = Brushes.White;
 
         [ObservableProperty]
-        public Brush foreground = Brushes.DarkGreen;
+        private Brush foreground = Brushes.DarkGreen;
 
         [ObservableProperty]
         private Brush rightBrush = Brushes.Transparent;
