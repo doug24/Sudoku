@@ -93,6 +93,14 @@
                               IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=20, Mode=TwoWay}"/>
                     <MenuItem Header="Irregular 22" IsCheckable="True"
                               IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=21, Mode=TwoWay}"/>
+                    <MenuItem Header="Irregular 23" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=22, Mode=TwoWay}"/>
+                    <MenuItem Header="Irregular 24" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=23, Mode=TwoWay}"/>
+                    <MenuItem Header="Irregular 25" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=24, Mode=TwoWay}"/>
+                    <MenuItem Header="Irregular 26" IsCheckable="True"
+                              IsChecked="{Binding Path=SectionLayout, Converter={StaticResource nbc}, ConverterParameter=25, Mode=TwoWay}"/>
                 </MenuItem>
                 <MenuItem Header="Symmetry">
                     <MenuItem Header="None" IsCheckable="True"
