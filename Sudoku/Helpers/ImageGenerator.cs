@@ -2,7 +2,6 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using ColorTools;
 using QQWingLib;
 
 namespace Sudoku
@@ -32,13 +31,6 @@ namespace Sudoku
             {
                 if (brushes[section] is SolidColorBrush brush)
                 {
-                    Color c = brush.Color;
-                    ColorHSV hsv = ColorHSV.ConvertFrom(c);
-                    hsv.Saturation = .3;
-                    Color c2 = hsv.ToColor();
-                    SolidColorBrush b2 = new(c2);
-                    b2.Freeze();
-
                     for (int offset = 0; offset < 9; offset++)
                     {
                         int cell = layout.SectionToCell(section, offset);
@@ -46,7 +38,7 @@ namespace Sudoku
                         int col = QQWing.CellToColumn(cell);
                         int x = 3 + (col * 10);
                         int y = 3 + (row * 10);
-                        context.DrawRectangle(b2, null, new Rect(x, y, 10, 10));
+                        context.DrawRectangle(brush, null, new Rect(x, y, 10, 10));
                     }
                 }
             }
@@ -67,13 +59,13 @@ namespace Sudoku
         private readonly static Brush[] brushes = new Brush[]
         {
             new SolidColorBrush(Color.FromRgb(255, 204, 178)),//hue= 20
-            new SolidColorBrush(Color.FromRgb(201, 255, 255)),//hue=180
+            new SolidColorBrush(Color.FromRgb(201, 233, 255)),//hue=180
             new SolidColorBrush(Color.FromRgb(204, 178, 255)),//hue=260
             new SolidColorBrush(Color.FromRgb(221, 255, 204)),//hue=100
             new SolidColorBrush(Color.FromRgb(255, 178, 204)),//hue=340
             new SolidColorBrush(Color.FromRgb(221, 255, 204)),//hue=100
             new SolidColorBrush(Color.FromRgb(204, 178, 255)),//hue=260
-            new SolidColorBrush(Color.FromRgb(201, 255, 255)),//hue=180
+            new SolidColorBrush(Color.FromRgb(201, 233, 255)),//hue=180
             new SolidColorBrush(Color.FromRgb(255, 204, 178)),//hue= 20
         };
     }
