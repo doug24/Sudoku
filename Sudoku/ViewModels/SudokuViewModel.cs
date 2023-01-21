@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Win32;
 using QQWingLib;
 
@@ -23,7 +25,22 @@ namespace Sudoku
             {
                 PuzzleSymmetry = symm;
             }
+
+            IrregularLayout layout = new();
+            LayoutMenuItems.Add(new("Classic", -1, SectionLayout == -1));
+            LayoutMenuItems.Add(new("Random", 999, SectionLayout == 999));
+            for (int idx = 0; idx < layout.LayoutCount; idx++)
+            {
+                LayoutMenuItems.Add(new($"Irregular {idx + 1}", idx, SectionLayout == idx));
+            }
+
+            WeakReferenceMessenger.Default.Register<SectionLayoutChangedMessage>(this, (r, m) =>
+            {
+                SectionLayout = m.Value;
+                LayoutMenuItems.ForEach(menu => menu.IsChecked = menu.LayoutId == m.Value);
+            });
         }
+
 
         internal void SaveSettings()
         {
@@ -54,6 +71,7 @@ namespace Sudoku
         [ObservableProperty]
         private bool isEraser;
 
+        public ObservableCollection<LayoutMenuItemViewModel> LayoutMenuItems { get; set; } = new();
 
         protected override void OnPropertyChanged(PropertyChangedEventArgs e)
         {

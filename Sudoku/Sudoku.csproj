@@ -15,9 +15,69 @@
     <Compile Remove="Controls\DoubleUtil.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Images\classic.png" />
+    <None Remove="Images\irr1.png" />
+    <None Remove="Images\irr10.png" />
+    <None Remove="Images\irr11.png" />
+    <None Remove="Images\irr12.png" />
+    <None Remove="Images\irr13.png" />
+    <None Remove="Images\irr14.png" />
+    <None Remove="Images\irr15.png" />
+    <None Remove="Images\irr16.png" />
+    <None Remove="Images\irr17.png" />
+    <None Remove="Images\irr18.png" />
+    <None Remove="Images\irr19.png" />
+    <None Remove="Images\irr2.png" />
+    <None Remove="Images\irr20.png" />
+    <None Remove="Images\irr21.png" />
+    <None Remove="Images\irr22.png" />
+    <None Remove="Images\irr23.png" />
+    <None Remove="Images\irr24.png" />
+    <None Remove="Images\irr25.png" />
+    <None Remove="Images\irr26.png" />
+    <None Remove="Images\irr27.png" />
+    <None Remove="Images\irr3.png" />
+    <None Remove="Images\irr4.png" />
+    <None Remove="Images\irr5.png" />
+    <None Remove="Images\irr6.png" />
+    <None Remove="Images\irr7.png" />
+    <None Remove="Images\irr8.png" />
+    <None Remove="Images\irr9.png" />
+    <None Remove="Images\random.png" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\QQWing\QQWing.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\classic.png" />
+    <Resource Include="Images\irr1.png" />
+    <Resource Include="Images\irr10.png" />
+    <Resource Include="Images\irr11.png" />
+    <Resource Include="Images\irr12.png" />
+    <Resource Include="Images\irr13.png" />
+    <Resource Include="Images\irr14.png" />
+    <Resource Include="Images\irr15.png" />
+    <Resource Include="Images\irr16.png" />
+    <Resource Include="Images\irr17.png" />
+    <Resource Include="Images\irr18.png" />
+    <Resource Include="Images\irr19.png" />
+    <Resource Include="Images\irr2.png" />
+    <Resource Include="Images\irr20.png" />
+    <Resource Include="Images\irr21.png" />
+    <Resource Include="Images\irr22.png" />
+    <Resource Include="Images\irr23.png" />
+    <Resource Include="Images\irr24.png" />
+    <Resource Include="Images\irr25.png" />
+    <Resource Include="Images\irr26.png" />
+    <Resource Include="Images\irr27.png" />
+    <Resource Include="Images\irr3.png" />
+    <Resource Include="Images\irr4.png" />
+    <Resource Include="Images\irr5.png" />
+    <Resource Include="Images\irr6.png" />
+    <Resource Include="Images\irr7.png" />
+    <Resource Include="Images\irr8.png" />
+    <Resource Include="Images\irr9.png" />
+    <Resource Include="Images\random.png" />
     <Resource Include="Sudoku.ico" />
   </ItemGroup>
   <ItemGroup>
