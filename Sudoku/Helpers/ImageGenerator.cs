@@ -11,7 +11,7 @@ namespace Sudoku
         public static void CreateSectionImages(int from, int to)
         {
             IrregularLayout layout = new();
-            for (int idx = from; idx < to; idx++)
+            for (int idx = from; idx <= to; idx++)
             {
                 layout.Layout = idx;
                 Generate($"irr{idx + 1}", layout);

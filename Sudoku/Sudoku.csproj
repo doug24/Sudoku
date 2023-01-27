@@ -36,6 +36,7 @@
     <None Remove="Images\irr25.png" />
     <None Remove="Images\irr26.png" />
     <None Remove="Images\irr27.png" />
+    <None Remove="Images\irr28.png" />
     <None Remove="Images\irr3.png" />
     <None Remove="Images\irr4.png" />
     <None Remove="Images\irr5.png" />
@@ -70,6 +71,7 @@
     <Resource Include="Images\irr25.png" />
     <Resource Include="Images\irr26.png" />
     <Resource Include="Images\irr27.png" />
+    <Resource Include="Images\irr28.png" />
     <Resource Include="Images\irr3.png" />
     <Resource Include="Images\irr4.png" />
     <Resource Include="Images\irr5.png" />

@@ -18,7 +18,7 @@ namespace Sudoku
 
             Closing += (s, e) => viewModel.SaveSettings();
 
-            //ImageGenerator.CreateSectionImages(0, 27);
+            //ImageGenerator.CreateSectionImages(26, 27);
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e) => viewModel.KeyDown(e);
