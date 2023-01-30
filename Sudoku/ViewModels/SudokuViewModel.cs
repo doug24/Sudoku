@@ -13,6 +13,8 @@ namespace Sudoku
 {
     public partial class SudokuViewModel : ObservableObject
     {
+        private readonly static Random rand = new Random();
+
         public SudokuViewModel()
         {
             SectionLayout = Properties.Settings.Default.SectionLayout;
@@ -29,15 +31,21 @@ namespace Sudoku
             IrregularLayout layout = new();
             LayoutMenuItems.Add(new("Classic", -1, SectionLayout == -1));
             LayoutMenuItems.Add(new("Random", 999, SectionLayout == 999));
-            for (int idx = 0; idx < layout.LayoutCount; idx++)
+            for (int idx = 0; idx < IrregularLayout.LayoutCount; idx++)
             {
                 LayoutMenuItems.Add(new($"Irregular {idx + 1}", idx, SectionLayout == idx));
             }
 
             WeakReferenceMessenger.Default.Register<SectionLayoutChangedMessage>(this, (r, m) =>
             {
-                SectionLayout = m.Value;
-                LayoutMenuItems.ForEach(menu => menu.IsChecked = menu.LayoutId == m.Value);
+                int index = m.Value;
+                if (m.Value == 999)
+                {
+                    index = rand.Next(0, IrregularLayout.LayoutCount);
+                }
+
+                SectionLayout = index;
+                LayoutMenuItems.ForEach(menu => menu.IsChecked = menu.LayoutId == index);
             });
         }
 
@@ -93,6 +101,14 @@ namespace Sudoku
 
         public ICommand NewPuzzleCommand => new RelayCommand(
             p => GameBoard.NewPuzzle(PuzzleDifficulty, PuzzleSymmetry));
+
+        public ICommand NewRandomPuzzleCommand => new RelayCommand(
+            p =>
+            {
+                int index = rand.Next(0, IrregularLayout.LayoutCount);
+                WeakReferenceMessenger.Default.Send(new SectionLayoutChangedMessage(index));
+                GameBoard.NewPuzzle(PuzzleDifficulty, PuzzleSymmetry);
+            });
 
         public ICommand SnapshotCommand => new RelayCommand(
             p => Snapshot(),

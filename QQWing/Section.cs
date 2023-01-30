@@ -7,11 +7,7 @@ namespace QQWingLib
 {
     public interface ISectionLayout
     {
-        int LayoutCount { get; }
-
         int Layout { get; set; }
-
-        void SetRandomLayout();
 
         IEnumerable<int> BottomBoundaries { get; }
 
@@ -80,12 +76,7 @@ namespace QQWingLib
 
     public class RegularLayout : ISectionLayout
     {
-        public int LayoutCount => 1;
-
         public int Layout { get { return -1; } set { /* do nothing */ } }
-
-        public void SetRandomLayout() { }
-
 
         public IEnumerable<int> BottomBoundaries { get; } = new int[]
         {
@@ -296,7 +287,6 @@ namespace QQWingLib
 
     public class IrregularLayout : ISectionLayout
     {
-        private readonly static Random rand;
         private readonly static List<int[][]> layouts = new();
 
         private readonly List<IrregularSection> sectionList = new();
@@ -305,7 +295,6 @@ namespace QQWingLib
 
         public IrregularLayout()
         {
-            //Layout = rand.Next(0, layouts.Count);
             Layout = layouts.Count - 1;
         }
 
@@ -321,15 +310,10 @@ namespace QQWingLib
 
                 if (layoutIndex < 0 || layoutIndex >= layouts.Count)
                 {
-                    layoutIndex = rand.Next(0, layouts.Count);
+                    layoutIndex = 0;
                 }
                 Initialize();
             }
-        }
-
-        public void SetRandomLayout()
-        {
-            Layout = rand.Next(0, layouts.Count);
         }
 
         private void Initialize()
@@ -402,7 +386,7 @@ namespace QQWingLib
             BottomBoundaries = bottom;
         }
 
-        public int LayoutCount => layouts.Count;
+        public static int LayoutCount => layouts.Count;
 
         public IEnumerable<int> BottomBoundaries { get; private set; }
 
@@ -518,8 +502,6 @@ namespace QQWingLib
 
         static IrregularLayout()
         {
-            rand = new Random();
-
             layouts.Add(new int[][] // #1
             {
                 new int[] {  0,  1,  2,  3, 12, 21, 30, 39, 48 },
