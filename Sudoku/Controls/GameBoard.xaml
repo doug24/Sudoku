@@ -17,9 +17,9 @@
     <Grid Background="DarkViolet">
         <ListBox x:Name="gameListBox"
                  ItemsSource="{Binding Cells}"
-                 SelectionMode="Extended"
+                 SelectionMode="{Binding SelectionMode}"
+                 local:MultiSelect.IsEnabled="{Binding IsMultiSelect}"
                  IsSynchronizedWithCurrentItem="True"
-                 local:MultiSelect.IsEnabled="True"
                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
                  Background="White"
                  Margin="3">

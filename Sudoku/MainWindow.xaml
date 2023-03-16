@@ -11,7 +11,8 @@
         Title="Sudoku"
         WindowStartupLocation="CenterScreen"
         KeyDown="Window_KeyDown"
-        Height="760" Width="1000">
+        SizeToContent="Width"
+        Height="760" >
 
     <Window.Resources>
         <local:EnumBooleanConverter x:Key="ebc" />
@@ -107,29 +108,53 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Row="0" Grid.Column="0">
-                    <TextBlock Text="Color incorrect answers" Margin="3" FontSize="14"/>
-                    <ToggleSwitch:HorizontalToggleSwitch 
+                <TextBlock Grid.Row="0" Grid.Column="0" 
+                           Text="Color incorrect answers" Margin="3" FontSize="14"/>
+                <ToggleSwitch:HorizontalToggleSwitch Grid.Row="0" Grid.Column="2"
                             IsChecked="{Binding GameBoard.HighlightIncorrect, Mode=TwoWay}" 
                             Style="{StaticResource carbon}"
                             UncheckedContent="No" CheckedContent="Yes" 
-                            Margin="0,3,0,10" HorizontalAlignment="Left"/>
+                            Margin="0,6" HorizontalAlignment="Left"/>
 
-                    <TextBlock Text="Clean pencil marks" Margin="3" FontSize="14"/>
-                    <ToggleSwitch:HorizontalToggleSwitch 
+                <TextBlock Grid.Row="1" Grid.Column="0"
+                           Text="Clean pencil marks" Margin="3" FontSize="14"/>
+                <ToggleSwitch:HorizontalToggleSwitch Grid.Row="1" Grid.Column="2"
                             IsChecked="{Binding GameBoard.CleanPencilMarks, Mode=TwoWay}" 
                             Style="{StaticResource carbon}"
                             UncheckedContent="No" CheckedContent="Yes" 
-                            Margin="0,3,0,10" HorizontalAlignment="Left"/>
+                            Margin="0,6" HorizontalAlignment="Left"/>
 
+                <TextBlock Grid.Row="2" Grid.Column="0" 
+                           Text="Highlight selected number" Margin="3" FontSize="14"/>
+                <ToggleSwitch:HorizontalToggleSwitch Grid.Row="2" Grid.Column="2"
+                            IsChecked="{Binding Path=GameBoard.EnableNumberHighlight, Mode=TwoWay}" 
+                            Style="{StaticResource carbon}"
+                            UncheckedContent="No" CheckedContent="Yes" 
+                            Margin="0,6" HorizontalAlignment="Left"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" 
+                           Text="Selection mode" Margin="3" FontSize="14"/>
+                <StackPanel Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" 
+                            Margin="0,6"  Orientation="Horizontal">
+                    <RadioButton Content="Cell" Margin="3" FontSize="14"
+                                 IsChecked="{Binding Path=GameBoard.PlayMode, Converter={StaticResource ebc}, ConverterParameter=CellFirst, Mode=TwoWay}" />
+                    <RadioButton Content="Number" Margin="3" FontSize="14"
+                                 IsChecked="{Binding Path=GameBoard.PlayMode, Converter={StaticResource ebc}, ConverterParameter=NumbersFirst, Mode=TwoWay}" />
                 </StackPanel>
-                <local:KeyPadControl Grid.Row="1" VerticalAlignment="Bottom" MaxWidth="220"/>
+
+                <local:KeyPadControl Grid.Row="4" Grid.ColumnSpan="3" 
+                                     VerticalAlignment="Bottom" MaxWidth="220"/>
             </Grid>
         </Border>
     </DockPanel>

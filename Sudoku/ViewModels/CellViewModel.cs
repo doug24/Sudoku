@@ -62,6 +62,18 @@ namespace Sudoku
             new SolidColorBrush(Color.FromRgb(255, 250, 247)),//hue= 20
         };
 
+        private readonly static Brush[] colorBrushes = new Brush[]
+        {
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFC2F0FF")),
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFACFFAC")),
+            new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFDDBF")),
+        };
+
+        public static Brush GetColor(int idx)
+        {
+            return colorBrushes[idx];
+        }
+
         public override string ToString()
         {
             return $"r{Row} c{Col} s{Section}";
@@ -150,11 +162,40 @@ namespace Sudoku
             }
         }
 
+        internal bool HasCandidateSet(int value)
+        {
+            return Candidates.FirstOrDefault(c => c.Value != 0 && c.Value == value)?.Visible ?? false;
+        }
+
+        internal void SetHighlight(int highlightValue)
+        {
+            IsHighlight = Value == highlightValue;
+        }
+
+        internal void SetColor(int color)
+        {
+            if (color >= 0 && color < colorBrushes.Length)
+            {
+                Brush br = colorBrushes[color];
+                if (Background == br)
+                {
+                    ResetBackground();
+                }
+                else
+                {
+                    Background = colorBrushes[color];
+                }
+            }
+        }
+
         [ObservableProperty]
         private bool given;
 
         [ObservableProperty]
         private string number = string.Empty;
+
+        [ObservableProperty]
+        private bool isHighlight;
 
         [ObservableProperty]
         private Brush background = Brushes.White;

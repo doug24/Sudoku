@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using QQWingLib;
@@ -25,12 +26,18 @@ namespace Sudoku
         private readonly Dictionary<int, List<CellViewModel>> rows;
         private readonly Dictionary<int, List<CellViewModel>> cols;
         private Dictionary<int, List<CellViewModel>> sections;
-        private int sectionLayout = QQWing.ClassicLayout;
+
+        private int currentHighlightNumber = -1;
+        private bool selectedNumberChanged;
 
         public GameBoardViewModel()
         {
             HighlightIncorrect = Properties.Settings.Default.HighlightIncorrect;
             CleanPencilMarks = Properties.Settings.Default.CleanPencilMarks;
+            if (Enum.TryParse(Properties.Settings.Default.SelectionMode, out GamePlayMode mode))
+            {
+                PlayMode = mode;
+            }
 
             Cells = new MultiSelectCollectionView<CellViewModel>(list);
 
@@ -58,35 +65,84 @@ namespace Sudoku
                 .OrderBy(cell => cell.Row)
                 .ThenBy(cell => cell.Col)
                 .ToList();
+
+            EnableNumberHighlight = Properties.Settings.Default.EnableNumberHighlight;
         }
 
         internal void SaveSettings()
         {
             Properties.Settings.Default.HighlightIncorrect = HighlightIncorrect;
             Properties.Settings.Default.CleanPencilMarks = CleanPencilMarks;
+            Properties.Settings.Default.SelectionMode = PlayMode.ToString();
+            Properties.Settings.Default.EnableNumberHighlight = EnableNumberHighlight;
         }
 
-        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+        [ObservableProperty]
+        private bool highlightIncorrect = true;
+
+        partial void OnHighlightIncorrectChanged(bool value)
         {
-            if (e.PropertyName is nameof(HighlightIncorrect) && allCells != null)
+            if (allCells != null)
             {
                 foreach (var cell in allCells)
                 {
                     cell.Redraw(HighlightIncorrect);
                 }
             }
-
-            base.OnPropertyChanged(e);
         }
-
-        [ObservableProperty]
-        private bool highlightIncorrect = true;
 
         [ObservableProperty]
         private bool cleanPencilMarks = true;
 
         [ObservableProperty]
         private bool isDesignMode;
+
+        [ObservableProperty]
+        private bool isMultiSelect = true;
+
+        [ObservableProperty]
+        private SelectionMode selectionMode = SelectionMode.Extended;
+
+        [ObservableProperty]
+        private GamePlayMode playMode = GamePlayMode.CellFirst;
+
+        partial void OnPlayModeChanged(GamePlayMode value)
+        {
+            // order of setting matters
+            SelectionMode = value == GamePlayMode.CellFirst ? SelectionMode.Extended : SelectionMode.Single;
+            IsMultiSelect = value == GamePlayMode.CellFirst;
+            if (value == GamePlayMode.CellFirst)
+            {
+                SelectedNumber = NumberSelection.None;
+            }
+        }
+
+        [ObservableProperty]
+        private NumberSelection selectedNumber = NumberSelection.None;
+
+        partial void OnSelectedNumberChanged(NumberSelection value)
+        {
+            selectedNumberChanged = true;
+
+            if (EnableNumberHighlight && PlayMode == GamePlayMode.NumbersFirst)
+            {
+                int number = (int)value;
+                HighlightNumbers(number);
+            }
+            if (PlayMode == GamePlayMode.CellFirst && SelectedNumber != NumberSelection.None)
+            {
+                SelectedNumber = NumberSelection.None;
+            }
+        }
+
+        [ObservableProperty]
+        private bool enableNumberHighlight;
+
+        partial void OnEnableNumberHighlightChanged(bool value)
+        {
+            int number = value ? (int)currentHighlightNumber : -1;
+            HighlightNumbers(number);
+        }
 
         public bool IsInProgress { get; private set; }
 
@@ -152,6 +208,7 @@ namespace Sudoku
 
                 Debug.WriteLine($"Undo after - undo stack count: {undoStack.Count}; redo stack count {redoStack.Count}");
 
+                HighlightNumbers(currentHighlightNumber);
                 IsInProgress = true;
             }
         }
@@ -173,9 +230,23 @@ namespace Sudoku
                     Debug.WriteLine($"Set {state}");
                 }
 
+                HighlightNumbers(currentHighlightNumber);
                 CheckComplete();
 
                 Debug.WriteLine($"Redo after - undo stack count: {undoStack.Count}; redo stack count {redoStack.Count}");
+            }
+        }
+
+        internal void HighlightNumbers(int number)
+        {
+            if (number > 9 || !EnableNumberHighlight || currentHighlightNumber == number)
+                number = -1;
+
+            currentHighlightNumber = number;
+
+            foreach (CellViewModel cell in allCells)
+            {
+                cell.SetHighlight(number);
             }
         }
 
@@ -236,13 +307,22 @@ namespace Sudoku
             List<CellState> list = new();
             int inkAnswerIndex = -1;
 
+            bool allHaveSameCandidate = Cells.SelectedItems.Where(c => c.Value == 0).All(c => c.HasCandidateSet(value));
+
             foreach (var cell in Cells.SelectedItems)
             {
                 int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
 
                 if (IsDesignMode)
                 {
-                    cell.Initialize(new(cellIndex, true, value), value);
+                    if (cell.Value == value)
+                    {
+                        cell.Reset();
+                    }
+                    else
+                    {
+                        cell.Initialize(new(cellIndex, true, value), value);
+                    }
                 }
                 else
                 {
@@ -267,19 +347,24 @@ namespace Sudoku
                     }
                     else if (mode == KeyPadMode.Pencil)
                     {
-                        if (!oldState.HasCandidate(value))
-                            newState = oldState.AddCandidate(value);
-                    }
-                    else if (mode == KeyPadMode.Eraser)
-                    {
-                        if (oldState.HasCandidate(value))
+                        if (allHaveSameCandidate)
+                        {
                             newState = oldState.RemoveCandidate(value);
+                        }
+                        else if (!oldState.HasCandidate(value))
+                        {
+                            newState = oldState.AddCandidate(value);
+                        }
                     }
 
                     if (newState != null && newState != oldState)
                     {
                         cell.SetState(newState, HighlightIncorrect);
                         list.Add(newState);
+                        if (EnableNumberHighlight)
+                        {
+                            cell.SetHighlight(currentHighlightNumber);
+                        }
                     }
                 }
             }
@@ -290,6 +375,97 @@ namespace Sudoku
             }
             else
             {
+                if (list.Count > 0)
+                {
+                    undoStack.Push(list);
+                    redoStack.Clear();
+                }
+
+                CheckComplete();
+
+                if (IsInProgress && CleanPencilMarks && inkAnswerIndex > -1)
+                    DoPencilCleanup(inkAnswerIndex);
+            }
+        }
+
+        internal void CellMouseDown(CellViewModel cell, MouseButtonEventArgs mouseArgs)
+        {
+            if (!(IsInProgress || IsDesignMode)) return;
+
+            if (PlayMode == GamePlayMode.CellFirst) return;
+
+            int value = (int)SelectedNumber;
+
+            if (IsDesignMode)
+            {
+                if (value >= 1 && value <= 9)
+                {
+                    if (cell.Value == value)
+                    {
+                        cell.Reset();
+                    }
+                    else
+                    {
+                        cell.Initialize(new(QQWing.RowColumnToCell(cell.Row, cell.Col), true, value), value);
+                    }
+                    CheckInvalid();
+                }
+                return;
+            }
+
+            List<CellState> list = new();
+            int inkAnswerIndex = -1;
+
+            if (value > 9)
+            {
+                cell.SetColor(value - 10);
+                return;
+            }
+
+            if (value >= 1 && value <= 9)
+            {
+                int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+                var oldState = GetCurrentCellState(cellIndex);
+                if (oldState.Given)
+                {
+                    return;
+                }
+
+                CellState? newState = null;
+                if (mouseArgs.ChangedButton == MouseButton.Left)
+                {
+                    if (oldState.HasValue(value))
+                    {
+                        newState = oldState.UnsetValue();
+                    }
+                    else
+                    {
+                        newState = oldState.SetValue(value);
+                        inkAnswerIndex = cellIndex;
+                    }
+                }
+                else if (mouseArgs.ChangedButton == MouseButton.Right)
+                {
+                    if (oldState.HasCandidate(value))
+                    {
+                        newState = oldState.RemoveCandidate(value);
+                    }
+                    else
+                    {
+                        newState = oldState.AddCandidate(value);
+                    }
+                }
+
+                if (newState != null && newState != oldState)
+                {
+                    cell.SetState(newState, HighlightIncorrect);
+                    list.Add(newState);
+                    if (EnableNumberHighlight)
+                    {
+                        cell.SetHighlight(value);
+                    }
+                }
+
                 if (list.Count > 0)
                 {
                     undoStack.Push(list);
@@ -436,11 +612,15 @@ namespace Sudoku
             return CellState.Empty;
         }
 
-        internal void SetColor(Brush br, KeyPadMode mode)
+        internal void SetColor(int brushIndex)
         {
+            Brush br = CellViewModel.GetColor(brushIndex);
+
+            bool allSame = !Cells.SelectedItems.Any(c => c.Background != br);
+
             foreach (var cell in Cells.SelectedItems)
             {
-                if (mode == KeyPadMode.Eraser)
+                if (allSame)
                 {
                     cell.ResetBackground();
                 }
@@ -633,7 +813,6 @@ namespace Sudoku
 
         internal void ChangeLayout(int layout)
         {
-            sectionLayout = layout;
             ClearBoard();
             if (layout == QQWing.ClassicLayout)
             {
@@ -738,6 +917,21 @@ namespace Sudoku
                 undoStack.Push(list);
                 IsInProgress = true;
             }
+        }
+
+        internal void SetSelectedNumber(int value)
+        {
+            // click on selected button, unset the button
+            if (!selectedNumberChanged && (int)SelectedNumber == value)
+            {
+                SelectedNumber = NumberSelection.None;
+            }
+            else if (value >= 1 && value <= 12)
+            {
+                SelectedNumber = (NumberSelection)value;
+            }
+
+            selectedNumberChanged = false;
         }
     }
 }

@@ -6,8 +6,12 @@ namespace Sudoku
     {
         public CandidateViewModel(int num)
         {
+            Value = num;
             Number = num.ToString();
         }
+
+        [ObservableProperty]
+        private int value;
 
         [ObservableProperty]
         private string number = string.Empty;

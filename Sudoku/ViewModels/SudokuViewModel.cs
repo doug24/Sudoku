@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Windows.Input;
-using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Win32;
@@ -13,7 +11,7 @@ namespace Sudoku
 {
     public partial class SudokuViewModel : ObservableObject
     {
-        private readonly static Random rand = new Random();
+        private readonly static Random rand = new();
 
         public SudokuViewModel()
         {
@@ -67,6 +65,11 @@ namespace Sudoku
         [ObservableProperty]
         private int sectionLayout = QQWing.ClassicLayout;
 
+        partial void OnSectionLayoutChanged(int value)
+        {
+            GameBoard.ChangeLayout(value);
+        }
+
         [ObservableProperty]
         private Symmetry puzzleSymmetry = Symmetry.MIRROR;
 
@@ -77,27 +80,10 @@ namespace Sudoku
         private KeyPadMode inputMode = KeyPadMode.Pen;
 
         [ObservableProperty]
-        private bool isEraser;
+        private bool isHighlightMode;
 
         public ObservableCollection<LayoutMenuItemViewModel> LayoutMenuItems { get; set; } = new();
 
-        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName is nameof(InputMode))
-            {
-                IsEraser = false;
-            }
-            else if (e.PropertyName is nameof(IsEraser) && IsEraser)
-            {
-                InputMode = KeyPadMode.Pencil;
-            }
-            else if (e.PropertyName is nameof(SectionLayout))
-            {
-                GameBoard.ChangeLayout(SectionLayout);
-            }
-
-            base.OnPropertyChanged(e);
-        }
 
         public ICommand NewPuzzleCommand => new RelayCommand(
             p => GameBoard.NewPuzzle(PuzzleDifficulty, PuzzleSymmetry));
@@ -157,15 +143,39 @@ namespace Sudoku
         {
             if (p is string num && int.TryParse(num, out int value))
             {
-                GameBoard.KeyDown(value, InputMode);
+                if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                {
+                    GameBoard.SelectedNumber = NumberSelection.None;
+
+                    if (IsHighlightMode)
+                    {
+                        GameBoard.HighlightNumbers(value);
+                        IsHighlightMode = false;
+                        return;
+                    }
+
+                    GameBoard.KeyDown(value, InputMode);
+                }
+                else
+                {
+                    GameBoard.SetSelectedNumber(value);
+                }
             }
         }
 
         private void ColorKey(object p)
         {
-            if (p is Brush br)
+            if (p is string num && int.TryParse(num, out int value))
             {
-                GameBoard.SetColor(br, InputMode);
+                if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                {
+                    IsHighlightMode = false;
+                    GameBoard.SetColor(value - 10);
+                }
+                else
+                {
+                    GameBoard.SetSelectedNumber(value);
+                }
             }
         }
 
@@ -175,35 +185,84 @@ namespace Sudoku
 
             Key key = e.Key == Key.System ? e.SystemKey : e.Key;
 
+            if (IsHighlightMode)
+            {
+                int number = KeyToNumber(key);
+                GameBoard.HighlightNumbers(number);
+                IsHighlightMode = false;
+                return;
+            }
+
+            if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+            {
+                GameBoard.SelectedNumber = NumberSelection.None;
+            }
+
             switch (key)
             {
                 case Key.D1:
                 case Key.NumPad1:
-                    GameBoard.KeyDown(1, InputMode); break;
+                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                        GameBoard.KeyDown(1, InputMode);
+                    else
+                        GameBoard.SetSelectedNumber(1);
+                    break;
                 case Key.D2:
                 case Key.NumPad2:
-                    GameBoard.KeyDown(2, InputMode); break;
+                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                        GameBoard.KeyDown(2, InputMode);
+                    else
+                        GameBoard.SetSelectedNumber(2);
+                    break;
                 case Key.D3:
                 case Key.NumPad3:
-                    GameBoard.KeyDown(3, InputMode); break;
+                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                        GameBoard.KeyDown(3, InputMode);
+                    else
+                        GameBoard.SetSelectedNumber(3);
+                    break;
                 case Key.D4:
                 case Key.NumPad4:
-                    GameBoard.KeyDown(4, InputMode); break;
+                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                        GameBoard.KeyDown(4, InputMode);
+                    else
+                        GameBoard.SetSelectedNumber(4);
+                    break;
                 case Key.D5:
                 case Key.NumPad5:
-                    GameBoard.KeyDown(5, InputMode); break;
+                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                        GameBoard.KeyDown(5, InputMode);
+                    else
+                        GameBoard.SetSelectedNumber(5);
+                    break;
                 case Key.D6:
                 case Key.NumPad6:
-                    GameBoard.KeyDown(6, InputMode); break;
+                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                        GameBoard.KeyDown(6, InputMode);
+                    else
+                        GameBoard.SetSelectedNumber(6);
+                    break;
                 case Key.D7:
                 case Key.NumPad7:
-                    GameBoard.KeyDown(7, InputMode); break;
+                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                        GameBoard.KeyDown(7, InputMode);
+                    else
+                        GameBoard.SetSelectedNumber(7);
+                    break;
                 case Key.D8:
                 case Key.NumPad8:
-                    GameBoard.KeyDown(8, InputMode); break;
+                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                        GameBoard.KeyDown(8, InputMode);
+                    else
+                        GameBoard.SetSelectedNumber(8);
+                    break;
                 case Key.D9:
                 case Key.NumPad9:
-                    GameBoard.KeyDown(9, InputMode); break;
+                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                        GameBoard.KeyDown(9, InputMode);
+                    else
+                        GameBoard.SetSelectedNumber(9);
+                    break;
                 case Key.S:
                     if (ctrl && GameBoard.IsInProgress)
                         Snapshot();
@@ -219,9 +278,6 @@ namespace Sudoku
                 case Key.Delete:
                     GameBoard.ClearColors();
                     break;
-                case Key.E:
-                    InputMode = KeyPadMode.Eraser;
-                    break;
                 case Key.Q:
                     InputMode = KeyPadMode.Pencil;
                     break;
@@ -230,6 +286,23 @@ namespace Sudoku
                     break;
             }
             e.Handled = true;
+        }
+
+        private static int KeyToNumber(Key key)
+        {
+            return key switch
+            {
+                Key.D1 or Key.NumPad1 => 1,
+                Key.D2 or Key.NumPad2 => 2,
+                Key.D3 or Key.NumPad3 => 3,
+                Key.D4 or Key.NumPad4 => 4,
+                Key.D5 or Key.NumPad5 => 5,
+                Key.D6 or Key.NumPad6 => 6,
+                Key.D7 or Key.NumPad7 => 7,
+                Key.D8 or Key.NumPad8 => 8,
+                Key.D9 or Key.NumPad9 => 9,
+                _ => -1,
+            };
         }
 
         private void OpenFile()

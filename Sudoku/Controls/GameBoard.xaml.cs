@@ -1,5 +1,7 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Sudoku
 {
@@ -12,8 +14,33 @@ namespace Sudoku
         {
             InitializeComponent();
 
+            gameListBox.PreviewMouseDown += GameListBox_PreviewMouseDown;
             gameListBox.PreviewStylusDown += GameListBox_PreviewStylusDown;
         }
+
+        private void GameListBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            CellViewModel? cell = GetCellAtPoint(e.GetPosition(gameListBox));
+            if (DataContext is GameBoardViewModel viewModel && cell != null)
+            {
+                viewModel.CellMouseDown(cell, e);
+            }
+        }
+
+        private CellViewModel? GetCellAtPoint(Point point)
+        {
+            HitTestResult result = VisualTreeHelper.HitTest(gameListBox, point);
+            DependencyObject obj = result.VisualHit;
+
+            while (VisualTreeHelper.GetParent(obj) != null && obj is not CellControl)
+            {
+                obj = VisualTreeHelper.GetParent(obj);
+            }
+
+            // Will return null if not found
+            return (obj as FrameworkElement)?.DataContext as CellViewModel;
+        }
+
 
         // ListBox selection events are inconsistent from touchscreen, convert the
         // touch events to mouse left button down events

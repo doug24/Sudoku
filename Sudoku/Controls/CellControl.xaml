@@ -25,12 +25,15 @@
 
     <Grid>
         <Border Background="{Binding Background}" Margin="2"/>
+        <Ellipse Stroke="ForestGreen" StrokeThickness="2" Margin="0" 
+                 Visibility="{Binding IsHighlight, Converter={StaticResource BoolToVisibilityConverter}}"/>
         <Viewbox>
             <TextBlock Text="{Binding Number}" 
-                           FontSize="44" 
-                           Foreground="{Binding Foreground}"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"/>
+                       FontSize="44" 
+                       Margin="0,0,0,2"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Foreground="{Binding Foreground}"/>
         </Viewbox>
         <!--<TextBlock Text="{Binding CellIndex}" FontSize="9" Foreground="Red"/>-->
         <ItemsControl ItemsSource="{Binding Path=Candidates}" x:Name="Candidates"
