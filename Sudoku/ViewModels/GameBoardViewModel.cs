@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -19,9 +18,9 @@ namespace Sudoku
         private readonly Stack<List<CellState>> undoStack = new();
         private readonly Stack<List<CellState>> redoStack = new();
 
-        private readonly ObservableCollection<CellViewModel> list = new();
         public MultiSelectCollectionView<CellViewModel> Cells { get; private set; }
 
+        private readonly List<CellViewModel> list = new();
         private readonly List<CellViewModel> allCells;
         private readonly Dictionary<int, List<CellViewModel>> rows;
         private readonly Dictionary<int, List<CellViewModel>> cols;
@@ -90,6 +89,25 @@ namespace Sudoku
                 }
             }
         }
+
+        [ObservableProperty]
+        private NumberButtonViewModel number1 = new(1);
+        [ObservableProperty]
+        private NumberButtonViewModel number2 = new(2);
+        [ObservableProperty]
+        private NumberButtonViewModel number3 = new(3);
+        [ObservableProperty]
+        private NumberButtonViewModel number4 = new(4);
+        [ObservableProperty]
+        private NumberButtonViewModel number5 = new(5);
+        [ObservableProperty]
+        private NumberButtonViewModel number6 = new(6);
+        [ObservableProperty]
+        private NumberButtonViewModel number7 = new(7);
+        [ObservableProperty]
+        private NumberButtonViewModel number8 = new(8);
+        [ObservableProperty]
+        private NumberButtonViewModel number9 = new(9);
 
         [ObservableProperty]
         private bool cleanPencilMarks = true;
@@ -208,7 +226,10 @@ namespace Sudoku
 
                 Debug.WriteLine($"Undo after - undo stack count: {undoStack.Count}; redo stack count {redoStack.Count}");
 
-                HighlightNumbers(currentHighlightNumber);
+                int chn = currentHighlightNumber;
+                HighlightNumbers(-1);
+                HighlightNumbers(chn);
+                UpdateRemainderCounts();
                 IsInProgress = true;
             }
         }
@@ -230,7 +251,10 @@ namespace Sudoku
                     Debug.WriteLine($"Set {state}");
                 }
 
-                HighlightNumbers(currentHighlightNumber);
+                int chn = currentHighlightNumber;
+                HighlightNumbers(-1);
+                HighlightNumbers(chn);
+                UpdateRemainderCounts();
                 CheckComplete();
 
                 Debug.WriteLine($"Redo after - undo stack count: {undoStack.Count}; redo stack count {redoStack.Count}");
@@ -255,48 +279,6 @@ namespace Sudoku
             foreach (var cell in allCells)
             {
                 cell.ResetBackground();
-            }
-        }
-
-        internal void ClearCell()
-        {
-            List<CellState> list = new();
-            foreach (var cell in Cells.SelectedItems)
-            {
-                int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
-
-                if (IsDesignMode)
-                {
-                    cell.Reset();
-                }
-                else
-                {
-                    var oldState = GetCurrentCellState(cellIndex);
-                    if (oldState.Given)
-                    {
-                        continue;
-                    }
-
-                    CellState newState = oldState.UnsetValue().RemoveCandidates();
-
-                    if (newState != oldState)
-                    {
-                        cell.SetState(newState, HighlightIncorrect);
-                        list.Add(newState);
-                    }
-
-                    cell.ResetBackground();
-                }
-            }
-
-            if (IsDesignMode)
-            {
-                CheckInvalid();
-            }
-            else if (list.Count > 0)
-            {
-                undoStack.Push(list);
-                redoStack.Clear();
             }
         }
 
@@ -372,6 +354,7 @@ namespace Sudoku
             if (IsDesignMode)
             {
                 CheckInvalid();
+                UpdateRemainderCounts();
             }
             else
             {
@@ -381,6 +364,7 @@ namespace Sudoku
                     redoStack.Clear();
                 }
 
+                UpdateRemainderCounts();
                 CheckComplete();
 
                 if (IsInProgress && CleanPencilMarks && inkAnswerIndex > -1)
@@ -408,6 +392,7 @@ namespace Sudoku
                     {
                         cell.Initialize(new(QQWing.RowColumnToCell(cell.Row, cell.Col), true, value), value);
                     }
+                    UpdateRemainderCounts();
                     CheckInvalid();
                 }
                 return;
@@ -472,6 +457,7 @@ namespace Sudoku
                     redoStack.Clear();
                 }
 
+                UpdateRemainderCounts();
                 CheckComplete();
 
                 if (IsInProgress && CleanPencilMarks && inkAnswerIndex > -1)
@@ -526,6 +512,41 @@ namespace Sudoku
                 cell.SetState(newState, HighlightIncorrect);
                 list.Add(newState);
             }
+        }
+
+        private void ClearRemainderCounts()
+        {
+            Number1.SetRemainder(-1);
+            Number2.SetRemainder(-1);
+            Number3.SetRemainder(-1);
+            Number4.SetRemainder(-1);
+            Number5.SetRemainder(-1);
+            Number6.SetRemainder(-1);
+            Number7.SetRemainder(-1);
+            Number8.SetRemainder(-1);
+            Number9.SetRemainder(-1);
+        }
+
+        private void UpdateRemainderCounts()
+        {
+            // skipping index 0, using indexes 1 - 9
+            int[] completed = new int[10];
+            foreach (var cell in allCells)
+            {
+                if (cell.Value > 0)
+                {
+                    completed[cell.Value]++;
+                }
+            }
+            Number1.SetRemainder(9 - completed[1]);
+            Number2.SetRemainder(9 - completed[2]);
+            Number3.SetRemainder(9 - completed[3]);
+            Number4.SetRemainder(9 - completed[4]);
+            Number5.SetRemainder(9 - completed[5]);
+            Number6.SetRemainder(9 - completed[6]);
+            Number7.SetRemainder(9 - completed[7]);
+            Number8.SetRemainder(9 - completed[8]);
+            Number9.SetRemainder(9 - completed[9]);
         }
 
         private void CheckComplete()
@@ -676,6 +697,7 @@ namespace Sudoku
                 undoStack.Push(list);
                 IsInProgress = true;
             }
+            UpdateRemainderCounts();
         }
 
         private static int[] GetPuzzle(string[] ssData)
@@ -790,6 +812,7 @@ namespace Sudoku
                 undoStack.Push(list);
                 IsInProgress = true;
             }
+            UpdateRemainderCounts();
         }
 
         internal void ClearBoard()
@@ -801,6 +824,12 @@ namespace Sudoku
             {
                 cell.Reset();
             }
+            if (PlayMode == GamePlayMode.NumbersFirst)
+            {
+                SelectedNumber = NumberSelection.None;
+            }
+            HighlightNumbers(-1);
+            ClearRemainderCounts();
         }
 
         private void UpdateLayout()
@@ -862,6 +891,7 @@ namespace Sudoku
                 }
 
                 undoStack.Push(list);
+                UpdateRemainderCounts();
                 IsInProgress = true;
             }
         }
@@ -915,6 +945,7 @@ namespace Sudoku
                 }
 
                 undoStack.Push(list);
+                UpdateRemainderCounts();
                 IsInProgress = true;
             }
         }

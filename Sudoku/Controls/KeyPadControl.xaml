@@ -46,7 +46,7 @@
             </Setter>
         </Style>
 
-        <Style x:Key="ToggleButtonStyle1" TargetType="ToggleButton">
+        <Style x:Key="BaseToggleButtonStyle" TargetType="ToggleButton">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Background" Value="Azure"/>
             <Setter Property="FontSize" Value="44"/>
@@ -77,14 +77,65 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="TooggleButtonStyle2" TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonStyle1}">
+        <Style x:Key="NumberToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Background" Value="Azure"/>
+            <Setter Property="FontSize" Value="44"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Name="border" 
+                                BorderThickness="1"
+                                Padding="4,2" 
+                                BorderBrush="DarkGray" 
+                                CornerRadius="3" 
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Stretch"                  
+                                              VerticalAlignment="Stretch">
+                                <ContentPresenter.ContentTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Count}"
+                                                       FontSize="14"
+                                                       HorizontalAlignment="Right"
+                                                       VerticalAlignment="Top"/>
+                                            <TextBlock Text="{Binding Number}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ContentPresenter.ContentTemplate>
+                            </ContentPresenter>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="Black" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="LightBlue" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ColorToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource BaseToggleButtonStyle}">
             <Style.Triggers>
                 <Trigger Property="IsChecked" Value="True">
                     <Setter Property="Content" Value="*"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonStyle1}"/>
+        <Style TargetType="ToggleButton" BasedOn="{StaticResource BaseToggleButtonStyle}"/>
     </UserControl.Resources>
 
     <Grid>
@@ -103,32 +154,41 @@
                               IsEnabled="{Binding Path=GameBoard.EnableNumberHighlight}"
                               Visibility="{Binding Path=GameBoard.PlayMode, Converter={StaticResource evc}, ConverterParameter=CellFirst}"/>
 
-                <ToggleButton Content="1" Command="{Binding NumberKeyCommand}" CommandParameter="1"
+                <ToggleButton Content="{Binding Path=GameBoard.Number1}" Style="{StaticResource NumberToggleButtonStyle}"
+                              Command="{Binding NumberKeyCommand}" CommandParameter="1"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D1, Mode=TwoWay}"/>
-                <ToggleButton Content="2" Command="{Binding NumberKeyCommand}" CommandParameter="2"
+                <ToggleButton Content="{Binding Path=GameBoard.Number2}" Style="{StaticResource NumberToggleButtonStyle}"
+                              Command="{Binding NumberKeyCommand}" CommandParameter="2"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D2, Mode=TwoWay}"/>
-                <ToggleButton Content="3" Command="{Binding NumberKeyCommand}" CommandParameter="3"
+                <ToggleButton Content="{Binding Path=GameBoard.Number3}" Style="{StaticResource NumberToggleButtonStyle}"
+                              Command="{Binding NumberKeyCommand}" CommandParameter="3"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D3, Mode=TwoWay}"/>
-                <ToggleButton Content="4" Command="{Binding NumberKeyCommand}" CommandParameter="4"
+                <ToggleButton Content="{Binding Path=GameBoard.Number4}" Style="{StaticResource NumberToggleButtonStyle}"
+                              Command="{Binding NumberKeyCommand}" CommandParameter="4"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D4, Mode=TwoWay}"/>
-                <ToggleButton Content="5" Command="{Binding NumberKeyCommand}" CommandParameter="5"
+                <ToggleButton Content="{Binding Path=GameBoard.Number5}" Style="{StaticResource NumberToggleButtonStyle}"
+                              Command="{Binding NumberKeyCommand}" CommandParameter="5"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D5, Mode=TwoWay}"/>
-                <ToggleButton Content="6" Command="{Binding NumberKeyCommand}" CommandParameter="6"
+                <ToggleButton Content="{Binding Path=GameBoard.Number6}" Style="{StaticResource NumberToggleButtonStyle}"
+                              Command="{Binding NumberKeyCommand}" CommandParameter="6"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D6, Mode=TwoWay}"/>
-                <ToggleButton Content="7" Command="{Binding NumberKeyCommand}" CommandParameter="7"
+                <ToggleButton Content="{Binding Path=GameBoard.Number7}" Style="{StaticResource NumberToggleButtonStyle}"
+                              Command="{Binding NumberKeyCommand}" CommandParameter="7"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D7, Mode=TwoWay}"/>
-                <ToggleButton Content="8" Command="{Binding NumberKeyCommand}" CommandParameter="8"
+                <ToggleButton Content="{Binding Path=GameBoard.Number8}" Style="{StaticResource NumberToggleButtonStyle}"
+                              Command="{Binding NumberKeyCommand}" CommandParameter="8"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D8, Mode=TwoWay}"/>
-                <ToggleButton Content="9" Command="{Binding NumberKeyCommand}" CommandParameter="9"
+                <ToggleButton Content="{Binding Path=GameBoard.Number9}" Style="{StaticResource NumberToggleButtonStyle}"
+                              Command="{Binding NumberKeyCommand}" CommandParameter="9"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D9, Mode=TwoWay}"/>
 
-                <ToggleButton Background="#FFC2F0FF" Style="{StaticResource TooggleButtonStyle2}"
+                <ToggleButton Background="#FFC2F0FF" Style="{StaticResource ColorToggleButtonStyle}"
                               Command="{Binding ColorKeyCommand}" CommandParameter="10"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C1, Mode=TwoWay}"/>
-                <ToggleButton Background="#FFACFFAC" Style="{StaticResource TooggleButtonStyle2}"
+                <ToggleButton Background="#FFACFFAC" Style="{StaticResource ColorToggleButtonStyle}"
                               Command="{Binding ColorKeyCommand}" CommandParameter="11"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C2, Mode=TwoWay}"/>
-                <ToggleButton Background="#FFFFDDBF" Style="{StaticResource TooggleButtonStyle2}" 
+                <ToggleButton Background="#FFFFDDBF" Style="{StaticResource ColorToggleButtonStyle}" 
                               Command="{Binding ColorKeyCommand}" CommandParameter="12"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C3, Mode=TwoWay}"/>
 
