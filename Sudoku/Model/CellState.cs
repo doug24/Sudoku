@@ -53,6 +53,18 @@ namespace Sudoku
                 return this;
         }
 
+        public CellState AddCandidates(int[] candidates)
+        {
+            if (!Candidates.SequenceEqual(candidates))
+            {
+                List<int> list = Candidates.Union(candidates).ToList();
+                list.Sort();
+                return new CellState(CellIndex, Given, Value, list.ToArray());
+            }
+            else
+                return this;
+        }
+
         public CellState RemoveCandidate(int candidate)
         {
             List<int> list = Candidates.ToList();

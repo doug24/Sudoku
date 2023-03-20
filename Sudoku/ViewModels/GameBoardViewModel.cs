@@ -164,6 +164,12 @@ namespace Sudoku
 
         public bool IsInProgress { get; private set; }
 
+        public ICommand FillCandidatesCommand => new RelayCommand(
+            p => FillCandidates(),
+            q => IsInProgress);
+
+
+
         internal string ToSnapshotString()
         {
             StringBuilder sb = new();
@@ -465,6 +471,106 @@ namespace Sudoku
             }
         }
 
+        private void FillCandidates()
+        {
+            int[] current = new int[81];
+            foreach (var cell in allCells)
+            {
+                if (cell.Value > 0)
+                {
+                    int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+                    current[cellIndex] = cell.Value;
+                }
+            }
+
+            int[] candidates = GetCandidates(current);
+
+            List<CellState> list = new();
+
+            int idx = 0;
+            foreach (var cell in allCells)
+            {
+                if (cell.Value == 0)
+                {
+                    int[] cellCandidates = GetCandiatesForCell(candidates, idx);
+                    AddCandidates(list, cell, idx, cellCandidates);
+                }
+
+                idx++;
+            }
+
+            if (list.Count > 0)
+            {
+                undoStack.Push(list);
+                redoStack.Clear();
+            }
+        }
+
+        private static int[] GetCandidates(int[] puzzle)
+        {
+            int[] candidates = new int[81 * 9];
+            for (int cell = 0; cell < 81; cell++)
+            {
+                for (int idx = 0; idx < 9; idx++)
+                {
+                    candidates[cell * 9 + idx] = idx + 1;
+                }
+            }
+
+            for (int cell = 0; cell < 81; cell++)
+            {
+                int given = Math.Max(0, puzzle[cell]);
+                if (given > 0)
+                {
+                    int valIdx = given - 1;
+                    int cellRow = QQWing.CellToRow(cell);
+                    int cellCol = QQWing.CellToColumn(cell);
+                    int cellSqr = QQWing.CellToSection(cell);
+
+                    for (int col = 0; col < 9; col++)
+                    {
+                        int cellIndex = QQWing.RowColumnToCell(cellRow, col);
+                        int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
+                        candidates[pi] = 0;
+                    }
+
+                    for (int row = 0; row < 9; row++)
+                    {
+                        int cellIndex = QQWing.RowColumnToCell(row, cellCol);
+                        int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
+                        candidates[pi] = 0;
+                    }
+
+                    for (int off = 0; off < 9; off++)
+                    {
+                        int cellIndex = QQWing.SectionToCell(cellSqr, off);
+                        int pi = QQWing.GetPossibilityIndex(valIdx, cellIndex);
+                        candidates[pi] = 0;
+                    }
+                }
+            }
+
+            return candidates;
+        }
+
+        private static int[] GetCandiatesForCell(int[] candidates, int cell)
+        {
+            if (candidates.Length > 0)
+            {
+                List<int> list = new();
+
+                for (int idx = 0; idx < 9; idx++)
+                {
+                    int pi = QQWing.GetPossibilityIndex(idx, cell);
+                    int num = candidates[pi];
+                    if (num > 0)
+                        list.Add(num);
+                }
+                return list.ToArray();
+            }
+            return Array.Empty<int>();
+        }
+
         private void DoPencilCleanup(int cellIndex)
         {
             List<CellState> list = new();
@@ -499,6 +605,17 @@ namespace Sudoku
             {
                 undoStack.Push(list);
                 redoStack.Clear();
+            }
+        }
+
+        private void AddCandidates(List<CellState> list, CellViewModel cell, int cellIndex, int[] cellCandidates)
+        {
+            var oldState = GetCurrentCellState(cellIndex);
+            var newState = oldState.AddCandidates(cellCandidates);
+            if (newState != oldState)
+            {
+                cell.SetState(newState, HighlightIncorrect);
+                list.Add(newState);
             }
         }
 
