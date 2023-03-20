@@ -106,5 +106,17 @@ namespace Sudoku.Properties {
                 this["EnableNumberHighlight"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RunTimer {
+            get {
+                return ((bool)(this["RunTimer"]));
+            }
+            set {
+                this["RunTimer"] = value;
+            }
+        }
     }
 }

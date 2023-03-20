@@ -17,6 +17,7 @@ namespace Sudoku
             DataContext = viewModel;
 
             Closing += (s, e) => viewModel.SaveSettings();
+            StateChanged += (s, e) => viewModel.GameBoard.OnStateChanged(WindowState);
 
             //ImageGenerator.CreateSectionImages(26, 27);
         }

@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using QQWingLib;
 
@@ -15,6 +16,9 @@ namespace Sudoku
 {
     public partial class GameBoardViewModel : ObservableObject
     {
+        private readonly DispatcherTimer periodicTimer = new();
+        private readonly Stopwatch stopwatch = new();
+
         private readonly Stack<List<CellState>> undoStack = new();
         private readonly Stack<List<CellState>> redoStack = new();
 
@@ -33,10 +37,14 @@ namespace Sudoku
         {
             HighlightIncorrect = Properties.Settings.Default.HighlightIncorrect;
             CleanPencilMarks = Properties.Settings.Default.CleanPencilMarks;
+            RunTimer = Properties.Settings.Default.RunTimer;
             if (Enum.TryParse(Properties.Settings.Default.SelectionMode, out GamePlayMode mode))
             {
                 PlayMode = mode;
             }
+
+            periodicTimer.Interval = TimeSpan.FromSeconds(1);
+            periodicTimer.Tick += OnTimer_Tick;
 
             Cells = new MultiSelectCollectionView<CellViewModel>(list);
 
@@ -72,6 +80,7 @@ namespace Sudoku
         {
             Properties.Settings.Default.HighlightIncorrect = HighlightIncorrect;
             Properties.Settings.Default.CleanPencilMarks = CleanPencilMarks;
+            Properties.Settings.Default.RunTimer = RunTimer;
             Properties.Settings.Default.SelectionMode = PlayMode.ToString();
             Properties.Settings.Default.EnableNumberHighlight = EnableNumberHighlight;
         }
@@ -124,6 +133,59 @@ namespace Sudoku
         [ObservableProperty]
         private GamePlayMode playMode = GamePlayMode.CellFirst;
 
+        [ObservableProperty]
+        private bool runTimer = false;
+
+        [ObservableProperty]
+        private bool canChangeTimer = true;
+
+        [ObservableProperty]
+        private string time = string.Empty;
+
+        [ObservableProperty]
+        private bool isInProgress = false;
+
+        partial void OnIsInProgressChanged(bool value)
+        {
+            CanChangeTimer = !value;
+            if (RunTimer)
+            {
+                periodicTimer.Start();
+            }
+            else
+            {
+                periodicTimer.Stop();
+                Time = string.Empty;
+            }
+        }
+
+        private void OnTimer_Tick(object? sender, EventArgs e)
+        {
+            if (RunTimer)
+            {
+                Time = stopwatch.Elapsed.ToString(@"m\:ss");
+            }
+            else
+            {
+                Time = string.Empty;
+            }
+        }
+
+        internal void OnStateChanged(WindowState state)
+        {
+            if (RunTimer)
+            {
+                if (state == WindowState.Minimized)
+                {
+                    stopwatch.Stop();
+                }
+                else if (state != WindowState.Minimized)
+                {
+                    stopwatch.Start();
+                }
+            }
+        }
+
         partial void OnPlayModeChanged(GamePlayMode value)
         {
             // order of setting matters
@@ -161,8 +223,6 @@ namespace Sudoku
             int number = value ? (int)currentHighlightNumber : -1;
             HighlightNumbers(number);
         }
-
-        public bool IsInProgress { get; private set; }
 
         public ICommand FillCandidatesCommand => new RelayCommand(
             p => FillCandidates(),
@@ -237,6 +297,7 @@ namespace Sudoku
                 HighlightNumbers(chn);
                 UpdateRemainderCounts();
                 IsInProgress = true;
+                stopwatch.Start();
             }
         }
 
@@ -680,8 +741,9 @@ namespace Sudoku
 
             if (complete)
             {
-                MessageBox.Show("Solved!", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                stopwatch.Stop();
                 IsInProgress = false;
+                MessageBox.Show("Solved!", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
 
@@ -813,6 +875,7 @@ namespace Sudoku
                 }
                 undoStack.Push(list);
                 IsInProgress = true;
+                stopwatch.Restart();
             }
             UpdateRemainderCounts();
         }
@@ -928,6 +991,7 @@ namespace Sudoku
 
                 undoStack.Push(list);
                 IsInProgress = true;
+                stopwatch.Restart();
             }
             UpdateRemainderCounts();
         }
@@ -947,6 +1011,7 @@ namespace Sudoku
             }
             HighlightNumbers(-1);
             ClearRemainderCounts();
+            Time = RunTimer ? "0:00" : string.Empty;
         }
 
         private void UpdateLayout()
@@ -1010,6 +1075,7 @@ namespace Sudoku
                 undoStack.Push(list);
                 UpdateRemainderCounts();
                 IsInProgress = true;
+                stopwatch.Restart();
             }
         }
 
@@ -1064,6 +1130,7 @@ namespace Sudoku
                 undoStack.Push(list);
                 UpdateRemainderCounts();
                 IsInProgress = true;
+                stopwatch.Restart();
             }
         }
 
