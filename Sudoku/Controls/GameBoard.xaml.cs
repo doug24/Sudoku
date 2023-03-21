@@ -15,6 +15,7 @@ namespace Sudoku
             InitializeComponent();
 
             gameListBox.PreviewMouseDown += GameListBox_PreviewMouseDown;
+            gameListBox.PreviewMouseDoubleClick += GameListBox_PreviewMouseDoubleClick;
             gameListBox.PreviewStylusDown += GameListBox_PreviewStylusDown;
         }
 
@@ -24,6 +25,16 @@ namespace Sudoku
             if (DataContext is GameBoardViewModel viewModel && cell != null)
             {
                 viewModel.CellMouseDown(cell, e);
+            }
+        }
+
+        private void GameListBox_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            CellViewModel? cell = GetCellAtPoint(e.GetPosition(gameListBox));
+            if (DataContext is GameBoardViewModel viewModel && cell != null && 
+                e.ChangedButton == MouseButton.Left)
+            {
+                viewModel.CellMouseDoubleClick(cell);
             }
         }
 

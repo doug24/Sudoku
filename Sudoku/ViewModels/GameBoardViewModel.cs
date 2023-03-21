@@ -128,6 +128,9 @@ namespace Sudoku
         private SelectionMode selectionMode = SelectionMode.Extended;
 
         [ObservableProperty]
+        private KeyPadMode keyInputMode = KeyPadMode.Pen;
+
+        [ObservableProperty]
         private bool numberFirstMode = false;
 
         partial void OnNumberFirstModeChanged(bool value)
@@ -346,7 +349,7 @@ namespace Sudoku
             }
         }
 
-        internal void KeyDown(int value, KeyPadMode mode)
+        internal void KeyDown(int value)
         {
             if (!(IsInProgress || IsDesignMode)) return;
 
@@ -379,7 +382,7 @@ namespace Sudoku
                     }
 
                     CellState? newState = null;
-                    if (mode == KeyPadMode.Pen)
+                    if (KeyInputMode == KeyPadMode.Pen)
                     {
                         if (oldState.HasValue(value))
                         {
@@ -391,7 +394,7 @@ namespace Sudoku
                             inkAnswerIndex = cellIndex;
                         }
                     }
-                    else if (mode == KeyPadMode.Pencil)
+                    else if (KeyInputMode == KeyPadMode.Pencil)
                     {
                         if (allHaveSameCandidate)
                         {
@@ -471,6 +474,7 @@ namespace Sudoku
                 return;
             }
 
+
             if (value >= 1 && value <= 9)
             {
                 int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
@@ -480,8 +484,15 @@ namespace Sudoku
                     return;
                 }
 
+                KeyPadMode inputMode = KeyPadMode.Pen;
+                if ((KeyInputMode == KeyPadMode.Pen && mouseArgs.ChangedButton == MouseButton.Right) ||
+                    (KeyInputMode == KeyPadMode.Pencil && mouseArgs.ChangedButton == MouseButton.Left))
+                {
+                    inputMode = KeyPadMode.Pencil;
+                }
+
                 CellState? newState = null;
-                if (mouseArgs.ChangedButton == MouseButton.Left)
+                if (inputMode == KeyPadMode.Pen)
                 {
                     if (oldState.HasValue(value))
                     {
@@ -493,7 +504,7 @@ namespace Sudoku
                         inkAnswerIndex = cellIndex;
                     }
                 }
-                else if (mouseArgs.ChangedButton == MouseButton.Right)
+                else if (inputMode == KeyPadMode.Pencil)
                 {
                     if (oldState.HasCandidate(value))
                     {
@@ -526,6 +537,28 @@ namespace Sudoku
 
                 if (IsInProgress && CleanPencilMarks && inkAnswerIndex > -1)
                     DoPencilCleanup(inkAnswerIndex);
+            }
+        }
+
+        internal void CellMouseDoubleClick(CellViewModel cell)
+        {
+            if (!(IsInProgress || IsDesignMode)) return;
+
+
+            if (NumberFirstMode && cell.Given)
+            {
+                SelectedNumber = (NumberSelection)cell.Value;
+            }
+            else
+            {
+                if (cell.Value > 0)
+                {
+                    HighlightNumbers(cell.Value);
+                }
+                else
+                {
+                    HighlightNumbers(-1);
+                }
             }
         }
 

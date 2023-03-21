@@ -77,9 +77,6 @@ namespace Sudoku
         private Difficulty puzzleDifficulty = Difficulty.INTERMEDIATE;
 
         [ObservableProperty]
-        private KeyPadMode inputMode = KeyPadMode.Pen;
-
-        [ObservableProperty]
         private bool isHighlightMode;
 
         public ObservableCollection<LayoutMenuItemViewModel> LayoutMenuItems { get; set; } = new();
@@ -158,7 +155,7 @@ namespace Sudoku
                         return;
                     }
 
-                    GameBoard.KeyDown(value, InputMode);
+                    GameBoard.KeyDown(value);
                 }
             }
         }
@@ -205,63 +202,63 @@ namespace Sudoku
                     if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(1);
                     else
-                        GameBoard.KeyDown(1, InputMode);
+                        GameBoard.KeyDown(1);
                     break;
                 case Key.D2:
                 case Key.NumPad2:
                     if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(2);
                     else
-                        GameBoard.KeyDown(2, InputMode);
+                        GameBoard.KeyDown(2);
                     break;
                 case Key.D3:
                 case Key.NumPad3:
                     if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(3);
                     else
-                        GameBoard.KeyDown(3, InputMode);
+                        GameBoard.KeyDown(3);
                     break;
                 case Key.D4:
                 case Key.NumPad4:
                     if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(4);
                     else
-                        GameBoard.KeyDown(4, InputMode);
+                        GameBoard.KeyDown(4);
                     break;
                 case Key.D5:
                 case Key.NumPad5:
                     if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(5);
                     else
-                        GameBoard.KeyDown(5, InputMode);
+                        GameBoard.KeyDown(5);
                     break;
                 case Key.D6:
                 case Key.NumPad6:
                     if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(6);
                     else
-                        GameBoard.KeyDown(6, InputMode);
+                        GameBoard.KeyDown(6);
                     break;
                 case Key.D7:
                 case Key.NumPad7:
                     if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(7);
                     else
-                        GameBoard.KeyDown(7, InputMode);
+                        GameBoard.KeyDown(7);
                     break;
                 case Key.D8:
                 case Key.NumPad8:
                     if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(8);
                     else
-                        GameBoard.KeyDown(8, InputMode);
+                        GameBoard.KeyDown(8);
                     break;
                 case Key.D9:
                 case Key.NumPad9:
                     if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(9);
                     else
-                        GameBoard.KeyDown(9, InputMode);
+                        GameBoard.KeyDown(9);
                     break;
                 case Key.S:
                     if (ctrl && GameBoard.IsInProgress)
@@ -279,10 +276,10 @@ namespace Sudoku
                     GameBoard.ClearColors();
                     break;
                 case Key.Q:
-                    InputMode = KeyPadMode.Pencil;
+                    GameBoard.KeyInputMode = KeyPadMode.Pencil;
                     break;
                 case Key.A:
-                    InputMode = KeyPadMode.Pen;
+                    GameBoard.KeyInputMode = KeyPadMode.Pen;
                     break;
             }
             e.Handled = true;
