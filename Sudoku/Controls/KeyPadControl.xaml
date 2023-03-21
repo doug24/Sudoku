@@ -146,7 +146,7 @@
                               IsChecked="{Binding Path=GameBoard.KeyInputMode, Converter={StaticResource ebc}, ConverterParameter=Pen}" />
                 <ToggleButton Content="✎" ToolTip="Add Pencil Marks"
                               IsChecked="{Binding Path=GameBoard.KeyInputMode, Converter={StaticResource ebc}, ConverterParameter=Pencil}" />
-                <ToggleButton Content="🔢" FontFamily="Segoe UI Symbol" Foreground="DarkGreen"
+                <ToggleButton Content="🔢" FontFamily="Segoe UI Symbol" Foreground="#FF466F85"
                               ToolTip="Select number first" IsChecked="{Binding GameBoard.NumberFirstMode, Mode=TwoWay}" />
 
                 <ToggleButton Content="{Binding Path=GameBoard.Number1}" Style="{StaticResource NumberToggleButtonStyle}"
