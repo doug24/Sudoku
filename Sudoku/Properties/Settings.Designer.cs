@@ -85,13 +85,13 @@ namespace Sudoku.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("CellFirst")]
-        public string SelectionMode {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool NumberFirstMode {
             get {
-                return ((string)(this["SelectionMode"]));
+                return ((bool)(this["NumberFirstMode"]));
             }
             set {
-                this["SelectionMode"] = value;
+                this["NumberFirstMode"] = value;
             }
         }
         

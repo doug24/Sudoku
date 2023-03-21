@@ -17,8 +17,8 @@
     <Setting Name="CleanPencilMarks" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="SelectionMode" Type="System.String" Scope="User">
-      <Value Profile="(Default)">CellFirst</Value>
+    <Setting Name="NumberFirstMode" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="EnableNumberHighlight" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

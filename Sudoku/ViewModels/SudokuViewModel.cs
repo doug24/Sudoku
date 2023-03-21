@@ -143,7 +143,11 @@ namespace Sudoku
         {
             if (p is string num && int.TryParse(num, out int value))
             {
-                if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                if (GameBoard.NumberFirstMode)
+                {
+                    GameBoard.SetSelectedNumber(value);
+                }
+                else
                 {
                     GameBoard.SelectedNumber = NumberSelection.None;
 
@@ -156,10 +160,6 @@ namespace Sudoku
 
                     GameBoard.KeyDown(value, InputMode);
                 }
-                else
-                {
-                    GameBoard.SetSelectedNumber(value);
-                }
             }
         }
 
@@ -167,14 +167,14 @@ namespace Sudoku
         {
             if (p is string num && int.TryParse(num, out int value))
             {
-                if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+                if (GameBoard.NumberFirstMode)
                 {
-                    IsHighlightMode = false;
-                    GameBoard.SetColor(value - 10);
+                    GameBoard.SetSelectedNumber(value);
                 }
                 else
                 {
-                    GameBoard.SetSelectedNumber(value);
+                    IsHighlightMode = false;
+                    GameBoard.SetColor(value - 10);
                 }
             }
         }
@@ -193,7 +193,7 @@ namespace Sudoku
                 return;
             }
 
-            if (GameBoard.PlayMode == GamePlayMode.CellFirst)
+            if (!GameBoard.NumberFirstMode)
             {
                 GameBoard.SelectedNumber = NumberSelection.None;
             }
@@ -202,66 +202,66 @@ namespace Sudoku
             {
                 case Key.D1:
                 case Key.NumPad1:
-                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
-                        GameBoard.KeyDown(1, InputMode);
-                    else
+                    if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(1);
+                    else
+                        GameBoard.KeyDown(1, InputMode);
                     break;
                 case Key.D2:
                 case Key.NumPad2:
-                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
-                        GameBoard.KeyDown(2, InputMode);
-                    else
+                    if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(2);
+                    else
+                        GameBoard.KeyDown(2, InputMode);
                     break;
                 case Key.D3:
                 case Key.NumPad3:
-                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
-                        GameBoard.KeyDown(3, InputMode);
-                    else
+                    if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(3);
+                    else
+                        GameBoard.KeyDown(3, InputMode);
                     break;
                 case Key.D4:
                 case Key.NumPad4:
-                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
-                        GameBoard.KeyDown(4, InputMode);
-                    else
+                    if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(4);
+                    else
+                        GameBoard.KeyDown(4, InputMode);
                     break;
                 case Key.D5:
                 case Key.NumPad5:
-                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
-                        GameBoard.KeyDown(5, InputMode);
-                    else
+                    if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(5);
+                    else
+                        GameBoard.KeyDown(5, InputMode);
                     break;
                 case Key.D6:
                 case Key.NumPad6:
-                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
-                        GameBoard.KeyDown(6, InputMode);
-                    else
+                    if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(6);
+                    else
+                        GameBoard.KeyDown(6, InputMode);
                     break;
                 case Key.D7:
                 case Key.NumPad7:
-                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
-                        GameBoard.KeyDown(7, InputMode);
-                    else
+                    if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(7);
+                    else
+                        GameBoard.KeyDown(7, InputMode);
                     break;
                 case Key.D8:
                 case Key.NumPad8:
-                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
-                        GameBoard.KeyDown(8, InputMode);
-                    else
+                    if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(8);
+                    else
+                        GameBoard.KeyDown(8, InputMode);
                     break;
                 case Key.D9:
                 case Key.NumPad9:
-                    if (GameBoard.PlayMode == GamePlayMode.CellFirst)
-                        GameBoard.KeyDown(9, InputMode);
-                    else
+                    if (GameBoard.NumberFirstMode)
                         GameBoard.SetSelectedNumber(9);
+                    else
+                        GameBoard.KeyDown(9, InputMode);
                     break;
                 case Key.S:
                     if (ctrl && GameBoard.IsInProgress)

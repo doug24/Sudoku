@@ -38,10 +38,7 @@ namespace Sudoku
             HighlightIncorrect = Properties.Settings.Default.HighlightIncorrect;
             CleanPencilMarks = Properties.Settings.Default.CleanPencilMarks;
             RunTimer = Properties.Settings.Default.RunTimer;
-            if (Enum.TryParse(Properties.Settings.Default.SelectionMode, out GamePlayMode mode))
-            {
-                PlayMode = mode;
-            }
+            NumberFirstMode = Properties.Settings.Default.NumberFirstMode;
 
             periodicTimer.Interval = TimeSpan.FromSeconds(1);
             periodicTimer.Tick += OnTimer_Tick;
@@ -81,7 +78,7 @@ namespace Sudoku
             Properties.Settings.Default.HighlightIncorrect = HighlightIncorrect;
             Properties.Settings.Default.CleanPencilMarks = CleanPencilMarks;
             Properties.Settings.Default.RunTimer = RunTimer;
-            Properties.Settings.Default.SelectionMode = PlayMode.ToString();
+            Properties.Settings.Default.NumberFirstMode = NumberFirstMode;
             Properties.Settings.Default.EnableNumberHighlight = EnableNumberHighlight;
         }
 
@@ -131,7 +128,18 @@ namespace Sudoku
         private SelectionMode selectionMode = SelectionMode.Extended;
 
         [ObservableProperty]
-        private GamePlayMode playMode = GamePlayMode.CellFirst;
+        private bool numberFirstMode = false;
+
+        partial void OnNumberFirstModeChanged(bool value)
+        {
+            // order of setting matters
+            SelectionMode = value ? SelectionMode.Single : SelectionMode.Extended;
+            IsMultiSelect = !value;
+            if (!value)
+            {
+                SelectedNumber = NumberSelection.None;
+            }
+        }
 
         [ObservableProperty]
         private bool runTimer = false;
@@ -186,17 +194,6 @@ namespace Sudoku
             }
         }
 
-        partial void OnPlayModeChanged(GamePlayMode value)
-        {
-            // order of setting matters
-            SelectionMode = value == GamePlayMode.CellFirst ? SelectionMode.Extended : SelectionMode.Single;
-            IsMultiSelect = value == GamePlayMode.CellFirst;
-            if (value == GamePlayMode.CellFirst)
-            {
-                SelectedNumber = NumberSelection.None;
-            }
-        }
-
         [ObservableProperty]
         private NumberSelection selectedNumber = NumberSelection.None;
 
@@ -204,12 +201,12 @@ namespace Sudoku
         {
             selectedNumberChanged = true;
 
-            if (EnableNumberHighlight && PlayMode == GamePlayMode.NumbersFirst)
+            if (EnableNumberHighlight && NumberFirstMode)
             {
                 int number = (int)value;
                 HighlightNumbers(number);
             }
-            if (PlayMode == GamePlayMode.CellFirst && SelectedNumber != NumberSelection.None)
+            if (!NumberFirstMode && SelectedNumber != NumberSelection.None)
             {
                 SelectedNumber = NumberSelection.None;
             }
@@ -443,7 +440,7 @@ namespace Sudoku
         {
             if (!(IsInProgress || IsDesignMode)) return;
 
-            if (PlayMode == GamePlayMode.CellFirst) return;
+            if (!NumberFirstMode) return;
 
             int value = (int)SelectedNumber;
 
@@ -1005,7 +1002,7 @@ namespace Sudoku
             {
                 cell.Reset();
             }
-            if (PlayMode == GamePlayMode.NumbersFirst)
+            if (NumberFirstMode)
             {
                 SelectedNumber = NumberSelection.None;
             }

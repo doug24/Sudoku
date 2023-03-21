@@ -8,9 +8,8 @@
              d:DesignWidth="150">
 
     <UserControl.Resources>
-        <local:BoolToVisibilityConverter x:Key="b2vc"/>
+        <local:BoolToVisibilityConverter x:Key="b2vc" TrueValue="Collapsed" FalseValue="Visible"/>
         <local:EnumBooleanConverter x:Key="ebc" />
-        <local:EnumToVisibilityConverter x:Key="evc"/>
 
         <Style TargetType="Button">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -145,14 +144,14 @@
 
                 <ToggleButton Content="" FontFamily="Segoe MDL2 Assets" ToolTip="Set Answers" 
                               IsChecked="{Binding Path=InputMode, Converter={StaticResource ebc}, ConverterParameter=Pen}"
-                              Visibility="{Binding Path=GameBoard.PlayMode, Converter={StaticResource evc}, ConverterParameter=CellFirst}"/>
+                              Visibility="{Binding Path=GameBoard.NumberFirstMode, Converter={StaticResource b2vc}}"/>
                 <ToggleButton Content="✎" ToolTip="Add Pencil Marks"
                               IsChecked="{Binding Path=InputMode, Converter={StaticResource ebc}, ConverterParameter=Pencil}"
-                              Visibility="{Binding Path=GameBoard.PlayMode, Converter={StaticResource evc}, ConverterParameter=CellFirst}"/>
+                              Visibility="{Binding Path=GameBoard.NumberFirstMode, Converter={StaticResource b2vc}}"/>
                 <ToggleButton Content="①" FontFamily="Segoe UI Symbol" Foreground="DarkGreen"
                               ToolTip="Highlight number" IsChecked="{Binding IsHighlightMode}"
                               IsEnabled="{Binding Path=GameBoard.EnableNumberHighlight}"
-                              Visibility="{Binding Path=GameBoard.PlayMode, Converter={StaticResource evc}, ConverterParameter=CellFirst}"/>
+                              Visibility="{Binding Path=GameBoard.NumberFirstMode, Converter={StaticResource b2vc}}"/>
 
                 <ToggleButton Content="{Binding Path=GameBoard.Number1}" Style="{StaticResource NumberToggleButtonStyle}"
                               Command="{Binding NumberKeyCommand}" CommandParameter="1"
