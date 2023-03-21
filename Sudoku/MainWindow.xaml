@@ -147,8 +147,7 @@
                 <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"
                            Text="Timer" Margin="3" FontSize="14"/>
                 <ToggleSwitch:HorizontalToggleSwitch Grid.Row="3" Grid.Column="2"
-                            IsChecked="{Binding GameBoard.RunTimer, Mode=TwoWay}" 
-                            IsEnabled="{Binding GameBoard.CanChangeTimer}"
+                            IsChecked="{Binding GameBoard.ShowTimer, Mode=TwoWay}" 
                             Style="{StaticResource carbon}"
                             UncheckedContent="No" CheckedContent="Yes" 
                             Margin="0,6" HorizontalAlignment="Left"/>

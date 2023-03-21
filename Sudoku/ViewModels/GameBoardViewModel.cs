@@ -37,7 +37,7 @@ namespace Sudoku
         {
             HighlightIncorrect = Properties.Settings.Default.HighlightIncorrect;
             CleanPencilMarks = Properties.Settings.Default.CleanPencilMarks;
-            RunTimer = Properties.Settings.Default.RunTimer;
+            ShowTimer = Properties.Settings.Default.ShowTimer;
             NumberFirstMode = Properties.Settings.Default.NumberFirstMode;
 
             periodicTimer.Interval = TimeSpan.FromSeconds(1);
@@ -77,7 +77,7 @@ namespace Sudoku
         {
             Properties.Settings.Default.HighlightIncorrect = HighlightIncorrect;
             Properties.Settings.Default.CleanPencilMarks = CleanPencilMarks;
-            Properties.Settings.Default.RunTimer = RunTimer;
+            Properties.Settings.Default.ShowTimer = ShowTimer;
             Properties.Settings.Default.NumberFirstMode = NumberFirstMode;
             Properties.Settings.Default.EnableNumberHighlight = EnableNumberHighlight;
         }
@@ -145,21 +145,11 @@ namespace Sudoku
         }
 
         [ObservableProperty]
-        private bool runTimer = false;
+        private bool showTimer = false;
 
-        [ObservableProperty]
-        private bool canChangeTimer = true;
-
-        [ObservableProperty]
-        private string time = string.Empty;
-
-        [ObservableProperty]
-        private bool isInProgress = false;
-
-        partial void OnIsInProgressChanged(bool value)
+        partial void OnShowTimerChanged(bool value)
         {
-            CanChangeTimer = !value;
-            if (RunTimer)
+            if (value)
             {
                 periodicTimer.Start();
             }
@@ -170,11 +160,17 @@ namespace Sudoku
             }
         }
 
+        [ObservableProperty]
+        private string time = string.Empty;
+
+        [ObservableProperty]
+        private bool isInProgress = false;
+
         private void OnTimer_Tick(object? sender, EventArgs e)
         {
-            if (RunTimer)
+            if (ShowTimer)
             {
-                Time = stopwatch.Elapsed.ToString(@"m\:ss");
+                Time = stopwatch.Elapsed.ToString(@"mm\:ss");
             }
             else
             {
@@ -184,7 +180,7 @@ namespace Sudoku
 
         internal void OnStateChanged(WindowState state)
         {
-            if (RunTimer)
+            if (ShowTimer)
             {
                 if (state == WindowState.Minimized)
                 {
@@ -1030,6 +1026,8 @@ namespace Sudoku
         {
             undoStack.Clear();
             redoStack.Clear();
+            stopwatch.Reset();
+            Time = ShowTimer ? "00:00" : string.Empty;
 
             foreach (var cell in allCells)
             {
@@ -1041,7 +1039,6 @@ namespace Sudoku
             }
             HighlightNumbers(-1);
             ClearRemainderCounts();
-            Time = RunTimer ? "0:00" : string.Empty;
         }
 
         private void UpdateLayout()

@@ -109,13 +109,13 @@ namespace Sudoku.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool RunTimer {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowTimer {
             get {
-                return ((bool)(this["RunTimer"]));
+                return ((bool)(this["ShowTimer"]));
             }
             set {
-                this["RunTimer"] = value;
+                this["ShowTimer"] = value;
             }
         }
     }
