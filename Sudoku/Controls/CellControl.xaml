@@ -11,11 +11,12 @@
     <UserControl.Resources>
 
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" TrueValue="Visible" FalseValue="Hidden" />
+        <local:BoolToColorConverter x:Key="BoolToColorConverter"/>
 
         <DataTemplate x:Key ="CandidateTemplate">
             <Viewbox>
                 <TextBlock Text="{Binding Number}" 
-                           Foreground="DimGray"
+                           Foreground="{Binding IsHighlight, Converter={StaticResource BoolToColorConverter}}"
                            VerticalAlignment="Center"
                            HorizontalAlignment="Center"
                            Visibility="{Binding Visible, Converter={StaticResource BoolToVisibilityConverter}}"/>

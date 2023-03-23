@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Sudoku
 {
@@ -18,5 +19,8 @@ namespace Sudoku
 
         [ObservableProperty]
         private bool visible;
+
+        [ObservableProperty]
+        private bool isHighlight;
     }
 }

@@ -170,6 +170,11 @@ namespace Sudoku
         internal void SetHighlight(int highlightValue)
         {
             IsHighlight = Value == highlightValue;
+
+            foreach (var candidate in Candidates)
+            {
+                candidate.IsHighlight = candidate.Visible && candidate.Value == highlightValue;
+            }
         }
 
         internal void SetColor(int color)
