@@ -42,6 +42,7 @@ namespace Sudoku
 
             periodicTimer.Interval = TimeSpan.FromSeconds(1);
             periodicTimer.Tick += OnTimer_Tick;
+            periodicTimer.Start();
 
             Cells = new MultiSelectCollectionView<CellViewModel>(list);
 
@@ -147,19 +148,6 @@ namespace Sudoku
         [ObservableProperty]
         private bool showTimer = false;
 
-        partial void OnShowTimerChanged(bool value)
-        {
-            if (value)
-            {
-                periodicTimer.Start();
-            }
-            else
-            {
-                periodicTimer.Stop();
-                Time = string.Empty;
-            }
-        }
-
         [ObservableProperty]
         private string time = string.Empty;
 
@@ -180,16 +168,13 @@ namespace Sudoku
 
         internal void OnStateChanged(WindowState state)
         {
-            if (ShowTimer)
+            if (state == WindowState.Minimized && stopwatch.IsRunning)
             {
-                if (state == WindowState.Minimized)
-                {
-                    stopwatch.Stop();
-                }
-                else if (state != WindowState.Minimized)
-                {
-                    stopwatch.Start();
-                }
+                stopwatch.Stop();
+            }
+            else if (state != WindowState.Minimized && IsInProgress)
+            {
+                stopwatch.Start();
             }
         }
 
