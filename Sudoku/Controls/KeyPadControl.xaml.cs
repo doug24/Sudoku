@@ -1,15 +1,14 @@
 ﻿using System.Windows.Controls;
 
-namespace Sudoku
+namespace Sudoku;
+
+/// <summary>
+/// Interaction logic for KeyPadControl.xaml
+/// </summary>
+public partial class KeyPadControl : UserControl
 {
-    /// <summary>
-    /// Interaction logic for KeyPadControl.xaml
-    /// </summary>
-    public partial class KeyPadControl : UserControl
+    public KeyPadControl()
     {
-        public KeyPadControl()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

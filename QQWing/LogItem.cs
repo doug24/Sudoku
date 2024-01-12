@@ -20,155 +20,154 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace QQWingLib
+namespace QQWingLib;
+
+/// <summary>
+/// While solving the puzzle, log steps taken in a log item. This is useful for
+/// later printing out the solve history or gathering statistics about how hard
+/// the puzzle was to solve.
+/// </summary>
+public class LogItem
 {
     /// <summary>
-    /// While solving the puzzle, log steps taken in a log item. This is useful for
-    /// later printing out the solve history or gathering statistics about how hard
-    /// the puzzle was to solve.
+    /// The recursion level at which this item was gathered. Used for backing out
+    /// log items solve branches that don't lead to a solution.
     /// </summary>
-    public class LogItem
+    private int round;
+
+    /// <summary>
+    /// The type of log message that will determine the message printed.
+    /// </summary>
+    private LogType type;
+
+    /// <summary>
+    /// Value that was set by the operation (or zero for no value)
+    /// </summary>
+    private int value;
+
+    /// <summary>
+    /// position on the board at which the value (if any) was set.
+    /// </summary>
+    private int position;
+
+    public LogItem(int r, LogType t)
     {
-        /// <summary>
-        /// The recursion level at which this item was gathered. Used for backing out
-        /// log items solve branches that don't lead to a solution.
-        /// </summary>
-        private int round;
+        Init(r, t, 0, -1);
+    }
 
-        /// <summary>
-        /// The type of log message that will determine the message printed.
-        /// </summary>
-        private LogType type;
+    public LogItem(int r, LogType t, int v, int p)
+    {
+        Init(r, t, v, p);
+    }
 
-        /// <summary>
-        /// Value that was set by the operation (or zero for no value)
-        /// </summary>
-        private int value;
+    private void Init(int r, LogType t, int v, int p)
+    {
+        round = r;
+        type = t;
+        value = v;
+        position = p;
+    }
 
-        /// <summary>
-        /// position on the board at which the value (if any) was set.
-        /// </summary>
-        private int position;
+    public int GetRound()
+    {
+        return round;
+    }
 
-        public LogItem(int r, LogType t)
+    /// <summary>
+    /// Get the type of this log item.
+    /// </summary>
+    public LogType GetLogType()
+    {
+        return type;
+    }
+
+    public void Print()
+    {
+        Debug.WriteLine(ToString());
+    }
+
+    /// <summary>
+    /// Get the row (1 indexed), or -1 if no row
+    /// </summary>
+    public int GetRow()
+    {
+        if (position <= -1) return -1;
+        return QQWing.CellToRow(position) + 1;
+    }
+
+    /// <summary>
+    /// Get the column (1 indexed), or -1 if no column
+    /// </summary>
+    public int GetColumn()
+    {
+        if (position <= -1) return -1;
+        return QQWing.CellToColumn(position) + 1;
+    }
+
+    /// <summary>
+    /// Get the position (0-80) on the board or -1 if no position
+    /// </summary>
+    public int GetPosition()
+    {
+        return position;
+    }
+
+    /// <summary>
+    /// Get the value, or -1 if no value
+    /// </summary>
+    public int GetValue()
+    {
+        if (value <= 0) return -1;
+        return value;
+    }
+
+    /// <summary>
+    /// Print the current log item. The message used is determined by the type of
+    /// log item.
+    /// </summary>
+    public string GetDescription()
+    {
+        StringBuilder sb = new();
+        sb.Append("Round: ").Append(GetRound());
+        sb.Append(" - ");
+        sb.Append(GetLogType().GetDescription());
+        if (value > 0 || position > -1)
         {
-            Init(r, t, 0, -1);
-        }
-
-        public LogItem(int r, LogType t, int v, int p)
-        {
-            Init(r, t, v, p);
-        }
-
-        private void Init(int r, LogType t, int v, int p)
-        {
-            round = r;
-            type = t;
-            value = v;
-            position = p;
-        }
-
-        public int GetRound()
-        {
-            return round;
-        }
-
-        /// <summary>
-        /// Get the type of this log item.
-        /// </summary>
-        public LogType GetLogType()
-        {
-            return type;
-        }
-
-        public void Print()
-        {
-            Debug.WriteLine(ToString());
-        }
-
-        /// <summary>
-        /// Get the row (1 indexed), or -1 if no row
-        /// </summary>
-        public int GetRow()
-        {
-            if (position <= -1) return -1;
-            return QQWing.CellToRow(position) + 1;
-        }
-
-        /// <summary>
-        /// Get the column (1 indexed), or -1 if no column
-        /// </summary>
-        public int GetColumn()
-        {
-            if (position <= -1) return -1;
-            return QQWing.CellToColumn(position) + 1;
-        }
-
-        /// <summary>
-        /// Get the position (0-80) on the board or -1 if no position
-        /// </summary>
-        public int GetPosition()
-        {
-            return position;
-        }
-
-        /// <summary>
-        /// Get the value, or -1 if no value
-        /// </summary>
-        public int GetValue()
-        {
-            if (value <= 0) return -1;
-            return value;
-        }
-
-        /// <summary>
-        /// Print the current log item. The message used is determined by the type of
-        /// log item.
-        /// </summary>
-        public string GetDescription()
-        {
-            StringBuilder sb = new();
-            sb.Append("Round: ").Append(GetRound());
-            sb.Append(" - ");
-            sb.Append(GetLogType().GetDescription());
-            if (value > 0 || position > -1)
+            sb.Append(" (");
+            if (position > -1)
             {
-                sb.Append(" (");
+                sb.Append("Row: ").Append(GetRow()).Append(" - Column: ").Append(GetColumn());
+            }
+            if (value > 0)
+            {
+                if (position > -1) sb.Append(" - ");
+                sb.Append("Value: ").Append(GetValue());
+            }
+            sb.Append(')');
+        }
+        return sb.ToString();
+    }
+
+    public string GetCompactString()
+    {
+        StringBuilder sb = new();
+        sb.Append($"R{round}|");
+        sb.Append(type.ToString()).Append('|');
+        if (value > 0 || position > -1)
+        {
+            sb.Append($"({GetRow()},{GetColumn()})");
+            if (value > 0)
+            {
                 if (position > -1)
-                {
-                    sb.Append("Row: ").Append(GetRow()).Append(" - Column: ").Append(GetColumn());
-                }
-                if (value > 0)
-                {
-                    if (position > -1) sb.Append(" - ");
-                    sb.Append("Value: ").Append(GetValue());
-                }
-                sb.Append(')');
+                    sb.Append('=');
+                sb.Append(GetValue());
             }
-            return sb.ToString();
         }
+        return sb.ToString();
+    }
 
-        public string GetCompactString()
-        {
-            StringBuilder sb = new();
-            sb.Append($"R{round}|");
-            sb.Append(type.ToString()).Append('|');
-            if (value > 0 || position > -1)
-            {
-                sb.Append($"({GetRow()},{GetColumn()})");
-                if (value > 0)
-                {
-                    if (position > -1)
-                        sb.Append('=');
-                    sb.Append(GetValue());
-                }
-            }
-            return sb.ToString();
-        }
-
-        public override string ToString()
-        {
-            return GetDescription();
-        }
+    public override string ToString()
+    {
+        return GetDescription();
     }
 }

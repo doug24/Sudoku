@@ -1,10 +1,9 @@
 ﻿using System.Windows.Controls.Primitives;
 
-namespace Sudoku
+namespace Sudoku;
+
+public interface IMultiSelectCollectionView
 {
-    public interface IMultiSelectCollectionView
-    {
-        void AddControl(Selector selector);
-        void RemoveControl(Selector selector);
-    }
+    void AddControl(Selector selector);
+    void RemoveControl(Selector selector);
 }

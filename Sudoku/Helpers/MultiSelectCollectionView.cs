@@ -6,106 +6,100 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 
-namespace Sudoku
+namespace Sudoku;
+
+/// <summary>
+/// http://grokys.blogspot.com/2010/07/mvvm-and-multiple-selection-part-iii.html
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public class MultiSelectCollectionView<T>(IList list) : ListCollectionView(list), IMultiSelectCollectionView
 {
-    /// <summary>
-    /// http://grokys.blogspot.com/2010/07/mvvm-and-multiple-selection-part-iii.html
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class MultiSelectCollectionView<T> : ListCollectionView, IMultiSelectCollectionView
+    private bool ignoreSelectionChanged;
+    private readonly List<Selector> controls = [];
+
+    public event EventHandler? SelectionChanged;
+
+    void IMultiSelectCollectionView.AddControl(Selector selector)
     {
-        private bool ignoreSelectionChanged;
-        private readonly List<Selector> controls = new();
+        controls.Add(selector);
+        SetSelection(selector);
+        selector.SelectionChanged += OnSelectionChanged;
+    }
 
-        public event EventHandler? SelectionChanged;
-
-        public MultiSelectCollectionView(IList list)
-            : base(list)
+    void IMultiSelectCollectionView.RemoveControl(Selector selector)
+    {
+        if (controls.Remove(selector))
         {
+            selector.SelectionChanged -= OnSelectionChanged;
         }
+    }
 
-        void IMultiSelectCollectionView.AddControl(Selector selector)
-        {
-            controls.Add(selector);
-            SetSelection(selector);
-            selector.SelectionChanged += OnSelectionChanged;
-        }
+    public ObservableCollection<T> SelectedItems { get; private set; } = [];
 
-        void IMultiSelectCollectionView.RemoveControl(Selector selector)
+    private void SetSelection(Selector selector)
+    {
+        if (selector is MultiSelector multiSelector)
         {
-            if (controls.Remove(selector))
+            multiSelector.SelectedItems.Clear();
+
+            foreach (T item in SelectedItems)
             {
-                selector.SelectionChanged -= OnSelectionChanged;
+                multiSelector.SelectedItems.Add(item);
             }
         }
-
-        public ObservableCollection<T> SelectedItems { get; private set; } = new();
-
-        private void SetSelection(Selector selector)
+        else if (selector is ListBox listBox)
         {
-            if (selector is MultiSelector multiSelector)
-            {
-                multiSelector.SelectedItems.Clear();
+            listBox.SelectedItems.Clear();
 
-                foreach (T item in SelectedItems)
-                {
-                    multiSelector.SelectedItems.Add(item);
-                }
-            }
-            else if (selector is ListBox listBox)
+            foreach (T item in SelectedItems)
             {
-                listBox.SelectedItems.Clear();
-
-                foreach (T item in SelectedItems)
-                {
-                    listBox.SelectedItems.Add(item);
-                }
+                listBox.SelectedItems.Add(item);
             }
         }
+    }
 
-        private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!ignoreSelectionChanged)
         {
-            if (!ignoreSelectionChanged)
+            bool changed = false;
+
+            ignoreSelectionChanged = true;
+
+            try
             {
-                bool changed = false;
-
-                ignoreSelectionChanged = true;
-
-                try
+                foreach (T item in e.AddedItems)
                 {
-                    foreach (T item in e.AddedItems)
+                    if (!SelectedItems.Contains(item))
                     {
-                        if (!SelectedItems.Contains(item))
-                        {
-                            SelectedItems.Add(item);
-                            changed = true;
-                        }
-                    }
-
-                    foreach (T item in e.RemovedItems)
-                    {
-                        if (SelectedItems.Remove(item))
-                        {
-                            changed = true;
-                        }
-                    }
-
-                    if (changed)
-                    {
-                        foreach (Selector control in controls)
-                        {
-                            if (control != sender)
-                            {
-                                SetSelection(control);
-                            }
-                        }
-                        SelectionChanged?.Invoke(this, EventArgs.Empty);
+                        SelectedItems.Add(item);
+                        changed = true;
                     }
                 }
-                finally
+
+                foreach (T item in e.RemovedItems)
                 {
-                    ignoreSelectionChanged = false;
+                    if (SelectedItems.Remove(item))
+                    {
+                        changed = true;
+                    }
                 }
+
+                if (changed)
+                {
+                    foreach (Selector control in controls)
+                    {
+                        if (control != sender)
+                        {
+                            SetSelection(control);
+                        }
+                    }
+                    SelectionChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+            finally
+            {
+                ignoreSelectionChanged = false;
             }
         }
     }

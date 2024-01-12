@@ -1,26 +1,24 @@
-﻿using System.Windows.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace Sudoku
+namespace Sudoku;
+
+public partial class CandidateViewModel : ObservableObject
 {
-    public partial class CandidateViewModel : ObservableObject
+    public CandidateViewModel(int num)
     {
-        public CandidateViewModel(int num)
-        {
-            Value = num;
-            Number = num.ToString();
-        }
-
-        [ObservableProperty]
-        private int value;
-
-        [ObservableProperty]
-        private string number = string.Empty;
-
-        [ObservableProperty]
-        private bool visible;
-
-        [ObservableProperty]
-        private bool isHighlight;
+        Value = num;
+        Number = num.ToString();
     }
+
+    [ObservableProperty]
+    private int value;
+
+    [ObservableProperty]
+    private string number = string.Empty;
+
+    [ObservableProperty]
+    private bool visible;
+
+    [ObservableProperty]
+    private bool isHighlight;
 }

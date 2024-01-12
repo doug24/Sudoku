@@ -1,8 +1,7 @@
-﻿namespace Sudoku
+﻿namespace Sudoku;
+
+public enum KeyPadMode
 {
-    public enum KeyPadMode
-    {
-        Pen,
-        Pencil,
-    }
+    Pen,
+    Pencil,
 }

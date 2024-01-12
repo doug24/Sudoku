@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sudoku
+namespace Sudoku;
+
+public static class Extensions
 {
-    public static class Extensions
+    public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
     {
-        public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
+        foreach (var item in enumerable)
         {
-            foreach (var item in enumerable)
-            {
-                action(item);
-            }
+            action(item);
         }
     }
 }

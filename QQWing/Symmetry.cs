@@ -21,48 +21,47 @@
 using System;
 using System.Globalization;
 
-namespace QQWingLib
+namespace QQWingLib;
+
+public enum Symmetry
 {
-    public enum Symmetry
+    NONE,
+    ROTATE90,
+    ROTATE180,
+    MIRROR,
+    FLIP,
+    RANDOM
+}
+
+public static class SymmetryExtensions
+{
+    public static Symmetry Get(string name)
     {
-        NONE,
-        ROTATE90,
-        ROTATE180,
-        MIRROR,
-        FLIP,
-        RANDOM
+        if (name == null) return Symmetry.NONE;
+
+        name = name.ToUpperInvariant();
+        if (Enum.TryParse(name, out Symmetry result))
+            return result;
+
+        return Symmetry.NONE;
     }
 
-    public static class SymmetryExtensions
+    public static string GetName(this Symmetry item)
     {
-        public static Symmetry get(string name)
-        {
-            if (name == null) return Symmetry.NONE;
+        TextInfo ti = new CultureInfo("en-US", false).TextInfo;
+        return ti.ToTitleCase(item.ToString());
+    }
 
-            name = name.ToUpperInvariant();
-            if (Enum.TryParse(name, out Symmetry result))
-                return result;
-
-            return Symmetry.NONE;
-        }
-
-        public static string getName(this Symmetry item)
-        {
-            TextInfo ti = new CultureInfo("en-US", false).TextInfo;
-            return ti.ToTitleCase(item.ToString());
-        }
-
-        public static Symmetry[] Values()
-        {
-            return new Symmetry[]
-            {
-                Symmetry.NONE,
-                Symmetry.ROTATE90,
-                Symmetry.ROTATE180,
-                Symmetry.MIRROR,
-                Symmetry.FLIP,
-                Symmetry.RANDOM
-           };
-        }
+    public static Symmetry[] Values()
+    {
+        return
+        [
+            Symmetry.NONE,
+            Symmetry.ROTATE90,
+            Symmetry.ROTATE180,
+            Symmetry.MIRROR,
+            Symmetry.FLIP,
+            Symmetry.RANDOM
+       ];
     }
 }

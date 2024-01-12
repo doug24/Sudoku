@@ -1,15 +1,14 @@
 ﻿using System.Windows.Controls;
 
-namespace Sudoku
+namespace Sudoku;
+
+/// <summary>
+/// Interaction logic for CellControl.xaml
+/// </summary>
+public partial class CellControl : UserControl
 {
-    /// <summary>
-    /// Interaction logic for CellControl.xaml
-    /// </summary>
-    public partial class CellControl : UserControl
+    public CellControl()
     {
-        public CellControl()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

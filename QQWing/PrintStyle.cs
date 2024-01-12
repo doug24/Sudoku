@@ -17,13 +17,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace QQWingLib
+namespace QQWingLib;
+
+public enum PrintStyle
 {
-    public enum PrintStyle
-    {
-        ONE_LINE,
-        COMPACT,
-        READABLE,
-        CSV
-    }
+    ONE_LINE,
+    COMPACT,
+    READABLE,
+    CSV
 }

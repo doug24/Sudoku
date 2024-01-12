@@ -112,6 +112,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -158,12 +159,18 @@
                            FontSize="28"/>
 
                 <Button Grid.Row="4" Grid.Column="2" 
-                        HorizontalAlignment="Left"
+                        HorizontalAlignment="Stretch"
                         Content="Fill candidates" 
                         Padding="6" Margin="3"
                         Command="{Binding Path=GameBoard.FillCandidatesCommand}"/>
 
-                <local:KeyPadControl Grid.Row="5" Grid.ColumnSpan="3" 
+                <Button Grid.Row="5" Grid.Column="2"
+                        HorizontalAlignment="Stretch"
+                        Content="Fast Forward"
+                        Padding="6" Margin="3"
+                        Command="{Binding Path=GameBoard.FastForwardCommand}"/>
+
+                <local:KeyPadControl Grid.Row="6" Grid.ColumnSpan="3" 
                                      VerticalAlignment="Bottom" MaxWidth="220"/>
             </Grid>
         </Border>

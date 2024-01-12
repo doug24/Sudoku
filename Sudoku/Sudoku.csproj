@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <VersionPrefix>1.2.0</VersionPrefix>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <VersionPrefix>1.3.0</VersionPrefix>
     <OutputType>WinExe</OutputType>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
@@ -87,7 +87,7 @@
     <Resource Include="Images\Sudoku.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.1.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="ToggleSwitch" Version="1.2.0">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>

@@ -17,14 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace QQWingLib
+namespace QQWingLib;
+
+public enum Difficulty
 {
-    public enum Difficulty
-    {
-        UNKNOWN,
-        SIMPLE,
-        EASY,
-        INTERMEDIATE,
-        EXPERT
-    }
+    UNKNOWN,
+    SIMPLE,
+    EASY,
+    INTERMEDIATE,
+    EXPERT
 }
