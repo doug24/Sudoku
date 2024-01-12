@@ -307,7 +307,7 @@ public partial class SudokuViewModel : ObservableObject
         OpenFileDialog dlg = new()
         {
             DefaultExt = ".ss",
-            Filter = "Sudoku Files (.ss)|*.ss"
+            Filter = "Simple Sudoku Files|*.ss"
         };
         var result = dlg.ShowDialog();
         if (result == true)
@@ -322,7 +322,7 @@ public partial class SudokuViewModel : ObservableObject
         SaveFileDialog dlg = new()
         {
             DefaultExt = ".ss",
-            Filter = "Sudoku Files (.ss)|*.ss"
+            Filter = "Simple Sudoku Files|*.ss"
         };
         var result = dlg.ShowDialog();
         if (result == true)
