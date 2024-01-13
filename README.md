@@ -1,10 +1,15 @@
 # Sudoku
-A free Sudoku game with both classic and irregular layouts
+A free Sudoku game with both classic and 28 different irregular layouts
 
-There are two input modes
+| Classic | Irregular |
+|---|---|
+|<img src="https://github.com/doug24/Sudoku/assets/17227248/e9aa99be-b184-4160-97fb-2630ca760699"/>|<img src="https://github.com/doug24/Sudoku/assets/17227248/03351dc3-f165-4475-901f-0f2336c05b05"/>|
 
-- When the "1234" button is pressed (highlighted), select a number from the digit pad then click a cell in the game board to place the number. Left click places an answer, and right click places a pencil mark. Click again to remove the answer or pencil mark. If the pencil button is selected, the left and right mouse buttons are reversed. The numbers on the keyboard can also be used to select digits. 
-- When the "1234" button is not pressed, first select one or more cells in the game board, then click a digit button or keyboard number to place a digit. Click the pen or pencil button to change between answers and pencil marks. Use ctrl + click to select multiple cells. Double click a number on the game board to highlight the selected number when that option is enabled.
+### Input modes
+There are two input modes:
+
+- **Number first** - When the "1234" button is pressed (highlighted), select a number from the digit pad then click a cell in the game board to place the number. Left click places an answer, and right click places a pencil mark. Click again to remove the answer or pencil mark. If the pencil button is selected, the left and right mouse buttons are reversed. The numbers on the keyboard can also be used to select digits. 
+- **Cell first**  - When the "1234" button is not pressed, first select one or more cells in the game board, then click a digit button or keyboard number to place a digit in the selected cells. Click the pen or pencil button to change between answers and pencil marks. Use ctrl + click to select multiple cells. Double click a number on the game board to highlight the selected number when that option is enabled.
 
 The digit pad also has **colors** for color solution techniques.
 The last row has buttons for **Undo**, **Redo**, and **Clear all colors**
