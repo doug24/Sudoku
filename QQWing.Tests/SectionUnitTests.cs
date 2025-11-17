@@ -1,5 +1,7 @@
 ﻿using QQWingLib;
 
+[assembly: Parallelize(Scope = ExecutionScope.MethodLevel)]
+
 namespace QQWingTest;
 
 [TestClass]
@@ -72,7 +74,7 @@ public class SectionUnitTests
         {
             var rows = layout.SectionToSectionRows(sec).ToList();
 
-            Assert.AreEqual(3, rows.Count);
+            Assert.HasCount(3, rows);
             var expectedRows = expected[sec];
             for (int idx = 0; idx < 3; idx++)
             {
@@ -102,7 +104,7 @@ public class SectionUnitTests
         {
             var sections = layout.RowToSections(row).ToList();
 
-            Assert.AreEqual(3, sections.Count);
+            Assert.HasCount(3, sections);
             var expectedSections = expected[row];
             for (int idx = 0; idx < 3; idx++)
             {
@@ -132,7 +134,7 @@ public class SectionUnitTests
         {
             var cols = layout.SectionToSectionCols(sec).ToList();
 
-            Assert.AreEqual(3, cols.Count);
+            Assert.HasCount(3, cols);
             var expectedCols = expected[sec];
             for (int idx = 0; idx < 3; idx++)
             {
@@ -162,7 +164,7 @@ public class SectionUnitTests
         {
             var sections = layout.ColumnToSections(col).ToList();
 
-            Assert.AreEqual(3, sections.Count);
+            Assert.HasCount(3, sections);
             var expectedSections = expected[col];
             for (int idx = 0; idx < 3; idx++)
             {
@@ -195,7 +197,7 @@ public class SectionUnitTests
             {
                 var rows = layout.SectionToSectionRowsByCol(sec, col).ToList();
 
-                Assert.AreEqual(3, rows.Count);
+                Assert.HasCount(3, rows);
                 var expectedRows = expected[sec];
                 for (int idx = 0; idx < 3; idx++)
                 {

@@ -6,8 +6,7 @@ namespace QQWingTest;
 [TestClass]
 public class SolverUnitTests
 {
-    [Ignore]
-    public void GenerateTestData()
+    public static void GenerateTestData()
     {
         QQWing ss = new();
         ss.SetRecordHistory(true);
@@ -134,14 +133,14 @@ public class SolverUnitTests
         Assert.IsTrue(ss.Solve(CancellationToken.None));
 
         var solution = ss.GetSolution();
-        Assert.AreEqual(data.Solution.Length, solution.Length);
+        Assert.HasCount(data.Solution.Length, solution);
         for (int idx = 0; idx < data.Solution.Length; idx++)
         {
             Assert.AreEqual(data.Solution[idx], solution[idx]);
         }
 
         var solveSteps = ss.GetCompactSolveInstructions();
-        Assert.AreEqual(data.SolveSteps.Length, solveSteps.Length);
+        Assert.HasCount(data.SolveSteps.Length, solveSteps);
         for (int jdx = 0; jdx < solveSteps.Length; jdx++)
         {
             Assert.AreEqual(data.SolveSteps[jdx], solveSteps[jdx]);
