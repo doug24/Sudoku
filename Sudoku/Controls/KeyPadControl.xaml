@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Sudoku"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=local:SudokuViewModel, IsDesignTimeCreatable=True}"
              d:DesignWidth="150">
 
     <UserControl.Resources>
@@ -13,7 +14,8 @@
 
         <Style TargetType="Button">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="Background" Value="Azure"/>
+            <Setter Property="Foreground" Value="{Binding ButtonForeground}"/>
+            <Setter Property="Background" Value="{Binding ButtonBackground}"/>
             <Setter Property="FontSize" Value="44"/>
             <Setter Property="Padding" Value="6"/>
             <Setter Property="Margin" Value="1"/>
@@ -26,7 +28,7 @@
                         <Border Name="border" 
                             BorderThickness="1"
                             Padding="4,2" 
-                            BorderBrush="DarkGray" 
+                            BorderBrush="{Binding ButtonBorder}" 
                             CornerRadius="3" 
                             Background="{TemplateBinding Background}">
                             <ContentPresenter x:Name="contentPresenter"
@@ -47,7 +49,8 @@
 
         <Style x:Key="BaseToggleButtonStyle" TargetType="ToggleButton">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="Background" Value="Azure"/>
+            <Setter Property="Foreground" Value="{Binding ButtonForeground}"/>
+            <Setter Property="Background" Value="{Binding ButtonBackground}"/>
             <Setter Property="FontSize" Value="44"/>
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Template">
@@ -56,7 +59,7 @@
                         <Border Name="border" 
                                 BorderThickness="1"
                                 Padding="4,2" 
-                                BorderBrush="DarkGray" 
+                                BorderBrush="{Binding ButtonBorder}" 
                                 CornerRadius="3" 
                                 Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Center"                  
@@ -72,13 +75,14 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="LightBlue" />
+                    <Setter Property="Background" Value="{Binding CheckedButtonBackground}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
         <Style x:Key="NumberToggleButtonStyle" TargetType="ToggleButton">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="Background" Value="Azure"/>
+            <Setter Property="Foreground" Value="{Binding ButtonForeground}"/>
+            <Setter Property="Background" Value="{Binding ButtonBackground}"/>
             <Setter Property="FontSize" Value="44"/>
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Template">
@@ -87,7 +91,7 @@
                         <Border Name="border" 
                                 BorderThickness="1"
                                 Padding="4,2" 
-                                BorderBrush="DarkGray" 
+                                BorderBrush="{Binding ButtonBorder}" 
                                 CornerRadius="3" 
                                 Background="{TemplateBinding Background}">
                             <ContentPresenter HorizontalAlignment="Stretch"                  
@@ -115,7 +119,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="BorderBrush" Value="Black" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{Binding MouseoverButtonBorder}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -123,7 +127,7 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="LightBlue" />
+                    <Setter Property="Background" Value="{Binding CheckedButtonBackground}" />
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -177,13 +181,13 @@
                               Command="{Binding NumberKeyCommand}" CommandParameter="9"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D9, Mode=TwoWay}"/>
 
-                <ToggleButton Background="#FFC2F0FF" Style="{StaticResource ColorToggleButtonStyle}"
+                <ToggleButton Background="{Binding ColorButton1Background}" Style="{StaticResource ColorToggleButtonStyle}"
                               Command="{Binding ColorKeyCommand}" CommandParameter="10"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C1, Mode=TwoWay}"/>
-                <ToggleButton Background="#FFACFFAC" Style="{StaticResource ColorToggleButtonStyle}"
+                <ToggleButton Background="{Binding ColorButton2Background}" Style="{StaticResource ColorToggleButtonStyle}"
                               Command="{Binding ColorKeyCommand}" CommandParameter="11"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C2, Mode=TwoWay}"/>
-                <ToggleButton Background="#FFFFDDBF" Style="{StaticResource ColorToggleButtonStyle}" 
+                <ToggleButton Background="{Binding ColorButton3Background}" Style="{StaticResource ColorToggleButtonStyle}" 
                               Command="{Binding ColorKeyCommand}" CommandParameter="12"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C3, Mode=TwoWay}"/>
 

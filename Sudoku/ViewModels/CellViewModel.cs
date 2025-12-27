@@ -25,6 +25,10 @@ public partial class CellViewModel : ObservableObject
 
     public CellViewModel(int row, int col)
     {
+        isDarkMode = Properties.Settings.Default.DarkMode;
+
+        HighlightBrush = isDarkMode ? Brushes.Cyan : Brushes.ForestGreen;
+
         Row = row;
         Col = col;
         CellIndex = QQWing.RowColumnToCell(row, col);
@@ -43,13 +47,27 @@ public partial class CellViewModel : ObservableObject
         Section = QQWing.CellToSection(CellIndex);
 
         var sectionLayout = QQWing.SectionLayout;
-        RightBrush = sectionLayout.RightBoundaries.Contains(CellIndex) ? Brushes.DarkViolet : RightBrush = Brushes.Transparent;
-        BottomBrush = sectionLayout.BottomBoundaries.Contains(CellIndex) ? Brushes.DarkViolet : BottomBrush = Brushes.Transparent;
+        if (isDarkMode)
+        {
+            RightBrush = sectionLayout.RightBoundaries.Contains(CellIndex) ? Brushes.LightBlue : RightBrush = Brushes.Transparent;
+            BottomBrush = sectionLayout.BottomBoundaries.Contains(CellIndex) ? Brushes.LightBlue : BottomBrush = Brushes.Transparent;
+        }
+        else
+        {
+            RightBrush = sectionLayout.RightBoundaries.Contains(CellIndex) ? Brushes.DarkViolet : RightBrush = Brushes.Transparent;
+            BottomBrush = sectionLayout.BottomBoundaries.Contains(CellIndex) ? Brushes.DarkViolet : BottomBrush = Brushes.Transparent;
+        }
 
+        brushes = isDarkMode ? darkBrushes : lightBrushes;
+        ColorBrushes = isDarkMode ? darkColorBrushes : lightColorBrushes;
         Background = defaultBackground = brushes[Section];
     }
 
-    private readonly static Brush[] brushes =
+    private bool isDarkMode = false;
+
+    private static Brush[] brushes = [];
+
+    private static readonly Brush[] lightBrushes =
     [
         new SolidColorBrush(Color.FromRgb(255, 250, 247)),//hue= 20
         new SolidColorBrush(Color.FromRgb(235, 246, 255)),//hue=180
@@ -62,16 +80,39 @@ public partial class CellViewModel : ObservableObject
         new SolidColorBrush(Color.FromRgb(255, 250, 247)),//hue= 20
     ];
 
-    private readonly static Brush[] colorBrushes =
+    private static readonly Brush[] darkBrushes =
     [
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFC2F0FF")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFACFFAC")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFDDBF")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C370D")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#594C0A")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#153f70")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#301174")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#002680")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#301174")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#153f70")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#594C0A")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C370D")),
+    ];
+
+    // these are the colors used for user-marking multiple colors
+    public static Brush[] ColorBrushes { get; private set; } = [];
+
+    private static readonly Brush[] lightColorBrushes =
+    [
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C2F0FF")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#ACFFAC")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFDDBF")),
+    ];
+
+    private static readonly Brush[] darkColorBrushes =
+    [
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#006EB8")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4B964B")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#DB6600")),
     ];
 
     public static Brush GetColor(int idx)
     {
-        return colorBrushes[idx];
+        return ColorBrushes[idx];
     }
 
     public override string ToString()
@@ -124,16 +165,31 @@ public partial class CellViewModel : ObservableObject
             Value = state.Value;
             Given = true;
             Number = Value.ToString();
-            Foreground = Brushes.Black;
+            Foreground = isDarkMode ? Brushes.White : Brushes.Black;
         }
         else
         {
             Value = state.Value;
             Number = state.Value <= 0 ? string.Empty : state.Value.ToString();
             if (colorIncorrect)
-                Foreground = Value == Answer ? Brushes.DarkGreen : Brushes.Red;
+            {
+                if (isDarkMode)
+                {
+                    Foreground = Value == Answer ? Brushes.PaleGreen : Brushes.Red;
+                }
+                else
+                {
+                    Foreground = Value == Answer ? Brushes.DarkGreen : Brushes.Red;
+                }
+            }
+            else if (isDarkMode)
+            {
+                Foreground = Brushes.PaleGreen;
+            }
             else
+            {
                 Foreground = Brushes.DarkGreen;
+            }
         }
         SetCandidates(state.Candidates);
     }
@@ -148,9 +204,24 @@ public partial class CellViewModel : ObservableObject
         if (!Given)
         {
             if (colorIncorrect)
-                Foreground = Value == Answer ? Brushes.DarkGreen : Brushes.Red;
+            {
+                if (isDarkMode)
+                {
+                    Foreground = Value == Answer ? Brushes.White : Brushes.Red;
+                }
+                else
+                {
+                    Foreground = Value == Answer ? Brushes.DarkGreen : Brushes.Red;
+                }
+            }
+            else if (isDarkMode)
+            {
+                Foreground = Brushes.White;
+            }
             else
+            {
                 Foreground = Brushes.DarkGreen;
+            }
         }
     }
 
@@ -179,16 +250,16 @@ public partial class CellViewModel : ObservableObject
 
     internal void SetColor(int color)
     {
-        if (color >= 0 && color < colorBrushes.Length)
+        if (color >= 0 && color < ColorBrushes.Length)
         {
-            Brush br = colorBrushes[color];
+            Brush br = ColorBrushes[color];
             if (Background == br)
             {
                 ResetBackground();
             }
             else
             {
-                Background = colorBrushes[color];
+                Background = ColorBrushes[color];
             }
         }
     }
@@ -213,4 +284,7 @@ public partial class CellViewModel : ObservableObject
 
     [ObservableProperty]
     private Brush bottomBrush = Brushes.Transparent;
+
+    [ObservableProperty]
+    private Brush highlightBrush = Brushes.ForestGreen;
 }

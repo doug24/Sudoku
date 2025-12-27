@@ -12,7 +12,7 @@
         WindowStartupLocation="CenterScreen"
         KeyDown="Window_KeyDown"
         SizeToContent="Width"
-        Height="760" >
+        Height="760">
 
     <Window.Resources>
         <local:EnumBooleanConverter x:Key="ebc" />
@@ -92,6 +92,12 @@
                 <Separator/>
                 <MenuItem Header="Snapshot" Command="{Binding SnapshotCommand}"/>
                 <MenuItem Header="Restore" Command="{Binding RestoreCommand}"/>
+                <MenuItem Header="Theme">
+                    <MenuItem Header="Light" IsCheckable="True"
+                              IsChecked="{Binding LightMode}" />
+                    <MenuItem Header="Dark" IsCheckable="True"
+                              IsChecked="{Binding DarkMode}" />
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="Edit">
                 <MenuItem Header="Enter Design Mode" Command="{Binding EnterDesignModeCommand}"/>

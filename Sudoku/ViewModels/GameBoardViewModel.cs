@@ -36,6 +36,8 @@ public partial class GameBoardViewModel : ObservableObject
 
     public GameBoardViewModel()
     {
+        Background = Properties.Settings.Default.DarkMode ? Brushes.Black : Brushes.White;
+        SectionBorder = Properties.Settings.Default.DarkMode ? Brushes.LightBlue : Brushes.DarkViolet;
         HighlightIncorrect = Properties.Settings.Default.HighlightIncorrect;
         CleanPencilMarks = Properties.Settings.Default.CleanPencilMarks;
         ShowTimer = Properties.Settings.Default.ShowTimer;
@@ -99,6 +101,16 @@ public partial class GameBoardViewModel : ObservableObject
     }
 
     [ObservableProperty]
+    private Brush background = Brushes.White;
+    [ObservableProperty]
+    private Brush sectionBorder = Brushes.White;
+
+    [ObservableProperty]
+    private Brush innerSelectionBorder = Brushes.Yellow;
+    [ObservableProperty]
+    private Brush outerSelectionBorder = Brushes.Black;
+
+    [ObservableProperty]
     private NumberButtonViewModel number1 = new(1);
     [ObservableProperty]
     private NumberButtonViewModel number2 = new(2);
@@ -144,6 +156,9 @@ public partial class GameBoardViewModel : ObservableObject
         {
             SelectedNumber = NumberSelection.None;
         }
+
+        InnerSelectionBorder = value ? Brushes.Transparent : Brushes.Yellow;
+        OuterSelectionBorder = value ? Brushes.Transparent : Brushes.Black;
     }
 
     [ObservableProperty]
@@ -182,14 +197,42 @@ public partial class GameBoardViewModel : ObservableObject
     [ObservableProperty]
     private NumberSelection selectedNumber = NumberSelection.None;
 
-    partial void OnSelectedNumberChanged(NumberSelection value)
+    private int numberHighlightWithColor = -1;
+    partial void OnSelectedNumberChanged(NumberSelection oldValue, NumberSelection newValue)
     {
         selectedNumberChanged = true;
 
         if (EnableNumberHighlight && NumberFirstMode)
         {
-            int number = (int)value;
-            HighlightNumbers(number);
+            if (oldValue <= NumberSelection.D9 &&
+                newValue >= NumberSelection.C1)
+            {
+                // toggle highlight off and back on to the
+                // old value to keep numbers highlighted 
+                // when in color cell mode
+                HighlightNumbers(-1);
+                HighlightNumbers((int)oldValue);
+                numberHighlightWithColor = (int)oldValue;
+            }
+            else if (oldValue >= NumberSelection.C1 &&
+                     newValue >= NumberSelection.C1)
+            {
+                // changing colors, keep previous number highlighted
+                HighlightNumbers(-1);
+                HighlightNumbers(numberHighlightWithColor);
+            }
+            else if (oldValue >= NumberSelection.C1 &&
+                     newValue <= NumberSelection.D9)
+            {
+                // going from color to number, reselect the number
+                HighlightNumbers(-1);
+                HighlightNumbers((int)newValue);
+            }
+            else
+            {
+                int number = (int)newValue;
+                HighlightNumbers(number);
+            }
         }
         if (!NumberFirstMode && SelectedNumber != NumberSelection.None)
         {
@@ -332,6 +375,7 @@ public partial class GameBoardViewModel : ObservableObject
         {
             cell.ResetBackground();
         }
+        numberHighlightWithColor = -1;
     }
 
     internal void KeyDown(int value)
@@ -758,7 +802,7 @@ public partial class GameBoardViewModel : ObservableObject
         {
             stopwatch.Stop();
             IsInProgress = false;
-            MessageBox.Show("Solved!", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            CustomMessageBox.Show("Solved!", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
     }
 
@@ -870,7 +914,7 @@ public partial class GameBoardViewModel : ObservableObject
         {
             int[] solution = ss.GetSolution();
             if (ss.HasMultipleSolutions())
-                MessageBox.Show("Puzzle has multiple solutions");
+                CustomMessageBox.Show("Puzzle has multiple solutions", "Sudoku");
 
             List<CellState> list = [];
 
@@ -985,7 +1029,7 @@ public partial class GameBoardViewModel : ObservableObject
         {
             int[] solution = ss.GetSolution();
             if (ss.HasMultipleSolutions())
-                MessageBox.Show("Puzzle has multiple solutions");
+                CustomMessageBox.Show("Puzzle has multiple solutions", "Sudoku");
 
             undoStack.Clear();
             List<CellState> list = [];
@@ -1124,7 +1168,7 @@ public partial class GameBoardViewModel : ObservableObject
         {
             int[] solution = ss.GetSolution();
             if (ss.HasMultipleSolutions())
-                MessageBox.Show("Puzzle has multiple solutions");
+                CustomMessageBox.Show("Puzzle has multiple solutions", "Sudoku");
 
             undoStack.Clear();
             List<CellState> list = [];

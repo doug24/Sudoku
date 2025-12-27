@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Win32;
@@ -15,7 +18,18 @@ public partial class SudokuViewModel : ObservableObject
 
     public SudokuViewModel()
     {
+        DarkMode = Properties.Settings.Default.DarkMode;
+        LightMode = !DarkMode;
         SectionLayout = Properties.Settings.Default.SectionLayout;
+
+        ButtonForeground = DarkMode ? Brushes.White : Brushes.Black;
+        ButtonBackground = DarkMode ? Brushes.DarkSlateGray : Brushes.Azure;
+        CheckedButtonBackground = DarkMode ? Brushes.Blue : Brushes.LightBlue;
+        ButtonBorder = DarkMode ? Brushes.Silver : Brushes.DarkGray;
+        MouseoverButtonBorder = DarkMode ? Brushes.White : Brushes.Black;
+        ColorButton1Background = CellViewModel.ColorBrushes[0];
+        ColorButton2Background = CellViewModel.ColorBrushes[1];
+        ColorButton3Background = CellViewModel.ColorBrushes[2];
 
         if (Enum.TryParse(Properties.Settings.Default.PuzzleDifficulty, out Difficulty diff))
         {
@@ -50,6 +64,7 @@ public partial class SudokuViewModel : ObservableObject
 
     internal void SaveSettings()
     {
+        Properties.Settings.Default.DarkMode = DarkMode;
         Properties.Settings.Default.SectionLayout = SectionLayout;
         Properties.Settings.Default.PuzzleDifficulty = PuzzleDifficulty.ToString();
         Properties.Settings.Default.PuzzleSymmetry = PuzzleSymmetry.ToString();
@@ -58,6 +73,61 @@ public partial class SudokuViewModel : ObservableObject
 
         Properties.Settings.Default.Save();
     }
+
+    public bool AppRunning { get; set; } = false;
+
+    [ObservableProperty]
+    private bool lightMode = true;
+
+    partial void OnLightModeChanged(bool value)
+    {
+        DarkMode = !value;
+    }
+
+    [ObservableProperty]
+    private bool darkMode = false;
+
+    partial void OnDarkModeChanged(bool value)
+    {
+        LightMode = !value;
+        if (AppRunning)
+        {
+            MessageBoxResult result = CustomMessageBox.Show(
+                "Do you want to restart to apply theme change?", "Sudoku",
+                MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                SaveSettings();
+                Process.Start(Application.ResourceAssembly.Location.Replace(".dll", ".exe"));
+                Application.Current.Shutdown();
+            }
+        }
+    }
+
+    [ObservableProperty]
+    private Brush buttonForeground = Brushes.Azure;
+
+    [ObservableProperty]
+    private Brush buttonBackground = Brushes.Azure;
+
+    [ObservableProperty]
+    private Brush checkedButtonBackground = Brushes.LightBlue;
+
+    [ObservableProperty]
+    private Brush buttonBorder = Brushes.DarkGray;
+
+    [ObservableProperty]
+    private Brush mouseoverButtonBorder = Brushes.Black;
+
+    [ObservableProperty]
+    private Brush colorButton1Background = Brushes.LightBlue;
+
+    [ObservableProperty]
+    private Brush colorButton2Background = Brushes.LightGreen;
+
+    [ObservableProperty]
+    private Brush colorButton3Background = Brushes.Tan;
 
     [ObservableProperty]
     private GameBoardViewModel gameBoard = new();

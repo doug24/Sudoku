@@ -14,14 +14,14 @@
     <UserControl.Resources>
     </UserControl.Resources>
 
-    <Grid Background="DarkViolet">
+    <Grid Background="{Binding SectionBorder}">
         <ListBox x:Name="gameListBox"
                  ItemsSource="{Binding Cells}"
                  SelectionMode="{Binding SelectionMode}"
                  local:MultiSelect.IsEnabled="{Binding IsMultiSelect}"
                  IsSynchronizedWithCurrentItem="True"
                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                 Background="White"
+                 Background="{Binding Background}"
                  Margin="3">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -53,8 +53,8 @@
                                 </Grid>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="outerSelectionBorder" Property="BorderBrush" Value="Black"/>
-                                        <Setter TargetName="innerSelectionBorder" Property="BorderBrush" Value="Yellow"/>
+                                        <Setter TargetName="outerSelectionBorder" Property="BorderBrush" Value="{Binding Path=DataContext.OuterSelectionBorder, RelativeSource={RelativeSource AncestorType={x:Type local:GameBoard}}}"/>
+                                        <Setter TargetName="innerSelectionBorder" Property="BorderBrush" Value="{Binding Path=DataContext.InnerSelectionBorder, RelativeSource={RelativeSource AncestorType={x:Type local:GameBoard}}}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>

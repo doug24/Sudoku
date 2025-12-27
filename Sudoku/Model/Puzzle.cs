@@ -45,7 +45,7 @@ public class Puzzle
 
         if (Initial.Length == 0)
         {
-            MessageBox.Show($"Could not generate a new puzzle in {timeout.TotalSeconds} seconds:" +
+            CustomMessageBox.Show($"Could not generate a new puzzle in {timeout.TotalSeconds} seconds:" +
                 Environment.NewLine + "Try again with different settings.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
@@ -115,7 +115,7 @@ public class Puzzle
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
-            MessageBox.Show("Error generating puzzle: " + e.Message, "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
+            CustomMessageBox.Show("Error generating puzzle: " + e.Message, "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         return PuzzleData.Empty;

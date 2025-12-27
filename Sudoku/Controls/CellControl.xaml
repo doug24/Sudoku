@@ -26,7 +26,7 @@
 
     <Grid>
         <Border Background="{Binding Background}" Margin="2"/>
-        <Ellipse Stroke="ForestGreen" StrokeThickness="2" Margin="0" 
+        <Ellipse Stroke="{Binding HighlightBrush}" StrokeThickness="2" Margin="0" 
                  Visibility="{Binding IsHighlight, Converter={StaticResource BoolToVisibilityConverter}}"/>
         <Viewbox>
             <TextBlock Text="{Binding Number}" 
@@ -36,7 +36,6 @@
                        HorizontalAlignment="Center"
                        Foreground="{Binding Foreground}"/>
         </Viewbox>
-        <!--<TextBlock Text="{Binding CellIndex}" FontSize="9" Foreground="Red"/>-->
         <ItemsControl ItemsSource="{Binding Path=Candidates}" x:Name="Candidates"
                           ItemTemplate="{StaticResource CandidateTemplate}">
             <ItemsControl.ItemsPanel>

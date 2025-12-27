@@ -1,0 +1,11 @@
+DeleteObject
+DwmSetWindowAttribute
+GetWindowLong
+SendMessage
+SetWindowLong
+
+DWMWINDOWATTRIBUTE
+ICON_BIG
+ICON_SMALL
+WM_SETICON
+WINDOW_EX_STYLE

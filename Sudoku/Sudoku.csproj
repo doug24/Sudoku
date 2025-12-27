@@ -10,6 +10,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Sudoku.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Controls\Border.cs" />
@@ -88,6 +90,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.257">
+      <PrivateAssets>all</PrivateAssets>
+      <!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+    </PackageReference>
     <PackageReference Include="ToggleSwitch" Version="1.2.0">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>

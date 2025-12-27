@@ -10,7 +10,16 @@ public class BoolToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        return (bool)value ? Brushes.Red : Brushes.DimGray;
+        bool isDarkMode = Properties.Settings.Default.DarkMode;
+
+        if (isDarkMode)
+        {
+            return (bool)value ? Brushes.Cyan : Brushes.Gainsboro;
+        }
+        else
+        {
+            return (bool)value ? Brushes.Red : Brushes.DimGray;
+        }
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
