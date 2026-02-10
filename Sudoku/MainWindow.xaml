@@ -107,7 +107,9 @@
             </MenuItem>
         </Menu>
         <Border DockPanel.Dock="Left"
-                BorderBrush="Blue" BorderThickness="1">
+                BorderBrush="Blue" 
+                BorderThickness="1"
+                Margin="5,0,0,5">
             <local:GameBoard DataContext="{Binding GameBoard}" Margin="6"/>
         </Border>
         <Border Padding="16,6,6,6">

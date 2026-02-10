@@ -14,6 +14,9 @@ namespace Sudoku
 {
     internal static partial class Native
     {
+        internal const int WM_DWMCOLORIZATIONCOLORCHANGED = 0x0320;
+        internal const int WM_SETTINGCHANGE = 0x001A;
+
         unsafe internal static bool UseImmersiveDarkMode(Window window, bool enabled)
         {
             if (IsWindows10OrGreater(18985))
@@ -35,6 +38,41 @@ namespace Sudoku
             BOOL cloaked = new(cloak); // 1 to enable cloaking, 0 to disable
             PInvoke.DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_CLOAK,
                 &cloaked, sizeof(int));
+        }
+
+        unsafe internal static void ApplyAccentColorToTitleBar(Window window)
+        {
+            HWND hwnd = new(new WindowInteropHelper(window).Handle);
+
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                @"SOFTWARE\Microsoft\Windows\DWM");
+
+            // ColorPrevalence indicates whether "Show accent color on title bars" is enabled
+            bool accentOnTitleBars = key?.GetValue("ColorPrevalence") is int prevalence && prevalence != 0;
+
+            if (accentOnTitleBars && key?.GetValue("ColorizationColor") is int colorValue)
+            {
+                // Extract RGB from the ABGR colorization value
+                byte r = (byte)((colorValue >> 16) & 0xFF);
+                byte g = (byte)((colorValue >> 8) & 0xFF);
+                byte b = (byte)(colorValue & 0xFF);
+
+                // COLORREF is 0x00BBGGRR
+                uint colorRef = (uint)(r | (g << 8) | (b << 16));
+
+                PInvoke.DwmSetWindowAttribute(hwnd,
+                    DWMWINDOWATTRIBUTE.DWMWA_CAPTION_COLOR,
+                    &colorRef, sizeof(uint));
+            }
+            else
+            {
+                // Reset to the system default caption color (0xFFFFFFFF = DWMWA_COLOR_DEFAULT)
+                uint defaultColor = 0xFFFFFFFF;
+
+                PInvoke.DwmSetWindowAttribute(hwnd,
+                    DWMWINDOWATTRIBUTE.DWMWA_CAPTION_COLOR,
+                    &defaultColor, sizeof(uint));
+            }
         }
 
         private static bool IsWindows10OrGreater(int build = -1)
