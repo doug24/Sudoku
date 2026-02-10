@@ -33,7 +33,6 @@ public partial class MainWindow : Window
         // cloak and uncloak to fix the white flash when the window is first shown
         base.OnSourceInitialized(e);
         Native.CloakWindow(this, true);
-        Native.ApplyAccentColorToTitleBar(this);
 
         // Listen for Windows accent color and setting changes
         var source = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
@@ -43,6 +42,9 @@ public partial class MainWindow : Window
     protected override void OnContentRendered(EventArgs e)
     {
         base.OnContentRendered(e);
+
+        // Apply accent color after WPF's ThemeMode has finished its DWM setup
+        Native.ApplyAccentColorToTitleBar(this);
         Native.CloakWindow(this, false);
     }
 
@@ -51,7 +53,8 @@ public partial class MainWindow : Window
         switch (msg)
         {
             case Native.WM_DWMCOLORIZATIONCOLORCHANGED:
-                Native.ApplyAccentColorToTitleBar(this);
+                // wParam contains the new ARGB colorization color
+                Native.ApplyAccentColorToTitleBar(this, (int)wParam);
                 break;
 
             case Native.WM_SETTINGCHANGE:

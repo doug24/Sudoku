@@ -17,6 +17,8 @@ namespace Sudoku
         internal const int WM_DWMCOLORIZATIONCOLORCHANGED = 0x0320;
         internal const int WM_SETTINGCHANGE = 0x001A;
 
+        private static bool cachedAccentOnTitleBars;
+
         unsafe internal static bool UseImmersiveDarkMode(Window window, bool enabled)
         {
             if (IsWindows10OrGreater(18985))
@@ -40,25 +42,31 @@ namespace Sudoku
                 &cloaked, sizeof(int));
         }
 
-        unsafe internal static void ApplyAccentColorToTitleBar(Window window)
+        internal static void ApplyAccentColorToTitleBar(Window window)
         {
-            HWND hwnd = new(new WindowInteropHelper(window).Handle);
-
             using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
                 @"SOFTWARE\Microsoft\Windows\DWM");
 
             // ColorPrevalence indicates whether "Show accent color on title bars" is enabled
-            bool accentOnTitleBars = key?.GetValue("ColorPrevalence") is int prevalence && prevalence != 0;
+            cachedAccentOnTitleBars = key?.GetValue("ColorPrevalence") is int prevalence && prevalence != 0;
 
-            if (accentOnTitleBars && key?.GetValue("ColorizationColor") is int colorValue)
+            int? colorValue = cachedAccentOnTitleBars ? key?.GetValue("ColorizationColor") as int? : null;
+
+            SetCaptionColor(window, colorValue);
+        }
+
+        internal static void ApplyAccentColorToTitleBar(Window window, int argbColor)
+        {
+            SetCaptionColor(window, cachedAccentOnTitleBars ? argbColor : null);
+        }
+
+        private static unsafe void SetCaptionColor(Window window, int? argbColor)
+        {
+            HWND hwnd = new(new WindowInteropHelper(window).Handle);
+
+            if (argbColor.HasValue)
             {
-                // Extract RGB from the ABGR colorization value
-                byte r = (byte)((colorValue >> 16) & 0xFF);
-                byte g = (byte)((colorValue >> 8) & 0xFF);
-                byte b = (byte)(colorValue & 0xFF);
-
-                // COLORREF is 0x00BBGGRR
-                uint colorRef = (uint)(r | (g << 8) | (b << 16));
+                uint colorRef = ArgbToColorRef(argbColor.Value);
 
                 PInvoke.DwmSetWindowAttribute(hwnd,
                     DWMWINDOWATTRIBUTE.DWMWA_CAPTION_COLOR,
@@ -73,6 +81,16 @@ namespace Sudoku
                     DWMWINDOWATTRIBUTE.DWMWA_CAPTION_COLOR,
                     &defaultColor, sizeof(uint));
             }
+        }
+
+        private static uint ArgbToColorRef(int argbColor)
+        {
+            byte r = (byte)((argbColor >> 16) & 0xFF);
+            byte g = (byte)((argbColor >> 8) & 0xFF);
+            byte b = (byte)(argbColor & 0xFF);
+
+            // COLORREF is 0x00BBGGRR
+            return (uint)(r | (g << 8) | (b << 16));
         }
 
         private static bool IsWindows10OrGreater(int build = -1)
