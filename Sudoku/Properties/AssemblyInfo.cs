@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 
-[assembly: AssemblyCopyright("Copyright ©  2020-2024")]
+[assembly: AssemblyCopyright("Copyright © 2020-2026")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
