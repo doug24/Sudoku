@@ -37,7 +37,28 @@ public enum LogType
     COLUMN_BOX,
     HIDDEN_PAIR_ROW,
     HIDDEN_PAIR_COLUMN,
-    HIDDEN_PAIR_SECTION
+    HIDDEN_PAIR_SECTION,
+    X_WING_ROW,
+    X_WING_COLUMN,
+    Y_WING,
+    SIMPLE_COLORING,
+    NAKED_TRIPLE_ROW,
+    NAKED_TRIPLE_COLUMN,
+    NAKED_TRIPLE_SECTION,
+    NAKED_QUAD_ROW,
+    NAKED_QUAD_COLUMN,
+    NAKED_QUAD_SECTION,
+    SWORDFISH_ROW,
+    SWORDFISH_COLUMN,
+    HIDDEN_TRIPLE_ROW,
+    HIDDEN_TRIPLE_COLUMN,
+    HIDDEN_TRIPLE_SECTION,
+    HIDDEN_QUAD_ROW,
+    HIDDEN_QUAD_COLUMN,
+    HIDDEN_QUAD_SECTION,
+    XYZ_WING,
+    JELLYFISH_ROW,
+    JELLYFISH_COLUMN
 }
 
 public static class LogTypeExtensions
@@ -60,7 +81,28 @@ public static class LogTypeExtensions
         "Remove possibilities for section because all values are in one column",
         "Remove possibilities from hidden pair in row",
         "Remove possibilities from hidden pair in column",
-        "Remove possibilities from hidden pair in section"
+        "Remove possibilities from hidden pair in section",
+        "Remove possibilities from X-Wing in rows",
+        "Remove possibilities from X-Wing in columns",
+        "Remove possibilities from Y-Wing",
+        "Remove possibilities from simple coloring",
+        "Remove possibilities for naked triple in row",
+        "Remove possibilities for naked triple in column",
+        "Remove possibilities for naked triple in section",
+        "Remove possibilities for naked quad in row",
+        "Remove possibilities for naked quad in column",
+        "Remove possibilities for naked quad in section",
+        "Remove possibilities from Swordfish in rows",
+        "Remove possibilities from Swordfish in columns",
+        "Remove possibilities from hidden triple in row",
+        "Remove possibilities from hidden triple in column",
+        "Remove possibilities from hidden triple in section",
+        "Remove possibilities from hidden quad in row",
+        "Remove possibilities from hidden quad in column",
+        "Remove possibilities from hidden quad in section",
+        "Remove possibilities from XYZ-Wing",
+        "Remove possibilities from Jellyfish in rows",
+        "Remove possibilities from Jellyfish in columns"
     ];
 
     public static string GetDescription(this LogType item)

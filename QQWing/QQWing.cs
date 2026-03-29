@@ -226,9 +226,19 @@ public class QQWing
     public Difficulty GetDifficulty()
     {
         if (GetGuessCount() > 0) return Difficulty.EXPERT;
+        if (GetSimpleColoringCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetJellyfishCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetSwordfishCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetXyzWingCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetYWingCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetXWingCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetBoxLineReductionCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetPointingPairTripleCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetHiddenQuadCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetHiddenTripleCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetHiddenPairCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetNakedQuadCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetNakedTripleCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetNakedPairCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetHiddenSingleCount() > 0) return Difficulty.EASY;
         if (GetSingleCount() > 0) return Difficulty.SIMPLE;
@@ -274,6 +284,26 @@ public class QQWing
     }
 
     /// <summary>
+    /// Get the number of naked triple reductions that were performed in solving
+    /// this puzzle.
+    /// </summary>
+    public int GetNakedTripleCount()
+    {
+        return (GetLogCount(solveInstructions, LogType.NAKED_TRIPLE_ROW) +
+            GetLogCount(solveInstructions, LogType.NAKED_TRIPLE_COLUMN) + GetLogCount(solveInstructions, LogType.NAKED_TRIPLE_SECTION));
+    }
+
+    /// <summary>
+    /// Get the number of naked quad reductions that were performed in solving
+    /// this puzzle.
+    /// </summary>
+    public int GetNakedQuadCount()
+    {
+        return (GetLogCount(solveInstructions, LogType.NAKED_QUAD_ROW) +
+            GetLogCount(solveInstructions, LogType.NAKED_QUAD_COLUMN) + GetLogCount(solveInstructions, LogType.NAKED_QUAD_SECTION));
+    }
+
+    /// <summary>
     /// Get the number of hidden pair reductions that were performed in solving
     /// this puzzle.
     /// </summary>
@@ -299,6 +329,83 @@ public class QQWing
     public int GetBoxLineReductionCount()
     {
         return (GetLogCount(solveInstructions, LogType.ROW_BOX) + GetLogCount(solveInstructions, LogType.COLUMN_BOX));
+    }
+
+    /// <summary>
+    /// Get the number of hidden triple reductions that were performed in solving
+    /// this puzzle.
+    /// </summary>
+    public int GetHiddenTripleCount()
+    {
+        return (GetLogCount(solveInstructions, LogType.HIDDEN_TRIPLE_ROW) +
+            GetLogCount(solveInstructions, LogType.HIDDEN_TRIPLE_COLUMN) + GetLogCount(solveInstructions, LogType.HIDDEN_TRIPLE_SECTION));
+    }
+
+    /// <summary>
+    /// Get the number of hidden quad reductions that were performed in solving
+    /// this puzzle.
+    /// </summary>
+    public int GetHiddenQuadCount()
+    {
+        return (GetLogCount(solveInstructions, LogType.HIDDEN_QUAD_ROW) +
+            GetLogCount(solveInstructions, LogType.HIDDEN_QUAD_COLUMN) + GetLogCount(solveInstructions, LogType.HIDDEN_QUAD_SECTION));
+    }
+
+    /// <summary>
+    /// Get the number of XYZ-Wing reductions that were performed in solving this
+    /// puzzle.
+    /// </summary>
+    public int GetXyzWingCount()
+    {
+        return GetLogCount(solveInstructions, LogType.XYZ_WING);
+    }
+
+    /// <summary>
+    /// Get the number of Jellyfish reductions that were performed in solving this
+    /// puzzle.
+    /// </summary>
+    public int GetJellyfishCount()
+    {
+        return (GetLogCount(solveInstructions, LogType.JELLYFISH_ROW) +
+            GetLogCount(solveInstructions, LogType.JELLYFISH_COLUMN));
+    }
+
+    /// <summary>
+    /// Get the number of X-Wing reductions that were performed in solving this
+    /// puzzle.
+    /// </summary>
+    public int GetXWingCount()
+    {
+        return (GetLogCount(solveInstructions, LogType.X_WING_ROW) +
+            GetLogCount(solveInstructions, LogType.X_WING_COLUMN));
+    }
+
+    /// <summary>
+    /// Get the number of Swordfish reductions that were performed in solving this
+    /// puzzle.
+    /// </summary>
+    public int GetSwordfishCount()
+    {
+        return (GetLogCount(solveInstructions, LogType.SWORDFISH_ROW) +
+            GetLogCount(solveInstructions, LogType.SWORDFISH_COLUMN));
+    }
+
+    /// <summary>
+    /// Get the number of Y-Wing reductions that were performed in solving this
+    /// puzzle.
+    /// </summary>
+    public int GetYWingCount()
+    {
+        return GetLogCount(solveInstructions, LogType.Y_WING);
+    }
+
+    /// <summary>
+    /// Get the number of simple coloring reductions that were performed in
+    /// solving this puzzle.
+    /// </summary>
+    public int GetSimpleColoringCount()
+    {
+        return GetLogCount(solveInstructions, LogType.SIMPLE_COLORING);
     }
 
     /// <summary>
@@ -830,18 +937,35 @@ public class QQWing
 
     private bool SingleSolveMove(int round)
     {
-        if (OnlyPossibilityForCell(round)) return true;
-        if (OnlyValueInSection(round)) return true;
-        if (OnlyValueInRow(round)) return true;
-        if (OnlyValueInColumn(round)) return true;
-        if (HandleNakedPairs(round)) return true;
-        if (PointingRowReduction(round)) return true;
-        if (PointingColumnReduction(round)) return true;
-        if (RowBoxReduction(round)) return true;
-        if (ColBoxReduction(round)) return true;
-        if (HiddenPairInRow(round)) return true;
-        if (HiddenPairInColumn(round)) return true;
-        if (HiddenPairInSection(round)) return true;
+        if (OnlyPossibilityForCell(round)) return true;        // Naked Single
+        if (OnlyValueInSection(round)) return true;            // Hidden Single
+        if (OnlyValueInRow(round)) return true;                // Hidden Single
+        if (OnlyValueInColumn(round)) return true;             // Hidden Single
+        if (HandleNakedPairs(round)) return true;              // Naked Pair
+        if (PointingRowReduction(round)) return true;          // Pointing Pair/Triple
+        if (PointingColumnReduction(round)) return true;       // Pointing Pair/Triple
+        if (RowBoxReduction(round)) return true;               // Box/Line Reduction
+        if (ColBoxReduction(round)) return true;               // Box/Line Reduction
+        if (HiddenPairInRow(round)) return true;               // Hidden Pair
+        if (HiddenPairInColumn(round)) return true;            // Hidden Pair
+        if (HiddenPairInSection(round)) return true;           // Hidden Pair
+        if (HandleNakedTriples(round)) return true;            // Naked Triple
+        if (HandleNakedQuads(round)) return true;              // Naked Quad
+        if (HiddenTripleInRow(round)) return true;             // Hidden Triple
+        if (HiddenTripleInColumn(round)) return true;          // Hidden Triple
+        if (HiddenTripleInSection(round)) return true;         // Hidden Triple
+        if (HiddenQuadInRow(round)) return true;               // Hidden Quad
+        if (HiddenQuadInColumn(round)) return true;            // Hidden Quad
+        if (HiddenQuadInSection(round)) return true;           // Hidden Quad
+        if (XWingInRows(round)) return true;                   // X-Wing
+        if (XWingInColumns(round)) return true;                // X-Wing
+        if (YWing(round)) return true;                         // Y-Wing
+        if (XyzWing(round)) return true;                       // XYZ-Wing
+        if (SwordfishInRows(round)) return true;               // Swordfish
+        if (SwordfishInColumns(round)) return true;            // Swordfish
+        if (JellyfishInRows(round)) return true;               // Jellyfish
+        if (JellyfishInColumns(round)) return true;            // Jellyfish
+        if (SimpleColoring(round)) return true;                // Simple Coloring
         return false;
     }
 
@@ -1403,6 +1527,1305 @@ public class QQWing
         return false;
     }
 
+    /// <summary>
+    /// Hidden Triple in Row: Find three values that each appear in only 2 or 3 cells
+    /// within a row, and the union of those cells is exactly 3. All other candidates
+    /// can be eliminated from those 3 cells.
+    /// </summary>
+    private bool HiddenTripleInRow(int round)
+    {
+        for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+        {
+            // For each value, build a bitmask of columns where it appears in this row
+            int[] valColMask = new int[ROW_COL_SEC_SIZE];
+            int[] valColCount = new int[ROW_COL_SEC_SIZE];
+            for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+            {
+                for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                {
+                    int position = RowColumnToCell(row, col);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        valColMask[valIndex] |= (1 << col);
+                        valColCount[valIndex]++;
+                    }
+                }
+            }
+
+            if (HiddenSubsetInUnit(valColMask, valColCount, 3, round, (col) => RowColumnToCell(row, col), LogType.HIDDEN_TRIPLE_ROW, RowColumnToCell(row, 0)))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Hidden Triple in Column: Find three values that each appear in only 2 or 3 cells
+    /// within a column, and the union of those cells is exactly 3.
+    /// </summary>
+    private bool HiddenTripleInColumn(int round)
+    {
+        for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+        {
+            int[] valRowMask = new int[ROW_COL_SEC_SIZE];
+            int[] valRowCount = new int[ROW_COL_SEC_SIZE];
+            for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+            {
+                for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                {
+                    int position = RowColumnToCell(row, col);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        valRowMask[valIndex] |= (1 << row);
+                        valRowCount[valIndex]++;
+                    }
+                }
+            }
+
+            if (HiddenSubsetInUnit(valRowMask, valRowCount, 3, round, (row) => RowColumnToCell(row, col), LogType.HIDDEN_TRIPLE_COLUMN, RowColumnToCell(0, col)))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Hidden Triple in Section: Find three values that each appear in only 2 or 3 cells
+    /// within a section, and the union of those cells is exactly 3.
+    /// </summary>
+    private bool HiddenTripleInSection(int round)
+    {
+        for (int sec = 0; sec < ROW_COL_SEC_SIZE; sec++)
+        {
+            int[] valCellMask = new int[ROW_COL_SEC_SIZE];
+            int[] valCellCount = new int[ROW_COL_SEC_SIZE];
+            int secIndex = 0;
+            foreach (int position in SectionLayout.SectionToSectionCells(sec))
+            {
+                for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                {
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        valCellMask[valIndex] |= (1 << secIndex);
+                        valCellCount[valIndex]++;
+                    }
+                }
+                secIndex++;
+            }
+
+            int localSec = sec;
+            if (HiddenSubsetInUnit(valCellMask, valCellCount, 3, round, (idx) => SectionToCell(localSec, idx), LogType.HIDDEN_TRIPLE_SECTION, SectionToFirstCell(sec)))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Hidden Quad in Row: Find four values that each appear in only 2, 3, or 4 cells
+    /// within a row, and the union of those cells is exactly 4.
+    /// </summary>
+    private bool HiddenQuadInRow(int round)
+    {
+        for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+        {
+            int[] valColMask = new int[ROW_COL_SEC_SIZE];
+            int[] valColCount = new int[ROW_COL_SEC_SIZE];
+            for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+            {
+                for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                {
+                    int position = RowColumnToCell(row, col);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        valColMask[valIndex] |= (1 << col);
+                        valColCount[valIndex]++;
+                    }
+                }
+            }
+
+            if (HiddenSubsetInUnit(valColMask, valColCount, 4, round, (col) => RowColumnToCell(row, col), LogType.HIDDEN_QUAD_ROW, RowColumnToCell(row, 0)))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Hidden Quad in Column: Find four values that each appear in only 2, 3, or 4 cells
+    /// within a column, and the union of those cells is exactly 4.
+    /// </summary>
+    private bool HiddenQuadInColumn(int round)
+    {
+        for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+        {
+            int[] valRowMask = new int[ROW_COL_SEC_SIZE];
+            int[] valRowCount = new int[ROW_COL_SEC_SIZE];
+            for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+            {
+                for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                {
+                    int position = RowColumnToCell(row, col);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        valRowMask[valIndex] |= (1 << row);
+                        valRowCount[valIndex]++;
+                    }
+                }
+            }
+
+            if (HiddenSubsetInUnit(valRowMask, valRowCount, 4, round, (row) => RowColumnToCell(row, col), LogType.HIDDEN_QUAD_COLUMN, RowColumnToCell(0, col)))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Hidden Quad in Section: Find four values that each appear in only 2, 3, or 4 cells
+    /// within a section, and the union of those cells is exactly 4.
+    /// </summary>
+    private bool HiddenQuadInSection(int round)
+    {
+        for (int sec = 0; sec < ROW_COL_SEC_SIZE; sec++)
+        {
+            int[] valCellMask = new int[ROW_COL_SEC_SIZE];
+            int[] valCellCount = new int[ROW_COL_SEC_SIZE];
+            int secIndex = 0;
+            foreach (int position in SectionLayout.SectionToSectionCells(sec))
+            {
+                for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                {
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        valCellMask[valIndex] |= (1 << secIndex);
+                        valCellCount[valIndex]++;
+                    }
+                }
+                secIndex++;
+            }
+
+            int localSec = sec;
+            if (HiddenSubsetInUnit(valCellMask, valCellCount, 4, round, (idx) => SectionToCell(localSec, idx), LogType.HIDDEN_QUAD_SECTION, SectionToFirstCell(sec)))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Generalized hidden subset finder. Given bitmasks of cell positions per value in a unit,
+    /// find N values (subsetSize) whose combined cell positions span exactly N cells.
+    /// Eliminate all other candidates from those N cells.
+    /// </summary>
+    /// <param name="valPosMask">Bitmask of cell positions per value index (0-8).</param>
+    /// <param name="valPosCount">Count of cell positions per value index.</param>
+    /// <param name="subsetSize">Size of the hidden subset (3 for triple, 4 for quad).</param>
+    /// <param name="round">Round for marking eliminations.</param>
+    /// <param name="indexToCell">Converts a bit index (0-8) to a board cell position (0-80).</param>
+    /// <param name="logType">Log type for history.</param>
+    /// <param name="logPosition">Position to log in history.</param>
+    private bool HiddenSubsetInUnit(int[] valPosMask, int[] valPosCount, int subsetSize, int round, Func<int, int> indexToCell, LogType logType, int logPosition)
+    {
+        // Collect value indices that have 2..subsetSize positions in this unit
+        List<int> candidates = [];
+        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+        {
+            if (valPosCount[valIndex] >= 2 && valPosCount[valIndex] <= subsetSize)
+            {
+                candidates.Add(valIndex);
+            }
+        }
+
+        if (candidates.Count < subsetSize) return false;
+
+        // Try all combinations of subsetSize values from the candidates
+        int[] combo = new int[subsetSize];
+        return HiddenSubsetRecurse(candidates, valPosMask, subsetSize, 0, 0, combo, round, indexToCell, logType, logPosition);
+    }
+
+    /// <summary>
+    /// Recursive combination generator for hidden subset search.
+    /// </summary>
+    private bool HiddenSubsetRecurse(List<int> candidates, int[] valPosMask, int subsetSize, int start, int depth, int[] combo, int round, Func<int, int> indexToCell, LogType logType, int logPosition)
+    {
+        if (depth == subsetSize)
+        {
+            // Compute the union of cell positions for the selected values
+            int unionMask = 0;
+            for (int d = 0; d < subsetSize; d++)
+            {
+                unionMask |= valPosMask[combo[d]];
+            }
+
+            if (BitCount(unionMask) != subsetSize) return false;
+
+            // Found a hidden subset: eliminate all OTHER candidates from these cells
+            bool doneSomething = false;
+            for (int bit = 0; bit < ROW_COL_SEC_SIZE; bit++)
+            {
+                if ((unionMask & (1 << bit)) == 0) continue;
+
+                int position = indexToCell(bit);
+                for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                {
+                    // Skip values that are part of the hidden subset
+                    bool inSubset = false;
+                    for (int d = 0; d < subsetSize; d++)
+                    {
+                        if (combo[d] == valIndex)
+                        {
+                            inSubset = true;
+                            break;
+                        }
+                    }
+                    if (inSubset) continue;
+
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        possibilities[valPos] = round;
+                        doneSomething = true;
+                    }
+                }
+            }
+            if (doneSomething)
+            {
+                if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, logType, combo[0] + 1, logPosition));
+            }
+            return doneSomething;
+        }
+
+        for (int i = start; i <= candidates.Count - (subsetSize - depth); i++)
+        {
+            combo[depth] = candidates[i];
+
+            // Early pruning: check if union so far already exceeds subsetSize
+            if (depth > 0)
+            {
+                int partialUnion = 0;
+                for (int d = 0; d <= depth; d++)
+                {
+                    partialUnion |= valPosMask[combo[d]];
+                }
+                if (BitCount(partialUnion) > subsetSize) continue;
+            }
+
+            if (HiddenSubsetRecurse(candidates, valPosMask, subsetSize, i + 1, depth + 1, combo, round, indexToCell, logType, logPosition))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// X-Wing strategy scanning rows: For a given candidate value, if it appears
+    /// in exactly two columns in each of two different rows, and those columns are
+    /// the same, then that candidate can be eliminated from all other cells in
+    /// those two columns.
+    /// </summary>
+    private bool XWingInRows(int round)
+    {
+        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+        {
+            // For each row, find which columns still have this candidate
+            for (int row1 = 0; row1 < ROW_COL_SEC_SIZE - 1; row1++)
+            {
+                int col1 = -1;
+                int col2 = -1;
+                int count = 0;
+                for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                {
+                    int position = RowColumnToCell(row1, col);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        if (col1 == -1)
+                        {
+                            col1 = col;
+                        }
+                        else if (col2 == -1)
+                        {
+                            col2 = col;
+                        }
+                        count++;
+                    }
+                }
+
+                // The candidate must appear in exactly two columns in this row
+                if (count != 2) continue;
+
+                // Look for a second row with the same two columns
+                for (int row2 = row1 + 1; row2 < ROW_COL_SEC_SIZE; row2++)
+                {
+                    int col3 = -1;
+                    int col4 = -1;
+                    int count2 = 0;
+                    for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                    {
+                        int position = RowColumnToCell(row2, col);
+                        int valPos = GetPossibilityIndex(valIndex, position);
+                        if (possibilities[valPos] == 0)
+                        {
+                            if (col3 == -1)
+                            {
+                                col3 = col;
+                            }
+                            else if (col4 == -1)
+                            {
+                                col4 = col;
+                            }
+                            count2++;
+                        }
+                    }
+
+                    // Must also have exactly two, in the same columns
+                    if (count2 != 2 || col1 != col3 || col2 != col4) continue;
+
+                    // Eliminate this candidate from all other cells in col1 and col2
+                    bool doneSomething = false;
+                    for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                    {
+                        if (row == row1 || row == row2) continue;
+
+                        int posA = RowColumnToCell(row, col1);
+                        int valPosA = GetPossibilityIndex(valIndex, posA);
+                        if (possibilities[valPosA] == 0)
+                        {
+                            possibilities[valPosA] = round;
+                            doneSomething = true;
+                        }
+
+                        int posB = RowColumnToCell(row, col2);
+                        int valPosB = GetPossibilityIndex(valIndex, posB);
+                        if (possibilities[valPosB] == 0)
+                        {
+                            possibilities[valPosB] = round;
+                            doneSomething = true;
+                        }
+                    }
+                    if (doneSomething)
+                    {
+                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.X_WING_ROW, valIndex + 1, RowColumnToCell(row1, col1)));
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// X-Wing strategy scanning columns: For a given candidate value, if it appears
+    /// in exactly two rows in each of two different columns, and those rows are
+    /// the same, then that candidate can be eliminated from all other cells in
+    /// those two rows.
+    /// </summary>
+    private bool XWingInColumns(int round)
+    {
+        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+        {
+            // For each column, find which rows still have this candidate
+            for (int col1 = 0; col1 < ROW_COL_SEC_SIZE - 1; col1++)
+            {
+                int row1 = -1;
+                int row2 = -1;
+                int count = 0;
+                for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                {
+                    int position = RowColumnToCell(row, col1);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        if (row1 == -1)
+                        {
+                            row1 = row;
+                        }
+                        else if (row2 == -1)
+                        {
+                            row2 = row;
+                        }
+                        count++;
+                    }
+                }
+
+                // The candidate must appear in exactly two rows in this column
+                if (count != 2) continue;
+
+                // Look for a second column with the same two rows
+                for (int col2 = col1 + 1; col2 < ROW_COL_SEC_SIZE; col2++)
+                {
+                    int row3 = -1;
+                    int row4 = -1;
+                    int count2 = 0;
+                    for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                    {
+                        int position = RowColumnToCell(row, col2);
+                        int valPos = GetPossibilityIndex(valIndex, position);
+                        if (possibilities[valPos] == 0)
+                        {
+                            if (row3 == -1)
+                            {
+                                row3 = row;
+                            }
+                            else if (row4 == -1)
+                            {
+                                row4 = row;
+                            }
+                            count2++;
+                        }
+                    }
+
+                    // Must also have exactly two, in the same rows
+                    if (count2 != 2 || row1 != row3 || row2 != row4) continue;
+
+                    // Eliminate this candidate from all other cells in row1 and row2
+                    bool doneSomething = false;
+                    for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                    {
+                        if (col == col1 || col == col2) continue;
+
+                        int posA = RowColumnToCell(row1, col);
+                        int valPosA = GetPossibilityIndex(valIndex, posA);
+                        if (possibilities[valPosA] == 0)
+                        {
+                            possibilities[valPosA] = round;
+                            doneSomething = true;
+                        }
+
+                        int posB = RowColumnToCell(row2, col);
+                        int valPosB = GetPossibilityIndex(valIndex, posB);
+                        if (possibilities[valPosB] == 0)
+                        {
+                            possibilities[valPosB] = round;
+                            doneSomething = true;
+                        }
+                    }
+                    if (doneSomething)
+                    {
+                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.X_WING_COLUMN, valIndex + 1, RowColumnToCell(row1, col1)));
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Swordfish strategy scanning rows: For a given candidate value, find three
+    /// rows where the candidate appears in only 2 or 3 columns, and the union of
+    /// those columns across all three rows is exactly 3. The candidate can then be
+    /// eliminated from all other cells in those 3 columns.
+    /// </summary>
+    private bool SwordfishInRows(int round)
+    {
+        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+        {
+            // For each row, compute a bitmask of columns containing this candidate
+            int[] rowColMask = new int[ROW_COL_SEC_SIZE];
+            int[] rowColCount = new int[ROW_COL_SEC_SIZE];
+            for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+            {
+                for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                {
+                    int position = RowColumnToCell(row, col);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        rowColMask[row] |= (1 << col);
+                        rowColCount[row]++;
+                    }
+                }
+            }
+
+            // Find three rows each with 2 or 3 candidate columns whose union is exactly 3 columns
+            for (int r1 = 0; r1 < ROW_COL_SEC_SIZE - 2; r1++)
+            {
+                if (rowColCount[r1] < 2 || rowColCount[r1] > 3) continue;
+
+                for (int r2 = r1 + 1; r2 < ROW_COL_SEC_SIZE - 1; r2++)
+                {
+                    if (rowColCount[r2] < 2 || rowColCount[r2] > 3) continue;
+
+                    int union12 = rowColMask[r1] | rowColMask[r2];
+                    // Early exit: if first two rows already span more than 3 columns, skip
+                    if (BitCount(union12) > 3) continue;
+
+                    for (int r3 = r2 + 1; r3 < ROW_COL_SEC_SIZE; r3++)
+                    {
+                        if (rowColCount[r3] < 2 || rowColCount[r3] > 3) continue;
+
+                        int unionMask = union12 | rowColMask[r3];
+                        if (BitCount(unionMask) != 3) continue;
+
+                        // We have a Swordfish: eliminate this candidate from the 3 columns
+                        // in all rows except r1, r2, r3
+                        bool doneSomething = false;
+                        for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                        {
+                            if (row == r1 || row == r2 || row == r3) continue;
+
+                            for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                            {
+                                if ((unionMask & (1 << col)) == 0) continue;
+
+                                int position = RowColumnToCell(row, col);
+                                int valPos = GetPossibilityIndex(valIndex, position);
+                                if (possibilities[valPos] == 0)
+                                {
+                                    possibilities[valPos] = round;
+                                    doneSomething = true;
+                                }
+                            }
+                        }
+                        if (doneSomething)
+                        {
+                            if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.SWORDFISH_ROW, valIndex + 1, RowColumnToCell(r1, 0)));
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Swordfish strategy scanning columns: For a given candidate value, find three
+    /// columns where the candidate appears in only 2 or 3 rows, and the union of
+    /// those rows across all three columns is exactly 3. The candidate can then be
+    /// eliminated from all other cells in those 3 rows.
+    /// </summary>
+    private bool SwordfishInColumns(int round)
+    {
+        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+        {
+            // For each column, compute a bitmask of rows containing this candidate
+            int[] colRowMask = new int[ROW_COL_SEC_SIZE];
+            int[] colRowCount = new int[ROW_COL_SEC_SIZE];
+            for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+            {
+                for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                {
+                    int position = RowColumnToCell(row, col);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        colRowMask[col] |= (1 << row);
+                        colRowCount[col]++;
+                    }
+                }
+            }
+
+            // Find three columns each with 2 or 3 candidate rows whose union is exactly 3 rows
+            for (int c1 = 0; c1 < ROW_COL_SEC_SIZE - 2; c1++)
+            {
+                if (colRowCount[c1] < 2 || colRowCount[c1] > 3) continue;
+
+                for (int c2 = c1 + 1; c2 < ROW_COL_SEC_SIZE - 1; c2++)
+                {
+                    if (colRowCount[c2] < 2 || colRowCount[c2] > 3) continue;
+
+                    int union12 = colRowMask[c1] | colRowMask[c2];
+                    if (BitCount(union12) > 3) continue;
+
+                    for (int c3 = c2 + 1; c3 < ROW_COL_SEC_SIZE; c3++)
+                    {
+                        if (colRowCount[c3] < 2 || colRowCount[c3] > 3) continue;
+
+                        int unionMask = union12 | colRowMask[c3];
+                        if (BitCount(unionMask) != 3) continue;
+
+                        // We have a Swordfish: eliminate this candidate from the 3 rows
+                        // in all columns except c1, c2, c3
+                        bool doneSomething = false;
+                        for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                        {
+                            if (col == c1 || col == c2 || col == c3) continue;
+
+                            for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                            {
+                                if ((unionMask & (1 << row)) == 0) continue;
+
+                                int position = RowColumnToCell(row, col);
+                                int valPos = GetPossibilityIndex(valIndex, position);
+                                if (possibilities[valPos] == 0)
+                                {
+                                    possibilities[valPos] = round;
+                                    doneSomething = true;
+                                }
+                            }
+                        }
+                        if (doneSomething)
+                        {
+                            if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.SWORDFISH_COLUMN, valIndex + 1, RowColumnToCell(0, c1)));
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Count the number of set bits in an integer (population count).
+    /// </summary>
+    private static int BitCount(int value)
+    {
+        int count = 0;
+        while (value != 0)
+        {
+            count += value & 1;
+            value >>= 1;
+        }
+        return count;
+    }
+
+    /// <summary>
+    /// Jellyfish strategy scanning rows: For a given candidate value, find four
+    /// rows where the candidate appears in only 2, 3, or 4 columns, and the union
+    /// of those columns across all four rows is exactly 4. The candidate can then be
+    /// eliminated from all other cells in those 4 columns.
+    /// </summary>
+    private bool JellyfishInRows(int round)
+    {
+        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+        {
+            int[] rowColMask = new int[ROW_COL_SEC_SIZE];
+            int[] rowColCount = new int[ROW_COL_SEC_SIZE];
+            for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+            {
+                for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                {
+                    int position = RowColumnToCell(row, col);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        rowColMask[row] |= (1 << col);
+                        rowColCount[row]++;
+                    }
+                }
+            }
+
+            for (int r1 = 0; r1 < ROW_COL_SEC_SIZE - 3; r1++)
+            {
+                if (rowColCount[r1] < 2 || rowColCount[r1] > 4) continue;
+
+                for (int r2 = r1 + 1; r2 < ROW_COL_SEC_SIZE - 2; r2++)
+                {
+                    if (rowColCount[r2] < 2 || rowColCount[r2] > 4) continue;
+                    int union12 = rowColMask[r1] | rowColMask[r2];
+                    if (BitCount(union12) > 4) continue;
+
+                    for (int r3 = r2 + 1; r3 < ROW_COL_SEC_SIZE - 1; r3++)
+                    {
+                        if (rowColCount[r3] < 2 || rowColCount[r3] > 4) continue;
+                        int union123 = union12 | rowColMask[r3];
+                        if (BitCount(union123) > 4) continue;
+
+                        for (int r4 = r3 + 1; r4 < ROW_COL_SEC_SIZE; r4++)
+                        {
+                            if (rowColCount[r4] < 2 || rowColCount[r4] > 4) continue;
+                            int unionMask = union123 | rowColMask[r4];
+                            if (BitCount(unionMask) != 4) continue;
+
+                            bool doneSomething = false;
+                            for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                            {
+                                if (row == r1 || row == r2 || row == r3 || row == r4) continue;
+
+                                for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                                {
+                                    if ((unionMask & (1 << col)) == 0) continue;
+
+                                    int position = RowColumnToCell(row, col);
+                                    int valPos = GetPossibilityIndex(valIndex, position);
+                                    if (possibilities[valPos] == 0)
+                                    {
+                                        possibilities[valPos] = round;
+                                        doneSomething = true;
+                                    }
+                                }
+                            }
+                            if (doneSomething)
+                            {
+                                if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.JELLYFISH_ROW, valIndex + 1, RowColumnToCell(r1, 0)));
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Jellyfish strategy scanning columns: For a given candidate value, find four
+    /// columns where the candidate appears in only 2, 3, or 4 rows, and the union
+    /// of those rows across all four columns is exactly 4. The candidate can then be
+    /// eliminated from all other cells in those 4 rows.
+    /// </summary>
+    private bool JellyfishInColumns(int round)
+    {
+        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+        {
+            int[] colRowMask = new int[ROW_COL_SEC_SIZE];
+            int[] colRowCount = new int[ROW_COL_SEC_SIZE];
+            for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+            {
+                for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                {
+                    int position = RowColumnToCell(row, col);
+                    int valPos = GetPossibilityIndex(valIndex, position);
+                    if (possibilities[valPos] == 0)
+                    {
+                        colRowMask[col] |= (1 << row);
+                        colRowCount[col]++;
+                    }
+                }
+            }
+
+            for (int c1 = 0; c1 < ROW_COL_SEC_SIZE - 3; c1++)
+            {
+                if (colRowCount[c1] < 2 || colRowCount[c1] > 4) continue;
+
+                for (int c2 = c1 + 1; c2 < ROW_COL_SEC_SIZE - 2; c2++)
+                {
+                    if (colRowCount[c2] < 2 || colRowCount[c2] > 4) continue;
+                    int union12 = colRowMask[c1] | colRowMask[c2];
+                    if (BitCount(union12) > 4) continue;
+
+                    for (int c3 = c2 + 1; c3 < ROW_COL_SEC_SIZE - 1; c3++)
+                    {
+                        if (colRowCount[c3] < 2 || colRowCount[c3] > 4) continue;
+                        int union123 = union12 | colRowMask[c3];
+                        if (BitCount(union123) > 4) continue;
+
+                        for (int c4 = c3 + 1; c4 < ROW_COL_SEC_SIZE; c4++)
+                        {
+                            if (colRowCount[c4] < 2 || colRowCount[c4] > 4) continue;
+                            int unionMask = union123 | colRowMask[c4];
+                            if (BitCount(unionMask) != 4) continue;
+
+                            bool doneSomething = false;
+                            for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                            {
+                                if (col == c1 || col == c2 || col == c3 || col == c4) continue;
+
+                                for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                                {
+                                    if ((unionMask & (1 << row)) == 0) continue;
+
+                                    int position = RowColumnToCell(row, col);
+                                    int valPos = GetPossibilityIndex(valIndex, position);
+                                    if (possibilities[valPos] == 0)
+                                    {
+                                        possibilities[valPos] = round;
+                                        doneSomething = true;
+                                    }
+                                }
+                            }
+                            if (doneSomething)
+                            {
+                                if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.JELLYFISH_COLUMN, valIndex + 1, RowColumnToCell(0, c1)));
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Y-Wing (XY-Wing) strategy: Find a pivot cell with exactly two candidates {A, B}.
+    /// Find two wing cells that each share a unit (row, column, or section) with the pivot:
+    ///   - Wing1 has candidates {A, C} (shares candidate A with the pivot)
+    ///   - Wing2 has candidates {B, C} (shares candidate B with the pivot)
+    /// The shared candidate C can be eliminated from any cell that sees both wings
+    /// (i.e., shares a row, column, or section with both Wing1 and Wing2).
+    /// </summary>
+    private bool YWing(int round)
+    {
+        for (int pivot = 0; pivot < BOARD_SIZE; pivot++)
+        {
+            if (solution[pivot] != 0) continue;
+            if (CountPossibilities(pivot) != 2) continue;
+
+            // Get the two candidates for the pivot
+            int pivotVal1 = -1;
+            int pivotVal2 = -1;
+            for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+            {
+                int valPos = GetPossibilityIndex(valIndex, pivot);
+                if (possibilities[valPos] == 0)
+                {
+                    if (pivotVal1 == -1)
+                    {
+                        pivotVal1 = valIndex;
+                    }
+                    else
+                    {
+                        pivotVal2 = valIndex;
+                    }
+                }
+            }
+
+            // Collect all bi-value cells that share a unit with the pivot
+            // and share exactly one candidate with the pivot
+            List<int> peers = GetPeers(pivot);
+
+            for (int wi = 0; wi < peers.Count; wi++)
+            {
+                int wing1 = peers[wi];
+                if (solution[wing1] != 0) continue;
+                if (CountPossibilities(wing1) != 2) continue;
+
+                // Wing1 must share exactly one candidate with the pivot
+                bool wing1HasVal1 = possibilities[GetPossibilityIndex(pivotVal1, wing1)] == 0;
+                bool wing1HasVal2 = possibilities[GetPossibilityIndex(pivotVal2, wing1)] == 0;
+
+                // Must have exactly one of the pivot's candidates (not both, not neither)
+                if (wing1HasVal1 == wing1HasVal2) continue;
+
+                // Determine which pivot candidate wing1 shares, and find wing1's other candidate (C)
+                int sharedVal1 = wing1HasVal1 ? pivotVal1 : pivotVal2;
+                int otherPivotVal = wing1HasVal1 ? pivotVal2 : pivotVal1;
+                int wingVal1C = -1;
+                for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                {
+                    int valPos = GetPossibilityIndex(valIndex, wing1);
+                    if (possibilities[valPos] == 0 && valIndex != sharedVal1)
+                    {
+                        wingVal1C = valIndex;
+                        break;
+                    }
+                }
+
+                for (int wj = wi + 1; wj < peers.Count; wj++)
+                {
+                    int wing2 = peers[wj];
+                    if (solution[wing2] != 0) continue;
+                    if (CountPossibilities(wing2) != 2) continue;
+
+                    // Wing2 must not share a unit with wing1's same unit as pivot
+                    // (they must be in different units relative to the pivot)
+                    // But most importantly: wing2 must have {otherPivotVal, C}
+                    bool wing2HasOtherVal = possibilities[GetPossibilityIndex(otherPivotVal, wing2)] == 0;
+                    bool wing2HasC = possibilities[GetPossibilityIndex(wingVal1C, wing2)] == 0;
+
+                    if (!wing2HasOtherVal || !wing2HasC) continue;
+                    if (CountPossibilities(wing2) != 2) continue;
+
+                    // We have a valid Y-Wing: pivot={A,B}, wing1={A,C}, wing2={B,C}
+                    // Eliminate C from all cells that can see both wing1 and wing2
+                    bool doneSomething = false;
+                    for (int target = 0; target < BOARD_SIZE; target++)
+                    {
+                        if (target == pivot || target == wing1 || target == wing2) continue;
+                        if (solution[target] != 0) continue;
+
+                        int valPos = GetPossibilityIndex(wingVal1C, target);
+                        if (possibilities[valPos] != 0) continue;
+
+                        // Target must see both wings
+                        if (SharesUnit(target, wing1) && SharesUnit(target, wing2))
+                        {
+                            possibilities[valPos] = round;
+                            doneSomething = true;
+                        }
+                    }
+                    if (doneSomething)
+                    {
+                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.Y_WING, wingVal1C + 1, pivot));
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// XYZ-Wing strategy: Find a pivot cell with exactly three candidates {A, B, C}.
+    /// Find two wing cells that each share a unit with the pivot:
+    ///   - Wing1 is a bi-value cell with candidates {A, C} (subset of pivot)
+    ///   - Wing2 is a bi-value cell with candidates {B, C} (subset of pivot)
+    /// Wing1 and Wing2 must NOT share a unit with each other (they connect through 
+    /// different units of the pivot). The shared candidate C can be eliminated from 
+    /// any cell that sees all three: pivot, wing1, and wing2.
+    /// </summary>
+    private bool XyzWing(int round)
+    {
+        for (int pivot = 0; pivot < BOARD_SIZE; pivot++)
+        {
+            if (solution[pivot] != 0) continue;
+            if (CountPossibilities(pivot) != 3) continue;
+
+            // Get the three candidates for the pivot
+            int[] pivotVals = new int[3];
+            int pIdx = 0;
+            for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+            {
+                int valPos = GetPossibilityIndex(valIndex, pivot);
+                if (possibilities[valPos] == 0)
+                {
+                    pivotVals[pIdx++] = valIndex;
+                }
+            }
+
+            List<int> peers = GetPeers(pivot);
+
+            // Try each pair of pivot values as the "non-shared" values for the two wings.
+            // The remaining pivot value is C (the shared elimination candidate).
+            for (int ci = 0; ci < 3; ci++)
+            {
+                int valC = pivotVals[ci];
+                int valA = pivotVals[(ci + 1) % 3];
+                int valB = pivotVals[(ci + 2) % 3];
+
+                // Find wing1 with {A, C} among peers
+                for (int wi = 0; wi < peers.Count; wi++)
+                {
+                    int wing1 = peers[wi];
+                    if (solution[wing1] != 0) continue;
+                    if (CountPossibilities(wing1) != 2) continue;
+
+                    bool w1HasA = possibilities[GetPossibilityIndex(valA, wing1)] == 0;
+                    bool w1HasC = possibilities[GetPossibilityIndex(valC, wing1)] == 0;
+                    if (!w1HasA || !w1HasC) continue;
+
+                    // Find wing2 with {B, C} among peers
+                    for (int wj = wi + 1; wj < peers.Count; wj++)
+                    {
+                        int wing2 = peers[wj];
+                        if (solution[wing2] != 0) continue;
+                        if (CountPossibilities(wing2) != 2) continue;
+
+                        bool w2HasB = possibilities[GetPossibilityIndex(valB, wing2)] == 0;
+                        bool w2HasC = possibilities[GetPossibilityIndex(valC, wing2)] == 0;
+                        if (!w2HasB || !w2HasC) continue;
+
+                        // Eliminate C from any cell that sees all three: pivot, wing1, wing2
+                        bool doneSomething = false;
+                        for (int target = 0; target < BOARD_SIZE; target++)
+                        {
+                            if (target == pivot || target == wing1 || target == wing2) continue;
+                            if (solution[target] != 0) continue;
+
+                            int valPos = GetPossibilityIndex(valC, target);
+                            if (possibilities[valPos] != 0) continue;
+
+                            if (SharesUnit(target, pivot) && SharesUnit(target, wing1) && SharesUnit(target, wing2))
+                            {
+                                possibilities[valPos] = round;
+                                doneSomething = true;
+                            }
+                        }
+                        if (doneSomething)
+                        {
+                            if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.XYZ_WING, valC + 1, pivot));
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Returns true if two cells share a row, column, or section.
+    /// </summary>
+    private static bool SharesUnit(int cell1, int cell2)
+    {
+        if (CellToRow(cell1) == CellToRow(cell2)) return true;
+        if (CellToColumn(cell1) == CellToColumn(cell2)) return true;
+        if (CellToSection(cell1) == CellToSection(cell2)) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// Returns all cells that share a row, column, or section with the given cell
+    /// (excluding the cell itself), without duplicates.
+    /// </summary>
+    private static List<int> GetPeers(int cell)
+    {
+        HashSet<int> peers = [];
+        int row = CellToRow(cell);
+        int col = CellToColumn(cell);
+        int section = CellToSection(cell);
+
+        // Row peers
+        for (int c = 0; c < ROW_COL_SEC_SIZE; c++)
+        {
+            int pos = RowColumnToCell(row, c);
+            if (pos != cell) peers.Add(pos);
+        }
+
+        // Column peers
+        for (int r = 0; r < ROW_COL_SEC_SIZE; r++)
+        {
+            int pos = RowColumnToCell(r, col);
+            if (pos != cell) peers.Add(pos);
+        }
+
+        // Section peers
+        foreach (int pos in SectionLayout.SectionToSectionCells(section))
+        {
+            if (pos != cell) peers.Add(pos);
+        }
+
+        return [.. peers];
+    }
+
+    /// <summary>
+    /// Simple Coloring (Singles Chains) strategy: For a given candidate value,
+    /// build chains of conjugate pairs (cells in a unit where the candidate
+    /// appears in exactly two places). Alternate two colors along the chain.
+    /// 
+    /// Rule 2 (Color Contradiction): If two cells of the same color share a unit,
+    /// that color is invalid and the candidate is eliminated from all cells of
+    /// that color.
+    /// 
+    /// Rule 4 (Color Elimination): If an uncolored cell with the candidate can
+    /// see cells of both colors, the candidate is eliminated from that cell.
+    /// </summary>
+    private bool SimpleColoring(int round)
+    {
+        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+        {
+            // Find all unsolved cells that have this candidate
+            List<int> candidateCells = [];
+            for (int pos = 0; pos < BOARD_SIZE; pos++)
+            {
+                if (solution[pos] == 0 && possibilities[GetPossibilityIndex(valIndex, pos)] == 0)
+                {
+                    candidateCells.Add(pos);
+                }
+            }
+
+            if (candidateCells.Count < 3) continue;
+
+            // Build conjugate pair links: two cells in a unit where the candidate
+            // appears in exactly those two cells
+            Dictionary<int, List<int>> conjugateLinks = [];
+            foreach (int cell in candidateCells)
+            {
+                conjugateLinks[cell] = [];
+            }
+
+            // Check rows for conjugate pairs
+            for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+            {
+                int c1 = -1;
+                int c2 = -1;
+                int count = 0;
+                for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+                {
+                    int pos = RowColumnToCell(row, col);
+                    if (solution[pos] == 0 && possibilities[GetPossibilityIndex(valIndex, pos)] == 0)
+                    {
+                        if (c1 == -1) c1 = pos;
+                        else if (c2 == -1) c2 = pos;
+                        count++;
+                    }
+                }
+                if (count == 2)
+                {
+                    conjugateLinks[c1].Add(c2);
+                    conjugateLinks[c2].Add(c1);
+                }
+            }
+
+            // Check columns for conjugate pairs
+            for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+            {
+                int c1 = -1;
+                int c2 = -1;
+                int count = 0;
+                for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+                {
+                    int pos = RowColumnToCell(row, col);
+                    if (solution[pos] == 0 && possibilities[GetPossibilityIndex(valIndex, pos)] == 0)
+                    {
+                        if (c1 == -1) c1 = pos;
+                        else if (c2 == -1) c2 = pos;
+                        count++;
+                    }
+                }
+                if (count == 2)
+                {
+                    if (!conjugateLinks[c1].Contains(c2)) conjugateLinks[c1].Add(c2);
+                    if (!conjugateLinks[c2].Contains(c1)) conjugateLinks[c2].Add(c1);
+                }
+            }
+
+            // Check sections for conjugate pairs
+            for (int sec = 0; sec < ROW_COL_SEC_SIZE; sec++)
+            {
+                int c1 = -1;
+                int c2 = -1;
+                int count = 0;
+                foreach (int pos in SectionLayout.SectionToSectionCells(sec))
+                {
+                    if (solution[pos] == 0 && possibilities[GetPossibilityIndex(valIndex, pos)] == 0)
+                    {
+                        if (c1 == -1) c1 = pos;
+                        else if (c2 == -1) c2 = pos;
+                        count++;
+                    }
+                }
+                if (count == 2)
+                {
+                    if (!conjugateLinks[c1].Contains(c2)) conjugateLinks[c1].Add(c2);
+                    if (!conjugateLinks[c2].Contains(c1)) conjugateLinks[c2].Add(c1);
+                }
+            }
+
+            // For each connected component, color with BFS using two colors (0 and 1)
+            HashSet<int> visited = [];
+            foreach (int startCell in candidateCells)
+            {
+                if (visited.Contains(startCell)) continue;
+                if (conjugateLinks[startCell].Count == 0) continue;
+
+                // BFS to color the chain
+                // color[cell] = 0 or 1
+                Dictionary<int, int> color = [];
+                Queue<int> queue = new();
+                color[startCell] = 0;
+                queue.Enqueue(startCell);
+                visited.Add(startCell);
+
+                while (queue.Count > 0)
+                {
+                    int cell = queue.Dequeue();
+                    int nextColor = 1 - color[cell];
+                    foreach (int linked in conjugateLinks[cell])
+                    {
+                        if (!color.ContainsKey(linked))
+                        {
+                            color[linked] = nextColor;
+                            visited.Add(linked);
+                            queue.Enqueue(linked);
+                        }
+                    }
+                }
+
+                // Need at least 2 cells in the chain for any elimination
+                if (color.Count < 2) continue;
+
+                // Separate cells by color
+                List<int> color0 = [];
+                List<int> color1 = [];
+                foreach (var kvp in color)
+                {
+                    if (kvp.Value == 0) color0.Add(kvp.Key);
+                    else color1.Add(kvp.Key);
+                }
+
+                // Rule 2: Color contradiction - if two cells of the same color
+                // share a unit, that color is invalid
+                bool color0Invalid = HasSameColorConflict(color0);
+                bool color1Invalid = HasSameColorConflict(color1);
+
+                if (color0Invalid && color1Invalid)
+                {
+                    // Both colors have contradictions - this shouldn't happen
+                    // in a valid puzzle, skip this chain
+                    continue;
+                }
+
+                if (color0Invalid || color1Invalid)
+                {
+                    // Eliminate the candidate from all cells of the invalid color
+                    List<int> invalidCells = color0Invalid ? color0 : color1;
+                    bool doneSomething = false;
+                    foreach (int cell in invalidCells)
+                    {
+                        int valPos = GetPossibilityIndex(valIndex, cell);
+                        if (possibilities[valPos] == 0)
+                        {
+                            possibilities[valPos] = round;
+                            doneSomething = true;
+                        }
+                    }
+                    if (doneSomething)
+                    {
+                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.SIMPLE_COLORING, valIndex + 1, invalidCells[0]));
+                        return true;
+                    }
+                }
+
+                // Rule 4: Color elimination - if an uncolored cell sees both colors,
+                // eliminate the candidate from that cell
+                bool doneSomethingR4 = false;
+                foreach (int cell in candidateCells)
+                {
+                    if (color.ContainsKey(cell)) continue;
+
+                    bool seesColor0 = false;
+                    bool seesColor1 = false;
+                    foreach (int c0 in color0)
+                    {
+                        if (SharesUnit(cell, c0))
+                        {
+                            seesColor0 = true;
+                            break;
+                        }
+                    }
+                    if (!seesColor0) continue;
+                    foreach (int c1 in color1)
+                    {
+                        if (SharesUnit(cell, c1))
+                        {
+                            seesColor1 = true;
+                            break;
+                        }
+                    }
+                    if (seesColor0 && seesColor1)
+                    {
+                        int valPos = GetPossibilityIndex(valIndex, cell);
+                        if (possibilities[valPos] == 0)
+                        {
+                            possibilities[valPos] = round;
+                            doneSomethingR4 = true;
+                        }
+                    }
+                }
+                if (doneSomethingR4)
+                {
+                    if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.SIMPLE_COLORING, valIndex + 1, startCell));
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Returns true if any two cells in the list share a row, column, or section,
+    /// indicating a color contradiction in Simple Coloring.
+    /// </summary>
+    private static bool HasSameColorConflict(List<int> cells)
+    {
+        for (int i = 0; i < cells.Count - 1; i++)
+        {
+            for (int j = i + 1; j < cells.Count; j++)
+            {
+                if (SharesUnit(cells[i], cells[j]))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private bool HandleNakedPairs(int round)
     {
         for (int position = 0; position < BOARD_SIZE; position++)
@@ -1470,6 +2893,431 @@ public class QQWing
                                     return true;
                                 }
                             }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Naked Triples: Find three cells in the same unit (row, column, or section)
+    /// whose combined candidates contain exactly three values, with each cell having
+    /// 2 or 3 of those values. Those three candidates can be eliminated from all
+    /// other cells in the unit.
+    /// </summary>
+    private bool HandleNakedTriples(int round)
+    {
+        // Check rows
+        for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+        {
+            // Collect unsolved cell positions in this row
+            List<int> cells = [];
+            for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+            {
+                int position = RowColumnToCell(row, col);
+                if (solution[position] == 0)
+                {
+                    int count = CountPossibilities(position);
+                    if (count == 2 || count == 3)
+                    {
+                        cells.Add(position);
+                    }
+                }
+            }
+            if (NakedTripleInUnit(cells, round, LogType.NAKED_TRIPLE_ROW, row, true))
+                return true;
+        }
+
+        // Check columns
+        for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+        {
+            List<int> cells = [];
+            for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+            {
+                int position = RowColumnToCell(row, col);
+                if (solution[position] == 0)
+                {
+                    int count = CountPossibilities(position);
+                    if (count == 2 || count == 3)
+                    {
+                        cells.Add(position);
+                    }
+                }
+            }
+            if (NakedTripleInUnit(cells, round, LogType.NAKED_TRIPLE_COLUMN, col, false))
+                return true;
+        }
+
+        // Check sections
+        for (int sec = 0; sec < ROW_COL_SEC_SIZE; sec++)
+        {
+            List<int> cells = [];
+            foreach (int position in SectionLayout.SectionToSectionCells(sec))
+            {
+                if (solution[position] == 0)
+                {
+                    int count = CountPossibilities(position);
+                    if (count == 2 || count == 3)
+                    {
+                        cells.Add(position);
+                    }
+                }
+            }
+            if (NakedTripleSectionUnit(cells, round, sec))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Search for a naked triple among the candidate cells in a row or column unit.
+    /// </summary>
+    /// <param name="cells">Cells in the unit with 2 or 3 possibilities.</param>
+    /// <param name="round">Round for marking eliminations.</param>
+    /// <param name="logType">The log type for history.</param>
+    /// <param name="unitIndex">Row or column index.</param>
+    /// <param name="isRow">True for row, false for column.</param>
+    private bool NakedTripleInUnit(List<int> cells, int round, LogType logType, int unitIndex, bool isRow)
+    {
+        if (cells.Count < 3) return false;
+
+        for (int i = 0; i < cells.Count - 2; i++)
+        {
+            for (int j = i + 1; j < cells.Count - 1; j++)
+            {
+                for (int k = j + 1; k < cells.Count; k++)
+                {
+                    int pos1 = cells[i];
+                    int pos2 = cells[j];
+                    int pos3 = cells[k];
+
+                    // Compute the union of candidates for these three cells
+                    int unionCount = 0;
+                    int unionMask = 0;
+                    for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                    {
+                        bool in1 = possibilities[GetPossibilityIndex(valIndex, pos1)] == 0;
+                        bool in2 = possibilities[GetPossibilityIndex(valIndex, pos2)] == 0;
+                        bool in3 = possibilities[GetPossibilityIndex(valIndex, pos3)] == 0;
+                        if (in1 || in2 || in3)
+                        {
+                            unionCount++;
+                            unionMask |= (1 << valIndex);
+                        }
+                    }
+
+                    // A naked triple requires exactly 3 distinct candidates across all three cells
+                    if (unionCount != 3) continue;
+
+                    // Eliminate those three candidates from all other cells in the unit
+                    bool doneSomething = false;
+                    for (int idx = 0; idx < ROW_COL_SEC_SIZE; idx++)
+                    {
+                        int position = isRow ? RowColumnToCell(unitIndex, idx) : RowColumnToCell(idx, unitIndex);
+                        if (position == pos1 || position == pos2 || position == pos3) continue;
+                        if (solution[position] != 0) continue;
+
+                        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                        {
+                            if ((unionMask & (1 << valIndex)) != 0)
+                            {
+                                int valPos = GetPossibilityIndex(valIndex, position);
+                                if (possibilities[valPos] == 0)
+                                {
+                                    possibilities[valPos] = round;
+                                    doneSomething = true;
+                                }
+                            }
+                        }
+                    }
+                    if (doneSomething)
+                    {
+                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, logType, 0, pos1));
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Search for a naked triple among the candidate cells in a section unit.
+    /// </summary>
+    private bool NakedTripleSectionUnit(List<int> cells, int round, int section)
+    {
+        if (cells.Count < 3) return false;
+
+        for (int i = 0; i < cells.Count - 2; i++)
+        {
+            for (int j = i + 1; j < cells.Count - 1; j++)
+            {
+                for (int k = j + 1; k < cells.Count; k++)
+                {
+                    int pos1 = cells[i];
+                    int pos2 = cells[j];
+                    int pos3 = cells[k];
+
+                    // Compute the union of candidates for these three cells
+                    int unionCount = 0;
+                    int unionMask = 0;
+                    for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                    {
+                        bool in1 = possibilities[GetPossibilityIndex(valIndex, pos1)] == 0;
+                        bool in2 = possibilities[GetPossibilityIndex(valIndex, pos2)] == 0;
+                        bool in3 = possibilities[GetPossibilityIndex(valIndex, pos3)] == 0;
+                        if (in1 || in2 || in3)
+                        {
+                            unionCount++;
+                            unionMask |= (1 << valIndex);
+                        }
+                    }
+
+                    if (unionCount != 3) continue;
+
+                    // Eliminate those three candidates from all other cells in the section
+                    bool doneSomething = false;
+                    foreach (int position in SectionLayout.SectionToSectionCells(section))
+                    {
+                        if (position == pos1 || position == pos2 || position == pos3) continue;
+                        if (solution[position] != 0) continue;
+
+                        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                        {
+                            if ((unionMask & (1 << valIndex)) != 0)
+                            {
+                                int valPos = GetPossibilityIndex(valIndex, position);
+                                if (possibilities[valPos] == 0)
+                                {
+                                    possibilities[valPos] = round;
+                                    doneSomething = true;
+                                }
+                            }
+                        }
+                    }
+                    if (doneSomething)
+                    {
+                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.NAKED_TRIPLE_SECTION, 0, pos1));
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Naked Quads: Find four cells in the same unit (row, column, or section)
+    /// whose combined candidates contain exactly four values, with each cell having
+    /// 2, 3, or 4 of those values. Those four candidates can be eliminated from all
+    /// other cells in the unit.
+    /// </summary>
+    private bool HandleNakedQuads(int round)
+    {
+        // Check rows
+        for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+        {
+            List<int> cells = [];
+            for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+            {
+                int position = RowColumnToCell(row, col);
+                if (solution[position] == 0)
+                {
+                    int count = CountPossibilities(position);
+                    if (count >= 2 && count <= 4)
+                    {
+                        cells.Add(position);
+                    }
+                }
+            }
+            if (NakedQuadInUnit(cells, round, LogType.NAKED_QUAD_ROW, row, true))
+                return true;
+        }
+
+        // Check columns
+        for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+        {
+            List<int> cells = [];
+            for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+            {
+                int position = RowColumnToCell(row, col);
+                if (solution[position] == 0)
+                {
+                    int count = CountPossibilities(position);
+                    if (count >= 2 && count <= 4)
+                    {
+                        cells.Add(position);
+                    }
+                }
+            }
+            if (NakedQuadInUnit(cells, round, LogType.NAKED_QUAD_COLUMN, col, false))
+                return true;
+        }
+
+        // Check sections
+        for (int sec = 0; sec < ROW_COL_SEC_SIZE; sec++)
+        {
+            List<int> cells = [];
+            foreach (int position in SectionLayout.SectionToSectionCells(sec))
+            {
+                if (solution[position] == 0)
+                {
+                    int count = CountPossibilities(position);
+                    if (count >= 2 && count <= 4)
+                    {
+                        cells.Add(position);
+                    }
+                }
+            }
+            if (NakedQuadSectionUnit(cells, round, sec))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Search for a naked quad among the candidate cells in a row or column unit.
+    /// </summary>
+    /// <param name="cells">Cells in the unit with 2, 3, or 4 possibilities.</param>
+    /// <param name="round">Round for marking eliminations.</param>
+    /// <param name="logType">The log type for history.</param>
+    /// <param name="unitIndex">Row or column index.</param>
+    /// <param name="isRow">True for row, false for column.</param>
+    private bool NakedQuadInUnit(List<int> cells, int round, LogType logType, int unitIndex, bool isRow)
+    {
+        if (cells.Count < 4) return false;
+
+        for (int i = 0; i < cells.Count - 3; i++)
+        {
+            for (int j = i + 1; j < cells.Count - 2; j++)
+            {
+                for (int k = j + 1; k < cells.Count - 1; k++)
+                {
+                    for (int l = k + 1; l < cells.Count; l++)
+                    {
+                        int pos1 = cells[i];
+                        int pos2 = cells[j];
+                        int pos3 = cells[k];
+                        int pos4 = cells[l];
+
+                        // Compute the union of candidates for these four cells
+                        int unionCount = 0;
+                        int unionMask = 0;
+                        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                        {
+                            bool in1 = possibilities[GetPossibilityIndex(valIndex, pos1)] == 0;
+                            bool in2 = possibilities[GetPossibilityIndex(valIndex, pos2)] == 0;
+                            bool in3 = possibilities[GetPossibilityIndex(valIndex, pos3)] == 0;
+                            bool in4 = possibilities[GetPossibilityIndex(valIndex, pos4)] == 0;
+                            if (in1 || in2 || in3 || in4)
+                            {
+                                unionCount++;
+                                unionMask |= (1 << valIndex);
+                            }
+                        }
+
+                        // A naked quad requires exactly 4 distinct candidates across all four cells
+                        if (unionCount != 4) continue;
+
+                        // Eliminate those four candidates from all other cells in the unit
+                        bool doneSomething = false;
+                        for (int idx = 0; idx < ROW_COL_SEC_SIZE; idx++)
+                        {
+                            int position = isRow ? RowColumnToCell(unitIndex, idx) : RowColumnToCell(idx, unitIndex);
+                            if (position == pos1 || position == pos2 || position == pos3 || position == pos4) continue;
+                            if (solution[position] != 0) continue;
+
+                            for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                            {
+                                if ((unionMask & (1 << valIndex)) != 0)
+                                {
+                                    int valPos = GetPossibilityIndex(valIndex, position);
+                                    if (possibilities[valPos] == 0)
+                                    {
+                                        possibilities[valPos] = round;
+                                        doneSomething = true;
+                                    }
+                                }
+                            }
+                        }
+                        if (doneSomething)
+                        {
+                            if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, logType, 0, pos1));
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Search for a naked quad among the candidate cells in a section unit.
+    /// </summary>
+    private bool NakedQuadSectionUnit(List<int> cells, int round, int section)
+    {
+        if (cells.Count < 4) return false;
+
+        for (int i = 0; i < cells.Count - 3; i++)
+        {
+            for (int j = i + 1; j < cells.Count - 2; j++)
+            {
+                for (int k = j + 1; k < cells.Count - 1; k++)
+                {
+                    for (int l = k + 1; l < cells.Count; l++)
+                    {
+                        int pos1 = cells[i];
+                        int pos2 = cells[j];
+                        int pos3 = cells[k];
+                        int pos4 = cells[l];
+
+                        // Compute the union of candidates for these four cells
+                        int unionCount = 0;
+                        int unionMask = 0;
+                        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                        {
+                            bool in1 = possibilities[GetPossibilityIndex(valIndex, pos1)] == 0;
+                            bool in2 = possibilities[GetPossibilityIndex(valIndex, pos2)] == 0;
+                            bool in3 = possibilities[GetPossibilityIndex(valIndex, pos3)] == 0;
+                            bool in4 = possibilities[GetPossibilityIndex(valIndex, pos4)] == 0;
+                            if (in1 || in2 || in3 || in4)
+                            {
+                                unionCount++;
+                                unionMask |= (1 << valIndex);
+                            }
+                        }
+
+                        if (unionCount != 4) continue;
+
+                        // Eliminate those four candidates from all other cells in the section
+                        bool doneSomething = false;
+                        foreach (int position in SectionLayout.SectionToSectionCells(section))
+                        {
+                            if (position == pos1 || position == pos2 || position == pos3 || position == pos4) continue;
+                            if (solution[position] != 0) continue;
+
+                            for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                            {
+                                if ((unionMask & (1 << valIndex)) != 0)
+                                {
+                                    int valPos = GetPossibilityIndex(valIndex, position);
+                                    if (possibilities[valPos] == 0)
+                                    {
+                                        possibilities[valPos] = round;
+                                        doneSomething = true;
+                                    }
+                                }
+                            }
+                        }
+                        if (doneSomething)
+                        {
+                            if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.NAKED_QUAD_SECTION, 0, pos1));
+                            return true;
                         }
                     }
                 }
