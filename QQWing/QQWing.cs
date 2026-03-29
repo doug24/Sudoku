@@ -692,6 +692,70 @@ public class QQWing
         return new ReadOnlyCollection<LogItem>(solveHistory);
     }
 
+    /// <summary>
+    /// Get a distinct list of strategy names used to solve the puzzle, in the
+    /// order they were first used.
+    /// </summary>
+    public List<string> GetStrategiesUsed()
+    {
+        List<string> strategies = [];
+        HashSet<string> seen = [];
+        foreach (LogItem item in GetSolveInstructions())
+        {
+            string name = GetStrategyName(item.GetLogType());
+            if (name != null && seen.Add(name))
+            {
+                strategies.Add(name);
+            }
+        }
+        return strategies;
+    }
+
+    /// <summary>
+    /// Maps a LogType to a human-readable strategy name, or null for
+    /// non-strategy log types like GIVEN and ROLLBACK.
+    /// </summary>
+    private static string GetStrategyName(LogType type) => type switch
+    {
+        LogType.SINGLE => "Naked Single",
+        LogType.HIDDEN_SINGLE_ROW or
+        LogType.HIDDEN_SINGLE_COLUMN or
+        LogType.HIDDEN_SINGLE_SECTION => "Hidden Single",
+        LogType.NAKED_PAIR_ROW or
+        LogType.NAKED_PAIR_COLUMN or
+        LogType.NAKED_PAIR_SECTION => "Naked Pair",
+        LogType.NAKED_TRIPLE_ROW or
+        LogType.NAKED_TRIPLE_COLUMN or
+        LogType.NAKED_TRIPLE_SECTION => "Naked Triple",
+        LogType.NAKED_QUAD_ROW or
+        LogType.NAKED_QUAD_COLUMN or
+        LogType.NAKED_QUAD_SECTION => "Naked Quad",
+        LogType.POINTING_PAIR_TRIPLE_ROW or
+        LogType.POINTING_PAIR_TRIPLE_COLUMN => "Pointing Pair/Triple",
+        LogType.ROW_BOX or
+        LogType.COLUMN_BOX => "Box/Line Reduction",
+        LogType.HIDDEN_PAIR_ROW or
+        LogType.HIDDEN_PAIR_COLUMN or
+        LogType.HIDDEN_PAIR_SECTION => "Hidden Pair",
+        LogType.HIDDEN_TRIPLE_ROW or
+        LogType.HIDDEN_TRIPLE_COLUMN or
+        LogType.HIDDEN_TRIPLE_SECTION => "Hidden Triple",
+        LogType.HIDDEN_QUAD_ROW or
+        LogType.HIDDEN_QUAD_COLUMN or
+        LogType.HIDDEN_QUAD_SECTION => "Hidden Quad",
+        LogType.X_WING_ROW or
+        LogType.X_WING_COLUMN => "X-Wing",
+        LogType.Y_WING => "Y-Wing",
+        LogType.XYZ_WING => "XYZ-Wing",
+        LogType.SWORDFISH_ROW or
+        LogType.SWORDFISH_COLUMN => "Swordfish",
+        LogType.JELLYFISH_ROW or
+        LogType.JELLYFISH_COLUMN => "Jellyfish",
+        LogType.SIMPLE_COLORING => "Simple Coloring",
+        LogType.GUESS => "Guess",
+        _ => null
+    };
+
     public bool Solve(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -707,10 +771,24 @@ public class QQWing
 
         token.ThrowIfCancellationRequested();
 
-        while (SingleSolveMove(round))
+        // When not recording history, use the fast solver with only cheap
+        // strategies. The expensive strategies (triples, quads, fish, wings,
+        // coloring) are unnecessary because guessing handles the rest.
+        if (recordHistory)
         {
-            if (IsSolved()) return true;
-            if (IsImpossible()) return false;
+            while (SingleSolveMove(round))
+            {
+                if (IsSolved()) return true;
+                if (IsImpossible()) return false;
+            }
+        }
+        else
+        {
+            while (SingleSolveMoveFast(round))
+            {
+                if (IsSolved()) return true;
+                if (IsImpossible()) return false;
+            }
         }
 
         int nextGuessRound = round + 1;
@@ -797,7 +875,7 @@ public class QQWing
 
     private int CountSolutions(int round, bool limitToTwo)
     {
-        while (SingleSolveMove(round))
+        while (SingleSolveMoveFast(round))
         {
             if (IsSolved())
             {
@@ -932,6 +1010,30 @@ public class QQWing
                 }
             }
         }
+        return false;
+    }
+
+
+    /// <summary>
+    /// Lightweight solve move used during solution counting and generation.
+    /// Only uses cheap strategies that don't allocate heap objects.
+    /// The expensive strategies (hidden triples/quads, fish patterns, wings,
+    /// coloring) are skipped since guessing handles the rest efficiently.
+    /// </summary>
+    private bool SingleSolveMoveFast(int round)
+    {
+        if (OnlyPossibilityForCell(round)) return true;
+        if (OnlyValueInSection(round)) return true;
+        if (OnlyValueInRow(round)) return true;
+        if (OnlyValueInColumn(round)) return true;
+        if (HandleNakedPairs(round)) return true;
+        if (PointingRowReduction(round)) return true;
+        if (PointingColumnReduction(round)) return true;
+        if (RowBoxReduction(round)) return true;
+        if (ColBoxReduction(round)) return true;
+        if (HiddenPairInRow(round)) return true;
+        if (HiddenPairInColumn(round)) return true;
+        if (HiddenPairInSection(round)) return true;
         return false;
     }
 

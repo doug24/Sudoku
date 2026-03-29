@@ -90,6 +90,7 @@
                 <MenuItem Header="Open" Command="{Binding OpenFileCommand}"/>
                 <MenuItem Header="Save As" Command="{Binding SaveAsCommand}"/>
                 <Separator/>
+                <MenuItem Header="Puzzle Info" Command="{Binding GameBoard.DescribeCommand}"/>
                 <MenuItem Header="Snapshot" Command="{Binding SnapshotCommand}"/>
                 <MenuItem Header="Restore" Command="{Binding RestoreCommand}"/>
                 <MenuItem Header="Theme">

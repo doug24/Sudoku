@@ -170,6 +170,9 @@ public partial class GameBoardViewModel : ObservableObject
     [ObservableProperty]
     private bool isInProgress = false;
 
+    [ObservableProperty]
+    private string puzzleDescription = string.Empty;
+
     private void OnTimer_Tick(object? sender, EventArgs e)
     {
         if (ShowTimer)
@@ -257,6 +260,14 @@ public partial class GameBoardViewModel : ObservableObject
         p => FastForward(),
         q => IsInProgress);
 
+    public ICommand DescribeCommand => new RelayCommand(
+        p => Describe(),
+        q => IsInProgress);
+
+    private void Describe()
+    {
+        CustomMessageBox.Show(PuzzleDescription);
+    }
 
     internal string ToSnapshotString()
     {
@@ -1136,6 +1147,10 @@ public partial class GameBoardViewModel : ObservableObject
             UpdateRemainderCounts();
             IsInProgress = true;
             stopwatch.Restart();
+
+            PuzzleDescription = puz.Strategies.Count > 0
+                ? $"{puz.Difficulty}: {string.Join(", ", puz.Strategies)}"
+                : puz.Difficulty;
         }
     }
 

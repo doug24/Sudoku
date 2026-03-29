@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-
 namespace QQWingLib;
 
 public class RegularLayout : ISectionLayout
@@ -103,7 +101,10 @@ public class RegularLayout : ISectionLayout
     {
         int secStart = SectionToFirstCell(section);
         int firstRow = QQWing.CellToRow(secStart);
-        return Enumerable.Range(firstRow, QQWing.GRID_SIZE);
+        for (int i = 0; i < QQWing.GRID_SIZE; i++)
+        {
+            yield return firstRow + i;
+        }
     }
 
     /// <summary>
@@ -113,7 +114,10 @@ public class RegularLayout : ISectionLayout
     {
         int secStart = SectionToFirstCell(section);
         int firstCol = QQWing.CellToColumn(secStart);
-        return Enumerable.Range(firstCol, QQWing.GRID_SIZE);
+        for (int i = 0; i < QQWing.GRID_SIZE; i++)
+        {
+            yield return firstCol + i;
+        }
     }
 
     /// <summary>
@@ -124,7 +128,10 @@ public class RegularLayout : ISectionLayout
     {
         int secStart = SectionToFirstCell(section);
         int firstRow = QQWing.CellToRow(secStart);
-        return Enumerable.Range(firstRow, QQWing.GRID_SIZE);
+        for (int i = 0; i < QQWing.GRID_SIZE; i++)
+        {
+            yield return firstRow + i;
+        }
     }
 
     /// <summary>
@@ -135,6 +142,9 @@ public class RegularLayout : ISectionLayout
     {
         int secStart = SectionToFirstCell(section);
         int firstCol = QQWing.CellToColumn(secStart);
-        return Enumerable.Range(firstCol, QQWing.GRID_SIZE);
+        for (int i = 0; i < QQWing.GRID_SIZE; i++)
+        {
+            yield return firstCol + i;
+        }
     }
 }

@@ -17,6 +17,8 @@ public class Puzzle
 
     public int[] Initial { get; private set; } = [];
     public int[] Solution { get; private set; } = [];
+    public string Difficulty { get; private set; } = string.Empty;
+    public List<string> Strategies { get; private set; } = [];
 
     //public string Initial  { get => ".....9.5.1.....2...2.7..8.6.45.1....89..4.51............8..2..9.5.4.8.....1..7..."; }
     //public string Solution { get => "784629351136584297529731846645913728897246513312875964478152639953468172261397485"; }
@@ -40,6 +42,8 @@ public class Puzzle
 
         Initial = completedTask.Result.Initial;
         Solution = completedTask.Result.Solution;
+        Difficulty = completedTask.Result.Difficulty;
+        Strategies = completedTask.Result.Strategies;
 
         await Task.WhenAll(tasks);
 
@@ -58,8 +62,6 @@ public class Puzzle
             bool done = false;
 
             QQWing ss = new();
-            ss.SetRecordHistory(true);
-            //ss.SetLogHistory(true);
             ss.SetPrintStyle(PrintStyle.ONE_LINE);
 
             // Solve puzzle or generate puzzles
@@ -75,11 +77,13 @@ public class Puzzle
 
                 if (havePuzzle)
                 {
-                    // Solve the puzzle
+                    // Solve with history recording so we can check difficulty
+                    // and get strategies used in a single pass
+                    ss.SetRecordHistory(true);
                     ss.Solve(token);
 
                     // Bail out if it didn't meet the difficulty standards for generation
-                    if (difficulty != Difficulty.UNKNOWN && difficulty != ss.GetDifficulty())
+                    if (difficulty != QQWingLib.Difficulty.UNKNOWN && difficulty != ss.GetDifficulty())
                     {
                         Debug.WriteLine($"Discard solution, difficulty is {ss.GetDifficulty()}");
                         havePuzzle = false;
@@ -100,7 +104,9 @@ public class Puzzle
                         Debug.WriteLine($"Puzzle GenerateInternal returning {ss.GetDifficulty()} puzzle");
                         return new PuzzleData(
                             ss.GetPuzzle(),
-                            ss.GetSolution());
+                            ss.GetSolution(),
+                            ss.GetDifficultyAsString(),
+                            ss.GetStrategiesUsed());
                     }
                     else
                     {
@@ -122,12 +128,14 @@ public class Puzzle
     }
 }
 
-public class PuzzleData(int[] initial, int[] solution)
+public class PuzzleData(int[] initial, int[] solution, string difficulty, List<string> strategies)
 {
     public int[] Initial { get; private set; } = initial;
     public int[] Solution { get; private set; } = solution;
+    public string Difficulty { get; private set; } = difficulty;
+    public List<string> Strategies { get; private set; } = strategies;
 
-    public static PuzzleData Empty => new([], []);
+    public static PuzzleData Empty => new([], [], string.Empty, []);
 
     public override string ToString()
     {
