@@ -409,7 +409,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number lucky guesses in solving this puzzle.
+    /// Get the number of lucky guesses in solving this puzzle.
     /// </summary>
     public int GetGuessCount()
     {
@@ -715,7 +715,7 @@ public class QQWing
     /// Maps a LogType to a human-readable strategy name, or null for
     /// non-strategy log types like GIVEN and ROLLBACK.
     /// </summary>
-    private static string GetStrategyName(LogType type) => type switch
+    public static string GetStrategyName(LogType type) => type switch
     {
         LogType.SINGLE => "Naked Single",
         LogType.HIDDEN_SINGLE_ROW or
@@ -755,6 +755,126 @@ public class QQWing
         LogType.GUESS => "Guess",
         _ => null
     };
+
+    /// <summary>
+    /// Eliminate a specific candidate value for a cell, as if the player has
+    /// already removed it. Must be called after SetPuzzle and before Solve.
+    /// </summary>
+    /// <param name="cell">Cell position (0-80)</param>
+    /// <param name="value">Candidate value to eliminate (1-9)</param>
+    public void EliminatePossibility(int cell, int value)
+    {
+        int valIndex = value - 1;
+        int valPos = GetPossibilityIndex(valIndex, cell);
+        if (possibilities[valPos] == 0)
+        {
+            // Use round 1 (same as givens) so these eliminations are
+            // never rolled back during guess backtracking.
+            possibilities[valPos] = 1;
+        }
+    }
+
+    /// <summary>
+    /// Given a partially solved board and the player's current candidate state,
+    /// solve with history recording and return a non-GIVEN LogItem
+    /// describing a strategy and move.
+    /// Returns null if the puzzle is already solved or unsolvable.
+    /// </summary>
+    /// <param name="currentBoard">81-element array: 1-9 for placed values, 0 for empty cells.</param>
+    /// <param name="playerCandidates">For each empty cell, the set of candidates the player
+    /// currently has visible. Null means the player has not set any candidates (use solver defaults).
+    /// When provided, any solver-possible candidate NOT in this set is pre-eliminated.</param>
+    /// <param name="hintIndex">Zero-based index of the hint to return, allowing the player
+    /// to skip past unhelpful hints. 0 returns the first applicable hint, 1 the second, etc.</param>
+    public LogItem GetHint(int[] currentBoard, HashSet<int>[] playerCandidates = null, int hintIndex = 0)
+    {
+        SetPuzzle(currentBoard);
+
+        // Apply the player's candidate eliminations before solving
+        if (playerCandidates != null)
+        {
+            for (int cell = 0; cell < BOARD_SIZE; cell++)
+            {
+                if (currentBoard[cell] != 0)
+                    continue; // cell is filled, no candidates to consider
+
+                HashSet<int> candidates = playerCandidates[cell];
+                if (candidates == null || candidates.Count == 0)
+                    continue; // player has no pencil marks in this cell, use solver defaults
+
+                for (int val = 1; val <= ROW_COL_SEC_SIZE; val++)
+                {
+                    if (!candidates.Contains(val))
+                    {
+                        EliminatePossibility(cell, val);
+                    }
+                }
+            }
+        }
+
+        SetRecordHistory(true);
+        Solve(CancellationToken.None);
+
+        if (!IsSolved())
+            return null;
+
+        int skipped = 0;
+        foreach (var item in GetSolveInstructions())
+        {
+            if (item.GetLogType() == LogType.GIVEN)
+                continue;
+
+            // Skip elimination-only steps that don't remove any candidate
+            // the player still has — they've already been resolved.
+            if (playerCandidates != null && IsAlreadyResolved(item, playerCandidates))
+                continue;
+
+            if (skipped < hintIndex)
+            {
+                skipped++;
+                continue;
+            }
+
+            return item;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Returns true if the action described by the log item has already been
+    /// resolved by the player's current candidate state. For placement steps
+    /// (Naked Single, Hidden Single), checks whether the value is already placed.
+    /// For elimination steps, checks whether the candidate is already absent
+    /// from the player's pencil marks at the indicated position.
+    /// </summary>
+    private static bool IsAlreadyResolved(LogItem item, HashSet<int>[] playerCandidates)
+    {
+        LogType type = item.GetLogType();
+        int position = item.GetPosition();
+        int value = item.GetValue();
+
+        if (position < 0)
+            return false;
+
+        return type switch
+        {
+            // Placement strategies: the solver wants to place a value in a cell.
+            // If the player has no candidates left for that cell (value already
+            // placed), the step is resolved.
+            LogType.SINGLE or
+            LogType.HIDDEN_SINGLE_ROW or
+            LogType.HIDDEN_SINGLE_COLUMN or
+            LogType.HIDDEN_SINGLE_SECTION =>
+                playerCandidates[position] == null || playerCandidates[position].Count == 0,
+
+            // Elimination strategies: the solver removed a candidate value from
+            // a position. If the player already doesn't have that candidate, or
+            // has no pencil marks at all for that cell, the step is resolved.
+            _ => value > 0
+                && playerCandidates[position] != null
+                && !playerCandidates[position].Contains(value),
+        };
+    }
 
     public bool Solve(CancellationToken token)
     {
@@ -2831,7 +2951,8 @@ public class QQWing
                 }
 
                 // Rule 2: Color contradiction - if two cells of the same color
-                // share a unit, that color is invalid
+                // share a unit, that color is invalid and the candidate is eliminated from all cells of
+                // that color.
                 bool color0Invalid = HasSameColorConflict(color0);
                 bool color1Invalid = HasSameColorConflict(color1);
 

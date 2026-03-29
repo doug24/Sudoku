@@ -126,11 +126,12 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                           VerticalAlignment="Center"
                            Text="Color incorrect answers" Margin="3" FontSize="14"/>
                 <ToggleSwitch:HorizontalToggleSwitch Grid.Row="0" Grid.Column="2"
                             IsChecked="{Binding GameBoard.HighlightIncorrect, Mode=TwoWay}" 
@@ -138,7 +139,8 @@
                             UncheckedContent="No" CheckedContent="Yes" 
                             Margin="0,6" HorizontalAlignment="Left"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"
+                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                           VerticalAlignment="Center"
                            Text="Clean pencil marks" Margin="3" FontSize="14"/>
                 <ToggleSwitch:HorizontalToggleSwitch Grid.Row="1" Grid.Column="2"
                             IsChecked="{Binding GameBoard.CleanPencilMarks, Mode=TwoWay}" 
@@ -146,7 +148,8 @@
                             UncheckedContent="No" CheckedContent="Yes" 
                             Margin="0,6" HorizontalAlignment="Left"/>
 
-                <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"
+                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                           VerticalAlignment="Center"
                            Text="Highlight selected number" Margin="3,3,6,3" FontSize="14"/>
                 <ToggleSwitch:HorizontalToggleSwitch Grid.Row="2" Grid.Column="2"
                             IsChecked="{Binding Path=GameBoard.EnableNumberHighlight, Mode=TwoWay}" 
@@ -162,18 +165,26 @@
                             UncheckedContent="No" CheckedContent="Yes" 
                             Margin="0,6" HorizontalAlignment="Left"/>
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Margin="3,0"
+                <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
+                           Margin="3,0"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            Text="{Binding GameBoard.Time}"
                            FontSize="28"/>
 
-                <Button Grid.Row="4" Grid.Column="2" 
+                <Button Grid.Row="5" Grid.Column="0"
+                        Width="{Binding ElementName=ff, Path=ActualWidth}"
+                        HorizontalAlignment="Right"
+                        Content="Hint"
+                        Padding="6" Margin="3"
+                        Command="{Binding Path=GameBoard.HintCommand}"/>
+                
+                <Button Grid.Row="5" Grid.Column="1" 
                         HorizontalAlignment="Stretch"
                         Content="Fill candidates" 
                         Padding="6" Margin="3"
                         Command="{Binding Path=GameBoard.FillCandidatesCommand}"/>
 
-                <Button Grid.Row="5" Grid.Column="2"
+                <Button Grid.Row="5" Grid.Column="2" x:Name="ff"
                         HorizontalAlignment="Stretch"
                         Content="Fast Forward"
                         Padding="6" Margin="3"

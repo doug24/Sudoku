@@ -142,6 +142,7 @@ namespace Sudoku
         {
             return Show(messageBoxText, caption, MessageBoxButton.OK, MessageBoxImage.None, MessageBoxResult.None, MessageBoxOptions.None);
         }
+
         public static MessageBoxResult Show(Window owner, string messageBoxText, string caption)
         {
             return Show(owner, messageBoxText, caption, MessageBoxButton.OK, MessageBoxImage.None, MessageBoxResult.None, MessageBoxOptions.None);
@@ -185,6 +186,13 @@ namespace Sudoku
             MessageBoxOptions options)
         {
             return Show(null, messageBoxText, caption, button, icon, defaultResult, options);
+        }
+
+        public static MessageBoxResult Show(string messageBoxText, string caption,
+            MessageBoxButton button, MessageBoxImage icon, MessageBoxResult defaultResult,
+            MessageBoxCustoms customs)
+        {
+            return Show(null, messageBoxText, caption, button, icon, defaultResult, customs, MessageBoxOptions.None);
         }
 
         public static MessageBoxResult Show(Window? owner, string messageBoxText, string caption,
@@ -342,11 +350,9 @@ namespace Sudoku
         /// Gets or sets a custom icon for the message box (see class for example)
         /// </summary>
         /// <example>
-        /// var bitmapImage = new System.Windows.Media.Imaging.BitmapImage();
-        /// bitmapImage.BeginInit();
+        /// var bitmapImage = new System.Windows.Media.Imaging.BitmapImage(); bitmapImage.BeginInit();
         /// bitmapImage.UriSource = new Uri("pack://application:,,,/dnGrep;component/images/dnGrep48.png");
-        /// bitmapImage.EndInit();
-        /// var customs = new MessageBoxCustoms() { Icon = bitmapImage };
+        /// bitmapImage.EndInit(); var customs = new MessageBoxCustoms() { Icon = bitmapImage };
         /// </example>
         public ImageSource? Icon { get; set; }
         public string OKButtonText { get; set; } = string.Empty;

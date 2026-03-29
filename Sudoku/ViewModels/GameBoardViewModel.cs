@@ -33,6 +33,7 @@ public partial class GameBoardViewModel : ObservableObject
 
     private int currentHighlightNumber = -1;
     private bool selectedNumberChanged;
+    private int hintIndex;
 
     public GameBoardViewModel()
     {
@@ -264,9 +265,100 @@ public partial class GameBoardViewModel : ObservableObject
         p => Describe(),
         q => IsInProgress);
 
+    public ICommand HintCommand => new RelayCommand(
+    p => GetHint(),
+    q => IsInProgress);
+
     private void Describe()
     {
         CustomMessageBox.Show(PuzzleDescription);
+    }
+
+    internal void GetHint()
+    {
+        // Build the current board: givens + correctly placed player values
+        int[] currentBoard = new int[81];
+        // Build the player's current candidate state for empty cells
+        HashSet<int>?[] playerCandidates = new HashSet<int>?[81];
+        bool hasCandidates = false;
+
+        foreach (var cell in allCells)
+        {
+            int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+            if (cell.Given)
+            {
+                currentBoard[cellIndex] = cell.Value;
+            }
+            else if (cell.Value > 0 && cell.Value == cell.Answer)
+            {
+                currentBoard[cellIndex] = cell.Value;
+            }
+            else if (cell.Value == 0)
+            {
+                // Collect visible candidates for this empty cell
+                HashSet<int> candidates = [];
+                foreach (var candidate in cell.Candidates)
+                {
+                    if (candidate.Visible)
+                    {
+                        candidates.Add(candidate.Value);
+                    }
+                }
+                if (candidates.Count > 0)
+                {
+                    playerCandidates[cellIndex] = candidates;
+                    hasCandidates = true;
+                }
+            }
+        }
+
+        QQWing ss = new();
+        LogItem? hint = ss.GetHint(currentBoard, hasCandidates ? playerCandidates : null, hintIndex);
+
+        if (hint == null)
+        {
+            if (hintIndex > 0)
+            {
+                hintIndex = 0;
+                CustomMessageBox.Show("No more hints available.", "Sudoku");
+            }
+            else
+            {
+                CustomMessageBox.Show("No hint available.", "Sudoku");
+            }
+            return;
+        }
+
+        hintIndex++;
+
+        string strategyName = QQWing.GetStrategyName(hint.GetLogType()) ?? hint.GetLogType().GetDescription();
+        string location = hint.GetRow() > 0 && hint.GetColumn() > 0
+            ? $" at row {hint.GetRow()}, column {hint.GetColumn()}"
+            : string.Empty;
+        string value = hint.GetValue() > 0
+            ? $" (value: {hint.GetValue()})"
+            : string.Empty;
+
+        MessageBoxCustoms customs = new()
+        {
+            CancelButtonText = "Next Hint"
+        };
+        MessageBoxButton button = hintIndex > 1 ? MessageBoxButton.OK : MessageBoxButton.OKCancel;
+
+        var result = CustomMessageBox.Show(
+            $"Try: {strategyName}{location}{value}",
+            "Hint",
+            button, MessageBoxImage.None,
+            MessageBoxResult.OK, customs);
+
+        if (result == MessageBoxResult.OK)
+        {
+            hintIndex = 0;
+        }
+        else if (result == MessageBoxResult.Cancel)
+        {
+            GetHint();
+        }
     }
 
     internal string ToSnapshotString()
@@ -1070,6 +1162,7 @@ public partial class GameBoardViewModel : ObservableObject
     {
         undoStack.Clear();
         redoStack.Clear();
+        hintIndex = 0;
         stopwatch.Reset();
         Time = ShowTimer ? "00:00" : string.Empty;
 
