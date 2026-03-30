@@ -846,6 +846,8 @@ public class QQWing
     /// (Naked Single, Hidden Single), checks whether the value is already placed.
     /// For elimination steps, checks whether the candidate is already absent
     /// from the player's pencil marks at the indicated position.
+    /// For naked set strategies (value=0), checks whether all eliminations in
+    /// the affected unit have already been applied by the player.
     /// </summary>
     private static bool IsAlreadyResolved(LogItem item, HashSet<int>[] playerCandidates)
     {
@@ -867,6 +869,21 @@ public class QQWing
             LogType.HIDDEN_SINGLE_SECTION =>
                 playerCandidates[position] == null || playerCandidates[position].Count == 0,
 
+            // Naked set strategies: the solver identified a naked pair/triple/quad
+            // and eliminated the set's values from other cells in the unit.
+            // The hint is resolved if the player has already removed those values
+            // from all cells in the unit where they have pencil marks.
+            LogType.NAKED_PAIR_ROW or
+            LogType.NAKED_PAIR_COLUMN or
+            LogType.NAKED_PAIR_SECTION or
+            LogType.NAKED_TRIPLE_ROW or
+            LogType.NAKED_TRIPLE_COLUMN or
+            LogType.NAKED_TRIPLE_SECTION or
+            LogType.NAKED_QUAD_ROW or
+            LogType.NAKED_QUAD_COLUMN or
+            LogType.NAKED_QUAD_SECTION =>
+                IsNakedSetResolved(type, position, playerCandidates),
+
             // Elimination strategies: the solver removed a candidate value from
             // a position. If the player already doesn't have that candidate, or
             // has no pencil marks at all for that cell, the step is resolved.
@@ -874,6 +891,63 @@ public class QQWing
                 && playerCandidates[position] != null
                 && !playerCandidates[position].Contains(value),
         };
+    }
+
+    /// <summary>
+    /// Returns true if a naked set strategy (pair/triple/quad) has already been
+    /// resolved by the player. The set values are taken from the player's
+    /// candidates at the logged position. The hint is resolved if no other cell
+    /// in the affected unit (where the player has pencil marks) still contains
+    /// any of the set values.
+    /// </summary>
+    private static bool IsNakedSetResolved(LogType type, int position, HashSet<int>[] playerCandidates)
+    {
+        HashSet<int> setValues = playerCandidates[position];
+        if (setValues == null || setValues.Count == 0)
+            return false;
+
+        IEnumerable<int> unitCells = type switch
+        {
+            LogType.NAKED_PAIR_ROW or LogType.NAKED_TRIPLE_ROW or LogType.NAKED_QUAD_ROW =>
+                RowCells(CellToRow(position)),
+            LogType.NAKED_PAIR_COLUMN or LogType.NAKED_TRIPLE_COLUMN or LogType.NAKED_QUAD_COLUMN =>
+                ColumnCells(CellToColumn(position)),
+            _ => CellToSectionCells(position),
+        };
+
+        foreach (int cell in unitCells)
+        {
+            if (cell == position)
+                continue;
+
+            HashSet<int> cellCandidates = playerCandidates[cell];
+            if (cellCandidates == null || cellCandidates.Count == 0)
+                continue;
+
+            // Skip other cells that are part of the naked set (their
+            // candidates are a subset of the set values).
+            if (cellCandidates.IsSubsetOf(setValues))
+                continue;
+
+            // If this cell still has any of the set values, the player
+            // has not finished applying the elimination.
+            if (cellCandidates.Overlaps(setValues))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static IEnumerable<int> RowCells(int row)
+    {
+        for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
+            yield return RowColumnToCell(row, col);
+    }
+
+    private static IEnumerable<int> ColumnCells(int col)
+    {
+        for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
+            yield return RowColumnToCell(row, col);
     }
 
     public bool Solve(CancellationToken token)

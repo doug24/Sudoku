@@ -146,4 +146,22 @@ public class SolverUnitTests
             Assert.AreEqual(data.SolveSteps[jdx], solveSteps[jdx]);
         }
     }
+
+    // this test is meant to be a canary for a specific bug that was found in the past,
+    // where a Naked Pair hint was returned even though the player candidates already
+    // eliminated everything possible from the Naked Pair. Added QQWing.IsNakedSetResolved
+    // to prevent this from happening again, and this test should fail if that method is
+    // removed or broken.
+    [TestMethod]
+    public void TestHintShouldReturnSimpleColoring()
+    {
+        int[] currentBoard = new int[] { 0, 2, 1, 9, 8, 0, 7, 4, 3, 7, 3, 0, 1, 4, 2, 0, 8, 9, 4, 9, 8, 0, 0, 0, 0, 1, 2, 0, 4, 0, 0, 0, 0, 8, 2, 1, 8, 1, 0, 2, 0, 0, 4, 3, 7, 3, 7, 2, 8, 1, 4, 9, 6, 5, 2, 6, 3, 4, 5, 9, 1, 7, 8, 1, 5, 7, 0, 0, 8, 2, 9, 4, 9, 8, 4, 7, 2, 1, 3, 5, 6 };
+        HashSet<int>[] playerCandidates = Util.DeserializeCandidates("96,0,0,0,0,96,0,0,0,0,0,96,0,0,0,96,0,0,0,0,0,104,200,136,96,0,0,96,0,608,104,712,136,0,0,0,0,0,608,0,576,96,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,72,72,0,0,0,0,0,0,0,0,0,0,0,0,0");
+
+        QQWing ss = new();
+        LogItem hint = ss.GetHint(currentBoard, playerCandidates, 0);
+
+        Assert.IsNotNull(hint);
+        Assert.AreEqual(LogType.SIMPLE_COLORING, hint.GetLogType());
+    }
 }
