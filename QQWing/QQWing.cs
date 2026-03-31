@@ -33,8 +33,7 @@ using System.Threading;
 namespace QQWingLib;
 
 /// <summary>
-/// The board containing all the memory structures and methods for solving or
-/// generating sudoku puzzles.
+/// The board containing all the memory structures and methods for solving or generating sudoku puzzles.
 /// </summary>
 public class QQWing
 {
@@ -65,8 +64,8 @@ public class QQWing
     private int lastSolveRound;
 
     /// <summary>
-    /// The section layout for this sudoku: classic 3x3 or an irregular pattern.
-    /// Made static to avoid changing the class interface.
+    /// The section layout for this sudoku: classic 3x3 or an irregular pattern. Made static to avoid changing the class
+    /// interface.
     /// </summary>
     public static ISectionLayout SectionLayout { get; set; } = new RegularLayout();
 
@@ -79,44 +78,39 @@ public class QQWing
     public readonly static int RandomLayout = 999;
 
     /// <summary>
-    /// The 81 integers that make up a sudoku puzzle. Givens are 1-9, unknowns
-    /// are 0. Once initialized, this puzzle remains as is. The answer is worked
-    /// out in "solution".
+    /// The 81 integers that make up a sudoku puzzle. Givens are 1-9, unknowns are 0. Once initialized, this puzzle
+    /// remains as is. The answer is worked out in "solution".
     /// </summary>
     private readonly int[] puzzle = new int[BOARD_SIZE];
 
     /// <summary>
-    /// The 81 integers that make up a sudoku puzzle. The solution is built here,
-    /// after completion all will be 1-9.
+    /// The 81 integers that make up a sudoku puzzle. The solution is built here, after completion all will be 1-9.
     /// </summary>
     private readonly int[] solution = new int[BOARD_SIZE];
 
     /// <summary>
-    /// Recursion depth at which each of the numbers in the solution were placed.
-    /// Useful for backing out solve branches that don't lead to a solution.
+    /// Recursion depth at which each of the numbers in the solution were placed. Useful for backing out solve branches
+    /// that don't lead to a solution.
     /// </summary>
     private readonly int[] solutionRound = new int[BOARD_SIZE];
 
     /// <summary>
-    /// The 729 integers that make up a the possible values for a Sudoku puzzle.
-    /// (9 possibilities for each of 81 squares). If possibilities[i] is zero,
-    /// then the possibility could still be filled in according to the Sudoku
-    /// rules. When a possibility is eliminated, possibilities[i] is assigned the
-    /// round (recursion level) at which it was determined that it could not be a
-    /// possibility.
+    /// The 729 integers that make up a the possible values for a Sudoku puzzle. (9 possibilities for each of 81
+    /// squares). If possibilities[i] is zero, then the possibility could still be filled in according to the Sudoku
+    /// rules. When a possibility is eliminated, possibilities[i] is assigned the round (recursion level) at which it
+    /// was determined that it could not be a possibility.
     /// </summary>
     private readonly int[] possibilities = new int[POSSIBILITY_SIZE];
 
     /// <summary>
-    /// An array the size of the board (81) containing each of the numbers 0-n
-    /// exactly once. This array may be shuffled so that operations that need to
-    /// look at each cell can do so in a random order.
+    /// An array the size of the board (81) containing each of the numbers 0-n exactly once. This array may be shuffled
+    /// so that operations that need to look at each cell can do so in a random order.
     /// </summary>
     private readonly int[] randomBoardArray = FillIncrementing(new int[BOARD_SIZE]);
 
     /// <summary>
-    /// An array with one element for each position (9), in some random order to
-    /// be used when trying each position in turn during guesses.
+    /// An array with one element for each position (9), in some random order to be used when trying each position in
+    /// turn during guesses.
     /// </summary>
     private readonly int[] randomPossibilityArray = FillIncrementing(new int[ROW_COL_SEC_SIZE]);
 
@@ -131,15 +125,14 @@ public class QQWing
     private bool logHistory = false;
 
     /// <summary>
-    /// A list of moves used to solve the puzzle. This list contains all moves,
-    /// even on solve branches that did not lead to a solution.
+    /// A list of moves used to solve the puzzle. This list contains all moves, even on solve branches that did not lead
+    /// to a solution.
     /// </summary>
     private readonly List<LogItem> solveHistory = [];
 
     /// <summary>
-    /// A list of moves used to solve the puzzle. This list contains only the
-    /// moves needed to solve the puzzle, but doesn't contain information about
-    /// bad guesses.
+    /// A list of moves used to solve the puzzle. This list contains only the moves needed to solve the puzzle, but
+    /// doesn't contain information about bad guesses.
     /// </summary>
     private readonly List<LogItem> solveInstructions = [];
 
@@ -165,8 +158,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of cells that are set in the puzzle (as opposed to figured
-    /// out in the solution
+    /// Get the number of cells that are set in the puzzle (as opposed to figured out in the solution
     /// </summary>
     public int GetGivenCount()
     {
@@ -179,8 +171,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Set the board to the given puzzle. The given puzzle must be an array of
-    /// 81 integers.
+    /// Set the board to the given puzzle. The given puzzle must be an array of 81 integers.
     /// </summary>
     public bool SetPuzzle(int[] initPuzzle)
     {
@@ -192,8 +183,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Reset the board to its initial state with only the givens. This method
-    /// clears any solution, resets statistics, and clears any history messages.
+    /// Reset the board to its initial state with only the givens. This method clears any solution, resets statistics,
+    /// and clears any history messages.
     /// </summary>
     private bool Reset()
     {
@@ -254,8 +245,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of cells for which the solution was determined because
-    /// there was only one possible value for that cell.
+    /// Get the number of cells for which the solution was determined because there was only one possible value for that
+    /// cell.
     /// </summary>
     public int GetSingleCount()
     {
@@ -263,9 +254,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of cells for which the solution was determined because
-    /// that cell had the only possibility for some value in the row, column, or
-    /// section.
+    /// Get the number of cells for which the solution was determined because that cell had the only possibility for
+    /// some value in the row, column, or section.
     /// </summary>
     public int GetHiddenSingleCount()
     {
@@ -274,8 +264,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of naked pair reductions that were performed in solving
-    /// this puzzle.
+    /// Get the number of naked pair reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetNakedPairCount()
     {
@@ -284,8 +273,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of naked triple reductions that were performed in solving
-    /// this puzzle.
+    /// Get the number of naked triple reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetNakedTripleCount()
     {
@@ -294,8 +282,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of naked quad reductions that were performed in solving
-    /// this puzzle.
+    /// Get the number of naked quad reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetNakedQuadCount()
     {
@@ -304,8 +291,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of hidden pair reductions that were performed in solving
-    /// this puzzle.
+    /// Get the number of hidden pair reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetHiddenPairCount()
     {
@@ -314,8 +300,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of pointing pair/triple reductions that were performed in
-    /// solving this puzzle.
+    /// Get the number of pointing pair/triple reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetPointingPairTripleCount()
     {
@@ -323,8 +308,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of box/line reductions that were performed in solving this
-    /// puzzle.
+    /// Get the number of box/line reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetBoxLineReductionCount()
     {
@@ -332,8 +316,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of hidden triple reductions that were performed in solving
-    /// this puzzle.
+    /// Get the number of hidden triple reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetHiddenTripleCount()
     {
@@ -342,8 +325,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of hidden quad reductions that were performed in solving
-    /// this puzzle.
+    /// Get the number of hidden quad reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetHiddenQuadCount()
     {
@@ -352,8 +334,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of XYZ-Wing reductions that were performed in solving this
-    /// puzzle.
+    /// Get the number of XYZ-Wing reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetXyzWingCount()
     {
@@ -361,8 +342,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of Jellyfish reductions that were performed in solving this
-    /// puzzle.
+    /// Get the number of Jellyfish reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetJellyfishCount()
     {
@@ -371,8 +351,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of X-Wing reductions that were performed in solving this
-    /// puzzle.
+    /// Get the number of X-Wing reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetXWingCount()
     {
@@ -381,8 +360,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of Swordfish reductions that were performed in solving this
-    /// puzzle.
+    /// Get the number of Swordfish reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetSwordfishCount()
     {
@@ -391,8 +369,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of Y-Wing reductions that were performed in solving this
-    /// puzzle.
+    /// Get the number of Y-Wing reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetYWingCount()
     {
@@ -400,8 +377,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of simple coloring reductions that were performed in
-    /// solving this puzzle.
+    /// Get the number of simple coloring reductions that were performed in solving this puzzle.
     /// </summary>
     public int GetSimpleColoringCount()
     {
@@ -417,8 +393,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get the number of backtracks (unlucky guesses) required when solving this
-    /// puzzle.
+    /// Get the number of backtracks (unlucky guesses) required when solving this puzzle.
     /// </summary>
     public int GetBacktrackCount()
     {
@@ -693,8 +668,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Get a distinct list of strategy names used to solve the puzzle, in the
-    /// order they were first used.
+    /// Get a distinct list of strategy names used to solve the puzzle, in the order they were first used.
     /// </summary>
     public List<string> GetStrategiesUsed()
     {
@@ -712,8 +686,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Maps a LogType to a human-readable strategy name, or null for
-    /// non-strategy log types like GIVEN and ROLLBACK.
+    /// Maps a LogType to a human-readable strategy name, or null for non-strategy log types like GIVEN and ROLLBACK.
     /// </summary>
     public static string GetStrategyName(LogType type) => type switch
     {
@@ -757,8 +730,8 @@ public class QQWing
     };
 
     /// <summary>
-    /// Eliminate a specific candidate value for a cell, as if the player has
-    /// already removed it. Must be called after SetPuzzle and before Solve.
+    /// Eliminate a specific candidate value for a cell, as if the player has already removed it. Must be called after
+    /// SetPuzzle and before Solve.
     /// </summary>
     /// <param name="cell">Cell position (0-80)</param>
     /// <param name="value">Candidate value to eliminate (1-9)</param>
@@ -775,19 +748,25 @@ public class QQWing
     }
 
     /// <summary>
-    /// Given a partially solved board and the player's current candidate state,
-    /// solve with history recording and return a non-GIVEN LogItem
-    /// describing a strategy and move.
-    /// Returns null if the puzzle is already solved or unsolvable.
+    /// Given a partially solved board and the player's current candidate state, solve with history recording and return
+    /// a non-GIVEN LogItem describing a strategy and move. Returns null if the puzzle is already solved or unsolvable.
     /// </summary>
     /// <param name="currentBoard">81-element array: 1-9 for placed values, 0 for empty cells.</param>
-    /// <param name="playerCandidates">For each empty cell, the set of candidates the player
-    /// currently has visible. Null means the player has not set any candidates (use solver defaults).
-    /// When provided, any solver-possible candidate NOT in this set is pre-eliminated.</param>
-    /// <param name="hintIndex">Zero-based index of the hint to return, allowing the player
-    /// to skip past unhelpful hints. 0 returns the first applicable hint, 1 the second, etc.</param>
+    /// <param name="playerCandidates">
+    /// For each empty cell, the set of candidates the player currently has visible. Null means the player has not set
+    /// any candidates (use solver defaults). When provided, any solver-possible candidate NOT in this set is
+    /// pre-eliminated.
+    /// </param>
+    /// <param name="hintIndex">
+    /// Zero-based index of the hint to return, allowing the player to skip past unhelpful hints. 0 returns the first
+    /// applicable hint, 1 the second, etc.
+    /// </param>
     public LogItem GetHint(int[] currentBoard, HashSet<int>[] playerCandidates = null, int hintIndex = 0)
     {
+        // useful for creating a unit test from a player's board state,
+        //string board = string.Join(",", currentBoard);
+        //string can = Util.SerializeCandidates(playerCandidates);
+
         SetPuzzle(currentBoard);
 
         // Apply the player's candidate eliminations before solving
@@ -813,7 +792,10 @@ public class QQWing
         }
 
         SetRecordHistory(true);
-        Solve(CancellationToken.None);
+        // Call the private Solve(round, token) overload directly so that
+        // the public Solve's Reset() does not discard the player's
+        // candidate eliminations applied above.
+        Solve(2, CancellationToken.None);
 
         if (!IsSolved())
             return null;
@@ -822,11 +804,6 @@ public class QQWing
         foreach (var item in GetSolveInstructions())
         {
             if (item.GetLogType() == LogType.GIVEN)
-                continue;
-
-            // Skip elimination-only steps that don't remove any candidate
-            // the player still has — they've already been resolved.
-            if (playerCandidates != null && IsAlreadyResolved(item, playerCandidates))
                 continue;
 
             if (skipped < hintIndex)
@@ -838,116 +815,6 @@ public class QQWing
             return item;
         }
         return null;
-    }
-
-    /// <summary>
-    /// Returns true if the action described by the log item has already been
-    /// resolved by the player's current candidate state. For placement steps
-    /// (Naked Single, Hidden Single), checks whether the value is already placed.
-    /// For elimination steps, checks whether the candidate is already absent
-    /// from the player's pencil marks at the indicated position.
-    /// For naked set strategies (value=0), checks whether all eliminations in
-    /// the affected unit have already been applied by the player.
-    /// </summary>
-    private static bool IsAlreadyResolved(LogItem item, HashSet<int>[] playerCandidates)
-    {
-        LogType type = item.GetLogType();
-        int position = item.GetPosition();
-        int value = item.GetValue();
-
-        if (position < 0)
-            return false;
-
-        return type switch
-        {
-            // Placement strategies: the solver wants to place a value in a cell.
-            // If the player has no candidates left for that cell (value already
-            // placed), the step is resolved.
-            LogType.SINGLE or
-            LogType.HIDDEN_SINGLE_ROW or
-            LogType.HIDDEN_SINGLE_COLUMN or
-            LogType.HIDDEN_SINGLE_SECTION =>
-                playerCandidates[position] == null || playerCandidates[position].Count == 0,
-
-            // Naked set strategies: the solver identified a naked pair/triple/quad
-            // and eliminated the set's values from other cells in the unit.
-            // The hint is resolved if the player has already removed those values
-            // from all cells in the unit where they have pencil marks.
-            LogType.NAKED_PAIR_ROW or
-            LogType.NAKED_PAIR_COLUMN or
-            LogType.NAKED_PAIR_SECTION or
-            LogType.NAKED_TRIPLE_ROW or
-            LogType.NAKED_TRIPLE_COLUMN or
-            LogType.NAKED_TRIPLE_SECTION or
-            LogType.NAKED_QUAD_ROW or
-            LogType.NAKED_QUAD_COLUMN or
-            LogType.NAKED_QUAD_SECTION =>
-                IsNakedSetResolved(type, position, playerCandidates),
-
-            // Elimination strategies: the solver removed a candidate value from
-            // a position. If the player already doesn't have that candidate, or
-            // has no pencil marks at all for that cell, the step is resolved.
-            _ => value > 0
-                && playerCandidates[position] != null
-                && !playerCandidates[position].Contains(value),
-        };
-    }
-
-    /// <summary>
-    /// Returns true if a naked set strategy (pair/triple/quad) has already been
-    /// resolved by the player. The set values are taken from the player's
-    /// candidates at the logged position. The hint is resolved if no other cell
-    /// in the affected unit (where the player has pencil marks) still contains
-    /// any of the set values.
-    /// </summary>
-    private static bool IsNakedSetResolved(LogType type, int position, HashSet<int>[] playerCandidates)
-    {
-        HashSet<int> setValues = playerCandidates[position];
-        if (setValues == null || setValues.Count == 0)
-            return false;
-
-        IEnumerable<int> unitCells = type switch
-        {
-            LogType.NAKED_PAIR_ROW or LogType.NAKED_TRIPLE_ROW or LogType.NAKED_QUAD_ROW =>
-                RowCells(CellToRow(position)),
-            LogType.NAKED_PAIR_COLUMN or LogType.NAKED_TRIPLE_COLUMN or LogType.NAKED_QUAD_COLUMN =>
-                ColumnCells(CellToColumn(position)),
-            _ => CellToSectionCells(position),
-        };
-
-        foreach (int cell in unitCells)
-        {
-            if (cell == position)
-                continue;
-
-            HashSet<int> cellCandidates = playerCandidates[cell];
-            if (cellCandidates == null || cellCandidates.Count == 0)
-                continue;
-
-            // Skip other cells that are part of the naked set (their
-            // candidates are a subset of the set values).
-            if (cellCandidates.IsSubsetOf(setValues))
-                continue;
-
-            // If this cell still has any of the set values, the player
-            // has not finished applying the elimination.
-            if (cellCandidates.Overlaps(setValues))
-                return false;
-        }
-
-        return true;
-    }
-
-    private static IEnumerable<int> RowCells(int row)
-    {
-        for (int col = 0; col < ROW_COL_SEC_SIZE; col++)
-            yield return RowColumnToCell(row, col);
-    }
-
-    private static IEnumerable<int> ColumnCells(int col)
-    {
-        for (int row = 0; row < ROW_COL_SEC_SIZE; row++)
-            yield return RowColumnToCell(row, col);
     }
 
     public bool Solve(CancellationToken token)
@@ -1011,8 +878,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// return true if the puzzle has a solution
-    /// and only a single solution
+    /// return true if the puzzle has a solution and only a single solution
     /// </summary>
     public bool HasUniqueSolution()
     {
@@ -1036,13 +902,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Count the number of solutions to the puzzle
-    /// but return two any time there are two or
-    /// more solutions.  This method will run much
-    /// faster than countSolutions() when there
-    /// are many possible solutions and can be used
-    /// when you are interested in knowing if the
-    /// puzzle has zero, one, or multiple solutions.
+    /// Count the number of solutions to the puzzle but return two any time there are two or more solutions. This method
+    /// will run much faster than countSolutions() when there are many possible solutions and can be used when you are
+    /// interested in knowing if the puzzle has zero, one, or multiple solutions.
     /// </summary>
     public int CountSolutionsLimited()
     {
@@ -1209,10 +1071,9 @@ public class QQWing
 
 
     /// <summary>
-    /// Lightweight solve move used during solution counting and generation.
-    /// Only uses cheap strategies that don't allocate heap objects.
-    /// The expensive strategies (hidden triples/quads, fish patterns, wings,
-    /// coloring) are skipped since guessing handles the rest efficiently.
+    /// Lightweight solve move used during solution counting and generation. Only uses cheap strategies that don't
+    /// allocate heap objects. The expensive strategies (hidden triples/quads, fish patterns, wings, coloring) are
+    /// skipped since guessing handles the rest efficiently.
     /// </summary>
     private bool SingleSolveMoveFast(int round)
     {
@@ -1266,9 +1127,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Looking at columns, if a value in found only in one section (box),
-    /// then that candidate value is eliminated from the other cells in 
-    /// the other columns in that section.
+    /// Looking at columns, if a value in found only in one section (box), then that candidate value is eliminated from
+    /// the other cells in the other columns in that section.
     /// </summary>
     private bool ColBoxReduction(int round)
     {
@@ -1329,9 +1189,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Looking at rows, if a value in found only in one section (box),
-    /// then that possibility value is eliminated from the other cells in 
-    /// other rows in that section.
+    /// Looking at rows, if a value in found only in one section (box), then that possibility value is eliminated from
+    /// the other cells in other rows in that section.
     /// </summary>
     private bool RowBoxReduction(int round)
     {
@@ -1394,9 +1253,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Pointing pairs and pointing triples across rows.  If a section contains
-    /// a possibility value only in a single row, then that possibility value is
-    /// eliminated from the other cells in that row. 
+    /// Pointing pairs and pointing triples across rows. If a section contains a possibility value only in a single row,
+    /// then that possibility value is eliminated from the other cells in that row.
     /// </summary>
     private bool PointingRowReduction(int round)
     {
@@ -1458,9 +1316,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Pointing pairs and pointing triples down columns.  If a section contains
-    /// a possibility value only in a single column, then that possibility value is
-    /// eliminated from the other cells in that column. 
+    /// Pointing pairs and pointing triples down columns. If a section contains a possibility value only in a single
+    /// column, then that possibility value is eliminated from the other cells in that column.
     /// </summary>
     private bool PointingColumnReduction(int round)
     {
@@ -1824,9 +1681,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Hidden Triple in Row: Find three values that each appear in only 2 or 3 cells
-    /// within a row, and the union of those cells is exactly 3. All other candidates
-    /// can be eliminated from those 3 cells.
+    /// Hidden Triple in Row: Find three values that each appear in only 2 or 3 cells within a row, and the union of
+    /// those cells is exactly 3. All other candidates can be eliminated from those 3 cells.
     /// </summary>
     private bool HiddenTripleInRow(int round)
     {
@@ -1856,8 +1712,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Hidden Triple in Column: Find three values that each appear in only 2 or 3 cells
-    /// within a column, and the union of those cells is exactly 3.
+    /// Hidden Triple in Column: Find three values that each appear in only 2 or 3 cells within a column, and the union
+    /// of those cells is exactly 3.
     /// </summary>
     private bool HiddenTripleInColumn(int round)
     {
@@ -1886,8 +1742,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Hidden Triple in Section: Find three values that each appear in only 2 or 3 cells
-    /// within a section, and the union of those cells is exactly 3.
+    /// Hidden Triple in Section: Find three values that each appear in only 2 or 3 cells within a section, and the
+    /// union of those cells is exactly 3.
     /// </summary>
     private bool HiddenTripleInSection(int round)
     {
@@ -1918,8 +1774,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Hidden Quad in Row: Find four values that each appear in only 2, 3, or 4 cells
-    /// within a row, and the union of those cells is exactly 4.
+    /// Hidden Quad in Row: Find four values that each appear in only 2, 3, or 4 cells within a row, and the union of
+    /// those cells is exactly 4.
     /// </summary>
     private bool HiddenQuadInRow(int round)
     {
@@ -1948,8 +1804,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Hidden Quad in Column: Find four values that each appear in only 2, 3, or 4 cells
-    /// within a column, and the union of those cells is exactly 4.
+    /// Hidden Quad in Column: Find four values that each appear in only 2, 3, or 4 cells within a column, and the union
+    /// of those cells is exactly 4.
     /// </summary>
     private bool HiddenQuadInColumn(int round)
     {
@@ -1978,8 +1834,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Hidden Quad in Section: Find four values that each appear in only 2, 3, or 4 cells
-    /// within a section, and the union of those cells is exactly 4.
+    /// Hidden Quad in Section: Find four values that each appear in only 2, 3, or 4 cells within a section, and the
+    /// union of those cells is exactly 4.
     /// </summary>
     private bool HiddenQuadInSection(int round)
     {
@@ -2010,9 +1866,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Generalized hidden subset finder. Given bitmasks of cell positions per value in a unit,
-    /// find N values (subsetSize) whose combined cell positions span exactly N cells.
-    /// Eliminate all other candidates from those N cells.
+    /// Generalized hidden subset finder. Given bitmasks of cell positions per value in a unit, find N values
+    /// (subsetSize) whose combined cell positions span exactly N cells. Eliminate all other candidates from those N
+    /// cells.
     /// </summary>
     /// <param name="valPosMask">Bitmask of cell positions per value index (0-8).</param>
     /// <param name="valPosCount">Count of cell positions per value index.</param>
@@ -2114,9 +1970,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// X-Wing strategy scanning rows: For a given candidate value, if it appears
-    /// in exactly two columns in each of two different rows, and those columns are
-    /// the same, then that candidate can be eliminated from all other cells in
+    /// X-Wing strategy scanning rows: For a given candidate value, if it appears in exactly two columns in each of two
+    /// different rows, and those columns are the same, then that candidate can be eliminated from all other cells in
     /// those two columns.
     /// </summary>
     private bool XWingInRows(int round)
@@ -2211,9 +2066,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// X-Wing strategy scanning columns: For a given candidate value, if it appears
-    /// in exactly two rows in each of two different columns, and those rows are
-    /// the same, then that candidate can be eliminated from all other cells in
+    /// X-Wing strategy scanning columns: For a given candidate value, if it appears in exactly two rows in each of two
+    /// different columns, and those rows are the same, then that candidate can be eliminated from all other cells in
     /// those two rows.
     /// </summary>
     private bool XWingInColumns(int round)
@@ -2308,10 +2162,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Swordfish strategy scanning rows: For a given candidate value, find three
-    /// rows where the candidate appears in only 2 or 3 columns, and the union of
-    /// those columns across all three rows is exactly 3. The candidate can then be
-    /// eliminated from all other cells in those 3 columns.
+    /// Swordfish strategy scanning rows: For a given candidate value, find three rows where the candidate appears in
+    /// only 2 or 3 columns, and the union of those columns across all three rows is exactly 3. The candidate can then
+    /// be eliminated from all other cells in those 3 columns.
     /// </summary>
     private bool SwordfishInRows(int round)
     {
@@ -2387,10 +2240,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Swordfish strategy scanning columns: For a given candidate value, find three
-    /// columns where the candidate appears in only 2 or 3 rows, and the union of
-    /// those rows across all three columns is exactly 3. The candidate can then be
-    /// eliminated from all other cells in those 3 rows.
+    /// Swordfish strategy scanning columns: For a given candidate value, find three columns where the candidate appears
+    /// in only 2 or 3 rows, and the union of those rows across all three columns is exactly 3. The candidate can then
+    /// be eliminated from all other cells in those 3 rows.
     /// </summary>
     private bool SwordfishInColumns(int round)
     {
@@ -2479,10 +2331,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Jellyfish strategy scanning rows: For a given candidate value, find four
-    /// rows where the candidate appears in only 2, 3, or 4 columns, and the union
-    /// of those columns across all four rows is exactly 4. The candidate can then be
-    /// eliminated from all other cells in those 4 columns.
+    /// Jellyfish strategy scanning rows: For a given candidate value, find four rows where the candidate appears in
+    /// only 2, 3, or 4 columns, and the union of those columns across all four rows is exactly 4. The candidate can
+    /// then be eliminated from all other cells in those 4 columns.
     /// </summary>
     private bool JellyfishInRows(int round)
     {
@@ -2558,10 +2409,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Jellyfish strategy scanning columns: For a given candidate value, find four
-    /// columns where the candidate appears in only 2, 3, or 4 rows, and the union
-    /// of those rows across all four columns is exactly 4. The candidate can then be
-    /// eliminated from all other cells in those 4 rows.
+    /// Jellyfish strategy scanning columns: For a given candidate value, find four columns where the candidate appears
+    /// in only 2, 3, or 4 rows, and the union of those rows across all four columns is exactly 4. The candidate can
+    /// then be eliminated from all other cells in those 4 rows.
     /// </summary>
     private bool JellyfishInColumns(int round)
     {
@@ -2637,12 +2487,11 @@ public class QQWing
     }
 
     /// <summary>
-    /// Y-Wing (XY-Wing) strategy: Find a pivot cell with exactly two candidates {A, B}.
-    /// Find two wing cells that each share a unit (row, column, or section) with the pivot:
-    ///   - Wing1 has candidates {A, C} (shares candidate A with the pivot)
-    ///   - Wing2 has candidates {B, C} (shares candidate B with the pivot)
-    /// The shared candidate C can be eliminated from any cell that sees both wings
-    /// (i.e., shares a row, column, or section with both Wing1 and Wing2).
+    /// Y-Wing (XY-Wing) strategy: Find a pivot cell with exactly two candidates {A, B}. Find two wing cells that each
+    /// share a unit (row, column, or section) with the pivot: - Wing1 has candidates {A, C} (shares candidate A with
+    /// the pivot) - Wing2 has candidates {B, C} (shares candidate B with the pivot) The shared candidate C can be
+    /// eliminated from any cell that sees both wings (i.e., shares a row, column, or section with both Wing1 and
+    /// Wing2).
     /// </summary>
     private bool YWing(int round)
     {
@@ -2746,13 +2595,11 @@ public class QQWing
     }
 
     /// <summary>
-    /// XYZ-Wing strategy: Find a pivot cell with exactly three candidates {A, B, C}.
-    /// Find two wing cells that each share a unit with the pivot:
-    ///   - Wing1 is a bi-value cell with candidates {A, C} (subset of pivot)
-    ///   - Wing2 is a bi-value cell with candidates {B, C} (subset of pivot)
-    /// Wing1 and Wing2 must NOT share a unit with each other (they connect through 
-    /// different units of the pivot). The shared candidate C can be eliminated from 
-    /// any cell that sees all three: pivot, wing1, and wing2.
+    /// XYZ-Wing strategy: Find a pivot cell with exactly three candidates {A, B, C}. Find two wing cells that each
+    /// share a unit with the pivot: - Wing1 is a bi-value cell with candidates {A, C} (subset of pivot) - Wing2 is a
+    /// bi-value cell with candidates {B, C} (subset of pivot) Wing1 and Wing2 must NOT share a unit with each other
+    /// (they connect through different units of the pivot). The shared candidate C can be eliminated from any cell that
+    /// sees all three: pivot, wing1, and wing2.
     /// </summary>
     private bool XyzWing(int round)
     {
@@ -2845,8 +2692,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Returns all cells that share a row, column, or section with the given cell
-    /// (excluding the cell itself), without duplicates.
+    /// Returns all cells that share a row, column, or section with the given cell (excluding the cell itself), without
+    /// duplicates.
     /// </summary>
     private static List<int> GetPeers(int cell)
     {
@@ -2879,15 +2726,10 @@ public class QQWing
     }
 
     /// <summary>
-    /// Simple Coloring (Singles Chains) strategy: For a given candidate value,
-    /// build chains of conjugate pairs (cells in a unit where the candidate
-    /// appears in exactly two places). Alternate two colors along the chain.
-    /// 
-    /// Rule 2 (Color Contradiction): If two cells of the same color share a unit,
-    /// that color is invalid and the candidate is eliminated from all cells of
-    /// that color.
-    /// 
-    /// Rule 4 (Color Elimination): If an uncolored cell with the candidate can
+    /// Simple Coloring (Singles Chains) strategy: For a given candidate value, build chains of conjugate pairs (cells
+    /// in a unit where the candidate appears in exactly two places). Alternate two colors along the chain. Rule 2
+    /// (Color Contradiction): If two cells of the same color share a unit, that color is invalid and the candidate is
+    /// eliminated from all cells of that color. Rule 4 (Color Elimination): If an uncolored cell with the candidate can
     /// see cells of both colors, the candidate is eliminated from that cell.
     /// </summary>
     private bool SimpleColoring(int round)
@@ -3105,8 +2947,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Returns true if any two cells in the list share a row, column, or section,
-    /// indicating a color contradiction in Simple Coloring.
+    /// Returns true if any two cells in the list share a row, column, or section, indicating a color contradiction in
+    /// Simple Coloring.
     /// </summary>
     private static bool HasSameColorConflict(List<int> cells)
     {
@@ -3199,10 +3041,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Naked Triples: Find three cells in the same unit (row, column, or section)
-    /// whose combined candidates contain exactly three values, with each cell having
-    /// 2 or 3 of those values. Those three candidates can be eliminated from all
-    /// other cells in the unit.
+    /// Naked Triples: Find three cells in the same unit (row, column, or section) whose combined candidates contain
+    /// exactly three values, with each cell having 2 or 3 of those values. Those three candidates can be eliminated
+    /// from all other cells in the unit.
     /// </summary>
     private bool HandleNakedTriples(int round)
     {
@@ -3407,10 +3248,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Naked Quads: Find four cells in the same unit (row, column, or section)
-    /// whose combined candidates contain exactly four values, with each cell having
-    /// 2, 3, or 4 of those values. Those four candidates can be eliminated from all
-    /// other cells in the unit.
+    /// Naked Quads: Find four cells in the same unit (row, column, or section) whose combined candidates contain
+    /// exactly four values, with each cell having 2, 3, or 4 of those values. Those four candidates can be eliminated
+    /// from all other cells in the unit.
     /// </summary>
     private bool HandleNakedQuads(int round)
     {
@@ -3624,10 +3464,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Mark exactly one cell which is the only possible value for some row, if
-    /// such a cell exists. This method will look in a row for a possibility that
-    /// is only listed for one cell. This type of cell is often called a
-    /// "hidden single"
+    /// Mark exactly one cell which is the only possible value for some row, if such a cell exists. This method will
+    /// look in a row for a possibility that is only listed for one cell. This type of cell is often called a "hidden
+    /// single"
     /// </summary>
     private bool OnlyValueInRow(int round)
     {
@@ -3660,10 +3499,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Mark exactly one cell which is the only possible value for some column,
-    /// if such a cell exists. This method will look in a column for a
-    /// possibility that is only listed for one cell. This type of cell is often
-    /// called a "hidden single"
+    /// Mark exactly one cell which is the only possible value for some column, if such a cell exists. This method will
+    /// look in a column for a possibility that is only listed for one cell. This type of cell is often called a "hidden
+    /// single"
     /// </summary>
     private bool OnlyValueInColumn(int round)
     {
@@ -3696,10 +3534,9 @@ public class QQWing
     }
 
     /// <summary>
-    /// Mark exactly one cell which is the only possible value for some section,
-    /// if such a cell exists. This method will look in a section for a
-    /// possibility that is only listed for one cell. This type of cell is often
-    /// called a "hidden single"
+    /// Mark exactly one cell which is the only possible value for some section, if such a cell exists. This method will
+    /// look in a section for a possibility that is only listed for one cell. This type of cell is often called a
+    /// "hidden single"
     /// </summary>
     private bool OnlyValueInSection(int round)
     {
@@ -3733,9 +3570,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Mark exactly one cell that has a single possibility, if such a cell
-    /// exists. This method will look for a cell that has only one possibility.
-    /// This type of cell is often called a "single"
+    /// Mark exactly one cell that has a single possibility, if such a cell exists. This method will look for a cell
+    /// that has only one possibility. This type of cell is often called a "single"
     /// </summary>
     private bool OnlyPossibilityForCell(int round)
     {
@@ -3766,8 +3602,8 @@ public class QQWing
     }
 
     /// <summary>
-    /// Mark the given value at the given position. Go through the row, column,
-    /// and section for the position and remove the value from the possibilities.
+    /// Mark the given value at the given position. Go through the row, column, and section for the position and remove
+    /// the value from the possibilities.
     /// </summary>
     /// <param name="position">Position into the board (0-80)</param>
     /// <param name="round">Round to mark for rollback purposes</param>
@@ -3833,8 +3669,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// print the given BOARD_SIZEd array of ints as a sudoku puzzle. Use print
-    /// options from member variables.
+    /// print the given BOARD_SIZEd array of ints as a sudoku puzzle. Use print options from member variables.
     /// </summary>
     private void Print(int[] sudoku)
     {
@@ -3964,8 +3799,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Given a vector of LogItems, determine how many log items in the vector
-    /// are of the specified type.
+    /// Given a vector of LogItems, determine how many log items in the vector are of the specified type.
     /// </summary>
     private static int GetLogCount(List<LogItem> v, LogType type)
     {
@@ -3998,8 +3832,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Given the index of a cell (0-80) calculate the column (0-8) in which that
-    /// cell resides.
+    /// Given the index of a cell (0-80) calculate the column (0-8) in which that cell resides.
     /// </summary>
     public static int CellToColumn(int cell)
     {
@@ -4007,8 +3840,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Given the index of a cell (0-80) calculate the row (0-8) in which it
-    /// resides.
+    /// Given the index of a cell (0-80) calculate the row (0-8) in which it resides.
     /// </summary>
     public static int CellToRow(int cell)
     {
@@ -4016,8 +3848,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Given the index of a cell (0-80) calculate the section (0-8) in which it
-    /// resides.
+    /// Given the index of a cell (0-80) calculate the section (0-8) in which it resides.
     /// </summary>
     public static int CellToSection(int cell)
     {
@@ -4025,8 +3856,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Given the index of a cell (0-80) calculate the cell (0-80) that is the
-    /// upper left start cell of that section.
+    /// Given the index of a cell (0-80) calculate the cell (0-80) that is the upper left start cell of that section.
     /// </summary>
     public static int CellToSectionStartCell(int cell)
     {
@@ -4067,8 +3897,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Given a value for a cell (0-8) and a cell number (0-80) calculate the
-    /// offset into the possibility array (0-728).
+    /// Given a value for a cell (0-8) and a cell number (0-80) calculate the offset into the possibility array (0-728).
     /// </summary>
     public static int GetPossibilityIndex(int valueIndex, int cell)
     {
@@ -4084,8 +3913,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Given a section (0-8) and an offset into that section (0-8) calculate the
-    /// cell (0-80)
+    /// Given a section (0-8) and an offset into that section (0-8) calculate the cell (0-80)
     /// </summary>
     public static int SectionToCell(int section, int offset)
     {

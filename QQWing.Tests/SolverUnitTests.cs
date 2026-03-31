@@ -149,14 +149,30 @@ public class SolverUnitTests
 
     // this test is meant to be a canary for a specific bug that was found in the past,
     // where a Naked Pair hint was returned even though the player candidates already
-    // eliminated everything possible from the Naked Pair. Added QQWing.IsNakedSetResolved
-    // to prevent this from happening again, and this test should fail if that method is
-    // removed or broken.
+    // eliminated everything possible from the Naked Pair. Fixed bug where GetHint called
+    // Solve which Reset the players candidates
     [TestMethod]
     public void TestHintShouldReturnSimpleColoring()
     {
         int[] currentBoard = new int[] { 0, 2, 1, 9, 8, 0, 7, 4, 3, 7, 3, 0, 1, 4, 2, 0, 8, 9, 4, 9, 8, 0, 0, 0, 0, 1, 2, 0, 4, 0, 0, 0, 0, 8, 2, 1, 8, 1, 0, 2, 0, 0, 4, 3, 7, 3, 7, 2, 8, 1, 4, 9, 6, 5, 2, 6, 3, 4, 5, 9, 1, 7, 8, 1, 5, 7, 0, 0, 8, 2, 9, 4, 9, 8, 4, 7, 2, 1, 3, 5, 6 };
         HashSet<int>[] playerCandidates = Util.DeserializeCandidates("96,0,0,0,0,96,0,0,0,0,0,96,0,0,0,96,0,0,0,0,0,104,200,136,96,0,0,96,0,608,104,712,136,0,0,0,0,0,608,0,576,96,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,72,72,0,0,0,0,0,0,0,0,0,0,0,0,0");
+
+        QQWing ss = new();
+        LogItem hint = ss.GetHint(currentBoard, playerCandidates, 0);
+
+        Assert.IsNotNull(hint);
+        Assert.AreEqual(LogType.SIMPLE_COLORING, hint.GetLogType());
+    }
+
+    // this test is meant to be a canary for a specific bug that was found in the past,
+    // where an X-Wing hint was returned even though the player candidates already
+    // eliminated everything possible from the X-Wing. Fixed bug where GetHint called
+    // Solve which Reset the players candidates
+    [TestMethod]
+    public void TestHintShouldNotReturnXWing()
+    {
+        int[] currentBoard = new int[] { 0, 9, 6, 0, 2, 1, 0, 0, 8, 7, 1, 0, 8, 3, 6, 2, 0, 9, 8, 2, 0, 9, 7, 0, 0, 6, 1, 4, 8, 2, 0, 6, 9, 0, 0, 3, 0, 0, 1, 2, 4, 8, 9, 0, 6, 9, 6, 0, 3, 1, 0, 8, 2, 4, 2, 4, 9, 1, 5, 3, 6, 8, 7, 6, 0, 8, 0, 9, 2, 0, 0, 5, 1, 0, 0, 6, 8, 0, 0, 9, 2 };
+        HashSet<int>[] playerCandidates = Util.DeserializeCandidates("40,0,0,48,0,0,184,184,0,0,0,48,0,0,0,0,48,0,0,0,56,0,0,48,56,0,0,0,0,0,160,0,0,162,162,0,40,168,0,0,0,0,0,160,0,0,0,160,0,0,160,0,0,0,0,0,0,0,0,0,0,0,0,0,136,0,144,0,0,26,26,0,0,40,168,0,0,144,24,0,0");
 
         QQWing ss = new();
         LogItem hint = ss.GetHint(currentBoard, playerCandidates, 0);
