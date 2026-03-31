@@ -87,6 +87,7 @@
                     <MenuItem Header="Expert" IsCheckable="True"
                               IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=EXPERT, Mode=TwoWay}" />
                 </MenuItem>
+                <MenuItem Header="Import" Command="{Binding ImportCommand}"/>
                 <MenuItem Header="Open" Command="{Binding OpenFileCommand}"/>
                 <MenuItem Header="Save As" Command="{Binding SaveAsCommand}"/>
                 <Separator/>

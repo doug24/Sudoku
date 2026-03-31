@@ -185,6 +185,9 @@ public partial class SudokuViewModel : ObservableObject
     public ICommand ColorKeyCommand => new RelayCommand(
         p => ColorKey(p));
 
+    public ICommand ImportCommand => new RelayCommand(
+        p => Import());
+
     public ICommand OpenFileCommand => new RelayCommand(
         p => OpenFile());
 
@@ -370,6 +373,16 @@ public partial class SudokuViewModel : ObservableObject
             Key.D9 or Key.NumPad9 => 9,
             _ => -1,
         };
+    }
+
+    private void Import()
+    {
+        ImportWindow dlg = new();
+        var result = dlg.ShowDialog();
+        if (result == true)
+        {
+            GameBoard.Import(dlg.InitialBoard, dlg.Candidates);
+        }
     }
 
     private void OpenFile()

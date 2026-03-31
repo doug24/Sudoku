@@ -1,0 +1,38 @@
+﻿<Window x:Class="Sudoku.ImportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Sudoku"
+        mc:Ignorable="d"
+        Title="Import a Sudoku Puzzle" Height="450" Width="800">
+    <DockPanel LastChildFill="True">
+        
+        <TextBlock Text="Please paste your Sudoku puzzle in the text box below. Use 0 or . for empty cells." 
+                   Margin="10" FontSize="16" DockPanel.Dock="Top"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10" DockPanel.Dock="Bottom">
+            <Button Content="Import" Margin="10" Padding="10,5" Width="100" 
+                    HorizontalAlignment="Right" IsDefault="True"
+                    Click="ImportButton_Click"/>
+
+            <Button Content="Cancel" Margin="10" Padding="10,5" Width="100" 
+                    HorizontalAlignment="Right" 
+                    IsCancel="True"/>
+        </StackPanel>
+
+        <TextBlock Text="Paste in 81 numbers. Zeroes can be dots or other punctuation.
+This importer can handle noisy formats like grids with lines and dots.
+As long as there are 81 separated numbers.
+Any number greater than 9 will be treated as a set of candidates." 
+                   Margin="10" FontSize="14" 
+                   TextWrapping="Wrap" DockPanel.Dock="Bottom"/>
+
+        <TextBox Name="InputTextBox" Margin="10" 
+                 VerticalScrollBarVisibility="Auto" 
+                 HorizontalScrollBarVisibility="Auto" 
+                 AcceptsReturn="True" 
+                 FontFamily="Consolas" FontSize="14"/>
+
+    </DockPanel>
+</Window>

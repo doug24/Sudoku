@@ -993,6 +993,53 @@ public partial class GameBoardViewModel : ObservableObject
         }
     }
 
+    internal void Import(int[] initialBoard, string[]? candidates)
+    {
+        ClearBoard();
+        IsDesignMode = false;
+
+        ChangeLayout(QQWing.ClassicLayout);
+
+        QQWing ss = new();
+        ss.SetRecordHistory(true);
+        ss.SetPuzzle(initialBoard);
+        ss.Solve(CancellationToken.None);
+        if (ss.IsSolved())
+        {
+            int[] solution = ss.GetSolution();
+
+            // Get difficulty and strategies before HasMultipleSolutions,
+            // which calls Reset and clears the solve instructions
+            string difficulty = ss.GetDifficultyAsString();
+            List<string> strategies = ss.GetStrategiesUsed();
+            PuzzleDescription = strategies.Count > 0
+                ? $"{difficulty}: {string.Join(", ", strategies)}"
+                : difficulty;
+
+            if (ss.HasMultipleSolutions())
+                CustomMessageBox.Show("Puzzle has multiple solutions", "Sudoku");
+
+            if (candidates != null && candidates.Length == 81)
+            {
+                List<CellState> list = [];
+                for (int row = 0; row < 9; row++)
+                {
+                    for (int col = 0; col < 9; col++)
+                    {
+                        int cellIndex = QQWing.RowColumnToCell(row, col);
+                        var state = CellState.FromSnapshotString(cellIndex, candidates[cellIndex]);
+                        list.Add(state);
+                        allCells[cellIndex].Initialize(state, solution[cellIndex]);
+                    }
+                }
+                undoStack.Push(list);
+            }
+            IsInProgress = true;
+            stopwatch.Restart();
+        }
+        UpdateRemainderCounts();
+    }
+
     internal void Restore(string[] ssData)
     {
         ClearBoard();
@@ -1012,10 +1059,20 @@ public partial class GameBoardViewModel : ObservableObject
 
         QQWing ss = new();
         ss.SetPuzzle(initial);
+        ss.SetRecordHistory(true);
         ss.Solve(CancellationToken.None);
         if (ss.IsSolved())
         {
             int[] solution = ss.GetSolution();
+
+            // Get difficulty and strategies before HasMultipleSolutions,
+            // which calls Reset and clears the solve instructions
+            string difficulty = ss.GetDifficultyAsString();
+            List<string> strategies = ss.GetStrategiesUsed();
+            PuzzleDescription = strategies.Count > 0
+                ? $"{difficulty}: {string.Join(", ", strategies)}"
+                : difficulty;
+
             if (ss.HasMultipleSolutions())
                 CustomMessageBox.Show("Puzzle has multiple solutions", "Sudoku");
 
@@ -1127,10 +1184,20 @@ public partial class GameBoardViewModel : ObservableObject
 
         QQWing ss = new();
         ss.SetPuzzle(initial);
+        ss.SetRecordHistory(true);
         ss.Solve(CancellationToken.None);
         if (ss.IsSolved())
         {
             int[] solution = ss.GetSolution();
+
+            // Get difficulty and strategies before HasMultipleSolutions,
+            // which calls Reset and clears the solve instructions
+            string difficulty = ss.GetDifficultyAsString();
+            List<string> strategies = ss.GetStrategiesUsed();
+            PuzzleDescription = strategies.Count > 0
+                ? $"{difficulty}: {string.Join(", ", strategies)}"
+                : difficulty;
+
             if (ss.HasMultipleSolutions())
                 CustomMessageBox.Show("Puzzle has multiple solutions", "Sudoku");
 
@@ -1271,10 +1338,20 @@ public partial class GameBoardViewModel : ObservableObject
 
         QQWing ss = new();
         ss.SetPuzzle(initial);
+        ss.SetRecordHistory(true);
         ss.Solve(CancellationToken.None);
         if (ss.IsSolved())
         {
             int[] solution = ss.GetSolution();
+
+            // Get difficulty and strategies before HasMultipleSolutions,
+            // which calls Reset and clears the solve instructions
+            string difficulty = ss.GetDifficultyAsString();
+            List<string> strategies = ss.GetStrategiesUsed();
+            PuzzleDescription = strategies.Count > 0
+                ? $"{difficulty}: {string.Join(", ", strategies)}"
+                : difficulty;
+
             if (ss.HasMultipleSolutions())
                 CustomMessageBox.Show("Puzzle has multiple solutions", "Sudoku");
 
