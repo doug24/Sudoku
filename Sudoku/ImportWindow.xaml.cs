@@ -20,6 +20,8 @@ namespace Sudoku
 
         private void ImportButton_Click(object sender, RoutedEventArgs e)
         {
+            bool skipCandidates = CandidatesCheckBox.IsChecked == true;
+
             string puzzleData = InputTextBox.Text;
 
             // PuzzleData must contain 81 numbers. Zeroes can be dots or other punctuation.
@@ -49,7 +51,7 @@ namespace Sudoku
                     initialBoard[i] = value;
                     candidates[i] = tokens[i];
                 }
-                else if (value > 9)
+                else if (value > 9 && !skipCandidates)
                 {
                     // Each digit is a candidate, format as "c135" for FromSnapshotString
                     initialBoard[i] = 0;

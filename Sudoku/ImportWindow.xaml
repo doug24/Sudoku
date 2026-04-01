@@ -28,6 +28,9 @@ As long as there are 81 separated numbers.
 Any number greater than 9 will be treated as a set of candidates." 
                    Margin="10" FontSize="14" 
                    TextWrapping="Wrap" DockPanel.Dock="Bottom"/>
+        
+        <CheckBox Name="CandidatesCheckBox" Content="Do not import candidates" Margin="10" 
+                  FontSize="14" DockPanel.Dock="Bottom"/>
 
         <TextBox Name="InputTextBox" Margin="10" TabIndex="0"
                  VerticalScrollBarVisibility="Auto" 
