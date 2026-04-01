@@ -339,11 +339,22 @@ public partial class GameBoardViewModel : ObservableObject
             ? $" (value: {hint.GetValue()})"
             : string.Empty;
 
+        bool hasDetailedMessage = !string.IsNullOrEmpty(hint.DetailedMessage);
         MessageBoxCustoms customs = new()
         {
-            CancelButtonText = "Next Hint"
+            YesButtonText = "OK",
+            NoButtonText = "Tell Me More",
+            CancelButtonText = "Next Hint",
         };
-        MessageBoxButton button = hintIndex > 1 ? MessageBoxButton.OK : MessageBoxButton.OKCancel;
+        MessageBoxButton button;
+        if (hasDetailedMessage)
+        {
+            button = (hintIndex > 1 ? MessageBoxButton.YesNo : MessageBoxButton.YesNoCancel);
+        }
+        else
+        {
+            button = (hintIndex > 1 ? MessageBoxButton.OK : MessageBoxButton.OKCancel);
+        }
 
         var result = CustomMessageBox.Show(
             $"Try: {strategyName}{location}{value}",
@@ -351,8 +362,20 @@ public partial class GameBoardViewModel : ObservableObject
             button, MessageBoxImage.None,
             MessageBoxResult.OK, customs);
 
-        if (result == MessageBoxResult.OK)
+        if (result == MessageBoxResult.OK || result == MessageBoxResult.Yes)
         {
+            hintIndex = 0;
+        }
+        else if (result == MessageBoxResult.No)
+        {
+            if (hasDetailedMessage)
+            {
+                CustomMessageBox.Show(hint.DetailedMessage, strategyName);
+            }
+            else
+            {
+                CustomMessageBox.Show("No additional details available.", strategyName);
+            }
             hintIndex = 0;
         }
         else if (result == MessageBoxResult.Cancel)

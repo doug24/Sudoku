@@ -50,6 +50,12 @@ public class LogItem
     /// </summary>
     private int position;
 
+    /// <summary>
+    /// Optional detailed message describing the strategy application, for use
+    /// in hints or verbose logging. Null when no detail is available.
+    /// </summary>
+    public string DetailedMessage { get; set; }
+
     public LogItem(int r, LogType t)
     {
         Init(r, t, 0, -1);

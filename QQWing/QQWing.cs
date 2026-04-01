@@ -1306,7 +1306,15 @@ public class QQWing
                     }
                     if (doneSomething)
                     {
-                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.POINTING_PAIR_TRIPLE_ROW, valIndex + 1, rowStart));
+                        if (logHistory || recordHistory)
+                        {
+                            var logItem = new LogItem(round, LogType.POINTING_PAIR_TRIPLE_ROW, valIndex + 1, rowStart)
+                            {
+                                DetailedMessage = $"Pointing Pair/Triple: candidate {valIndex + 1} in box {section + 1} is confined to row {boxRow + 1}. " +
+                                    $"Eliminate {valIndex + 1} from other cells in row {boxRow + 1}."
+                            };
+                            AddHistoryItem(logItem);
+                        }
                         return true;
                     }
                 }
@@ -1316,7 +1324,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Pointing pairs and pointing triples down columns. If a section contains a possibility value only in a single
+    /// Pointing pairs and pointing triples down columns
     /// column, then that possibility value is eliminated from the other cells in that column.
     /// </summary>
     private bool PointingColumnReduction(int round)
@@ -1369,7 +1377,15 @@ public class QQWing
                     }
                     if (doneSomething)
                     {
-                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.POINTING_PAIR_TRIPLE_COLUMN, valIndex + 1, colStart));
+                        if (logHistory || recordHistory)
+                        {
+                            var logItem = new LogItem(round, LogType.POINTING_PAIR_TRIPLE_COLUMN, valIndex + 1, colStart)
+                            {
+                                DetailedMessage = $"Pointing Pair/Triple: candidate {valIndex + 1} in box {section + 1} is confined to column {boxCol + 1}. " +
+                                    $"Eliminate {valIndex + 1} from other cells in column {boxCol + 1}."
+                            };
+                            AddHistoryItem(logItem);
+                        }
                         return true;
                     }
                 }
@@ -1387,6 +1403,24 @@ public class QQWing
             if (possibilities[valPos] == 0) count++;
         }
         return count;
+    }
+
+    /// <summary>
+    /// Returns a comma-separated string of candidate values (1-9) for the given cell position.
+    /// </summary>
+    private string GetCandidatesString(int position)
+    {
+        StringBuilder sb = new();
+        for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+        {
+            int valPos = GetPossibilityIndex(valIndex, position);
+            if (possibilities[valPos] == 0)
+            {
+                if (sb.Length > 0) sb.Append(',');
+                sb.Append(valIndex + 1);
+            }
+        }
+        return sb.ToString();
     }
 
     private bool ArePossibilitiesSame(int position1, int position2)
@@ -2056,7 +2090,16 @@ public class QQWing
                     }
                     if (doneSomething)
                     {
-                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.X_WING_ROW, valIndex + 1, RowColumnToCell(row1, col1)));
+                        if (logHistory || recordHistory)
+                        {
+                            var logItem = new LogItem(round, LogType.X_WING_ROW, valIndex + 1, RowColumnToCell(row1, col1))
+                            {
+                                DetailedMessage = $"X-Wing (rows): candidate {valIndex + 1} in rows {row1 + 1} and {row2 + 1}, " +
+                                    $"columns {col1 + 1} and {col2 + 1}. " +
+                                    $"Eliminate {valIndex + 1} from other cells in columns {col1 + 1} and {col2 + 1}."
+                            };
+                            AddHistoryItem(logItem);
+                        }
                         return true;
                     }
                 }
@@ -2066,7 +2109,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// X-Wing strategy scanning columns: For a given candidate value, if it appears in exactly two rows in each of two
+    /// X-Wing strategy scanning columns
     /// different columns, and those rows are the same, then that candidate can be eliminated from all other cells in
     /// those two rows.
     /// </summary>
@@ -2152,7 +2195,16 @@ public class QQWing
                     }
                     if (doneSomething)
                     {
-                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.X_WING_COLUMN, valIndex + 1, RowColumnToCell(row1, col1)));
+                        if (logHistory || recordHistory)
+                        {
+                            var logItem = new LogItem(round, LogType.X_WING_COLUMN, valIndex + 1, RowColumnToCell(row1, col1))
+                            {
+                                DetailedMessage = $"X-Wing (columns): candidate {valIndex + 1} in columns {col1 + 1} and {col2 + 1}, " +
+                                    $"rows {row1 + 1} and {row2 + 1}. " +
+                                    $"Eliminate {valIndex + 1} from other cells in rows {row1 + 1} and {row2 + 1}."
+                            };
+                            AddHistoryItem(logItem);
+                        }
                         return true;
                     }
                 }
@@ -2229,7 +2281,16 @@ public class QQWing
                         }
                         if (doneSomething)
                         {
-                            if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.SWORDFISH_ROW, valIndex + 1, RowColumnToCell(r1, 0)));
+                            if (logHistory || recordHistory)
+                            {
+                                var logItem = new LogItem(round, LogType.SWORDFISH_ROW, valIndex + 1, RowColumnToCell(r1, 0))
+                                {
+                                    DetailedMessage = $"Swordfish (rows): candidate {valIndex + 1} in rows {r1 + 1}, {r2 + 1}, and {r3 + 1}, " +
+                                        $"columns {BitmaskToString(unionMask)}. " +
+                                        $"Eliminate {valIndex + 1} from other cells in columns {BitmaskToString(unionMask)}."
+                                };
+                                AddHistoryItem(logItem);
+                            }
                             return true;
                         }
                     }
@@ -2240,7 +2301,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Swordfish strategy scanning columns: For a given candidate value, find three columns where the candidate appears
+    /// Swordfish strategy scanning columns
     /// in only 2 or 3 rows, and the union of those rows across all three columns is exactly 3. The candidate can then
     /// be eliminated from all other cells in those 3 rows.
     /// </summary>
@@ -2306,7 +2367,16 @@ public class QQWing
                         }
                         if (doneSomething)
                         {
-                            if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.SWORDFISH_COLUMN, valIndex + 1, RowColumnToCell(0, c1)));
+                            if (logHistory || recordHistory)
+                            {
+                                var logItem = new LogItem(round, LogType.SWORDFISH_COLUMN, valIndex + 1, RowColumnToCell(0, c1))
+                                {
+                                    DetailedMessage = $"Swordfish (columns): candidate {valIndex + 1} in columns {c1 + 1}, {c2 + 1}, and {c3 + 1}, " +
+                                        $"rows {BitmaskToString(unionMask)}. " +
+                                        $"Eliminate {valIndex + 1} from other cells in rows {BitmaskToString(unionMask)}."
+                                };
+                                AddHistoryItem(logItem);
+                            }
                             return true;
                         }
                     }
@@ -2317,7 +2387,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Count the number of set bits in an integer (population count).
+    /// Count the number of set bits
     /// </summary>
     private static int BitCount(int value)
     {
@@ -2328,6 +2398,23 @@ public class QQWing
             value >>= 1;
         }
         return count;
+    }
+
+    /// <summary>
+    /// Converts a bitmask of positions (0-8) to a comma-separated string of 1-indexed values.
+    /// </summary>
+    private static string BitmaskToString(int mask)
+    {
+        StringBuilder sb = new();
+        for (int i = 0; i < ROW_COL_SEC_SIZE; i++)
+        {
+            if ((mask & (1 << i)) != 0)
+            {
+                if (sb.Length > 0) sb.Append(", ");
+                sb.Append(i + 1);
+            }
+        }
+        return sb.ToString();
     }
 
     /// <summary>
@@ -2397,7 +2484,16 @@ public class QQWing
                             }
                             if (doneSomething)
                             {
-                                if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.JELLYFISH_ROW, valIndex + 1, RowColumnToCell(r1, 0)));
+                                if (logHistory || recordHistory)
+                                {
+                                    var logItem = new LogItem(round, LogType.JELLYFISH_ROW, valIndex + 1, RowColumnToCell(r1, 0))
+                                    {
+                                        DetailedMessage = $"Jellyfish (rows): candidate {valIndex + 1} in rows {r1 + 1}, {r2 + 1}, {r3 + 1}, and {r4 + 1}, " +
+                                            $"columns {BitmaskToString(unionMask)}. " +
+                                            $"Eliminate {valIndex + 1} from other cells in columns {BitmaskToString(unionMask)}."
+                                    };
+                                    AddHistoryItem(logItem);
+                                }
                                 return true;
                             }
                         }
@@ -2409,7 +2505,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Jellyfish strategy scanning columns: For a given candidate value, find four columns where the candidate appears
+    /// Jellyfish strategy scanning columns
     /// in only 2, 3, or 4 rows, and the union of those rows across all four columns is exactly 4. The candidate can
     /// then be eliminated from all other cells in those 4 rows.
     /// </summary>
@@ -2475,7 +2571,16 @@ public class QQWing
                             }
                             if (doneSomething)
                             {
-                                if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.JELLYFISH_COLUMN, valIndex + 1, RowColumnToCell(0, c1)));
+                                if (logHistory || recordHistory)
+                                {
+                                    var logItem = new LogItem(round, LogType.JELLYFISH_COLUMN, valIndex + 1, RowColumnToCell(0, c1))
+                                    {
+                                        DetailedMessage = $"Jellyfish (columns): candidate {valIndex + 1} in columns {c1 + 1}, {c2 + 1}, {c3 + 1}, and {c4 + 1}, " +
+                                            $"rows {BitmaskToString(unionMask)}. " +
+                                            $"Eliminate {valIndex + 1} from other cells in rows {BitmaskToString(unionMask)}."
+                                    };
+                                    AddHistoryItem(logItem);
+                                }
                                 return true;
                             }
                         }
@@ -2487,7 +2592,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Y-Wing (XY-Wing) strategy: Find a pivot cell with exactly two candidates {A, B}. Find two wing cells that each
+    /// Y-Wing (XY-Wing) strategy
     /// share a unit (row, column, or section) with the pivot: - Wing1 has candidates {A, C} (shares candidate A with
     /// the pivot) - Wing2 has candidates {B, C} (shares candidate B with the pivot) The shared candidate C can be
     /// eliminated from any cell that sees both wings (i.e., shares a row, column, or section with both Wing1 and
@@ -2585,7 +2690,17 @@ public class QQWing
                     }
                     if (doneSomething)
                     {
-                        if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.Y_WING, wingVal1C + 1, pivot));
+                        if (logHistory || recordHistory)
+                        {
+                            var logItem = new LogItem(round, LogType.Y_WING, wingVal1C + 1, pivot)
+                            {
+                                DetailedMessage = $"Y-Wing: pivot R{CellToRow(pivot) + 1}C{CellToColumn(pivot) + 1}{{{GetCandidatesString(pivot)}}}, " +
+                                    $"wing1 R{CellToRow(wing1) + 1}C{CellToColumn(wing1) + 1}{{{GetCandidatesString(wing1)}}}, " +
+                                    $"wing2 R{CellToRow(wing2) + 1}C{CellToColumn(wing2) + 1}{{{GetCandidatesString(wing2)}}}. " +
+                                    $"Eliminate {wingVal1C + 1} from cells that see both wings."
+                            };
+                            AddHistoryItem(logItem);
+                        }
                         return true;
                     }
                 }
@@ -2670,7 +2785,17 @@ public class QQWing
                         }
                         if (doneSomething)
                         {
-                            if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.XYZ_WING, valC + 1, pivot));
+                            if (logHistory || recordHistory)
+                            {
+                                var logItem = new LogItem(round, LogType.XYZ_WING, valC + 1, pivot)
+                                {
+                                    DetailedMessage = $"XYZ-Wing: pivot R{CellToRow(pivot) + 1}C{CellToColumn(pivot) + 1}{{{GetCandidatesString(pivot)}}}, " +
+                                        $"wing1 R{CellToRow(wing1) + 1}C{CellToColumn(wing1) + 1}{{{GetCandidatesString(wing1)}}}, " +
+                                        $"wing2 R{CellToRow(wing2) + 1}C{CellToColumn(wing2) + 1}{{{GetCandidatesString(wing2)}}}. " +
+                                        $"Eliminate {valC + 1} from cells that see all three."
+                                };
+                                AddHistoryItem(logItem);
+                            }
                             return true;
                         }
                     }
