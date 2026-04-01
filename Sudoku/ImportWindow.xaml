@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Sudoku"
         mc:Ignorable="d"
+        FocusManager.FocusedElement="{Binding ElementName=InputTextBox}"
         Title="Import a Sudoku Puzzle" Height="450" Width="800">
     <DockPanel LastChildFill="True">
         
@@ -13,11 +14,11 @@
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10" DockPanel.Dock="Bottom">
             <Button Content="Import" Margin="10" Padding="10,5" Width="100" 
-                    HorizontalAlignment="Right" IsDefault="True"
+                    HorizontalAlignment="Right" IsDefault="True" TabIndex="1"
                     Click="ImportButton_Click"/>
 
             <Button Content="Cancel" Margin="10" Padding="10,5" Width="100" 
-                    HorizontalAlignment="Right" 
+                    HorizontalAlignment="Right" TabIndex="2"
                     IsCancel="True"/>
         </StackPanel>
 
@@ -28,7 +29,7 @@ Any number greater than 9 will be treated as a set of candidates."
                    Margin="10" FontSize="14" 
                    TextWrapping="Wrap" DockPanel.Dock="Bottom"/>
 
-        <TextBox Name="InputTextBox" Margin="10" 
+        <TextBox Name="InputTextBox" Margin="10" TabIndex="0"
                  VerticalScrollBarVisibility="Auto" 
                  HorizontalScrollBarVisibility="Auto" 
                  AcceptsReturn="True" 
