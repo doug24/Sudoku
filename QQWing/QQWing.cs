@@ -812,6 +812,11 @@ public class QQWing
                 continue;
             }
 
+            if (item.GetLogType() == LogType.GUESS)
+            {
+                return null; // Don't return Guess as a hint
+            }
+
             return item;
         }
         return null;
