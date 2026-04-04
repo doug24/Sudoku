@@ -217,18 +217,18 @@ public class QQWing
     public Difficulty GetDifficulty()
     {
         if (GetGuessCount() > 0) return Difficulty.EXPERT;
-        if (GetSimpleColoringCount() > 0) return Difficulty.INTERMEDIATE;
-        if (GetJellyfishCount() > 0) return Difficulty.INTERMEDIATE;
-        if (GetSwordfishCount() > 0) return Difficulty.INTERMEDIATE;
-        if (GetXyzWingCount() > 0) return Difficulty.INTERMEDIATE;
-        if (GetYWingCount() > 0) return Difficulty.INTERMEDIATE;
-        if (GetXWingCount() > 0) return Difficulty.INTERMEDIATE;
+        if (GetSimpleColoringCount() > 0) return Difficulty.TOUGH;
+        if (GetJellyfishCount() > 0) return Difficulty.TOUGH;
+        if (GetSwordfishCount() > 0) return Difficulty.TOUGH;
+        if (GetXyzWingCount() > 0) return Difficulty.TOUGH;
+        if (GetYWingCount() > 0) return Difficulty.TOUGH;
+        if (GetXWingCount() > 0) return Difficulty.TOUGH;
+        if (GetHiddenQuadCount() > 0) return Difficulty.TOUGH;
+        if (GetNakedQuadCount() > 0) return Difficulty.TOUGH;
         if (GetBoxLineReductionCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetPointingPairTripleCount() > 0) return Difficulty.INTERMEDIATE;
-        if (GetHiddenQuadCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetHiddenTripleCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetHiddenPairCount() > 0) return Difficulty.INTERMEDIATE;
-        if (GetNakedQuadCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetNakedTripleCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetNakedPairCount() > 0) return Difficulty.INTERMEDIATE;
         if (GetHiddenSingleCount() > 0) return Difficulty.EASY;

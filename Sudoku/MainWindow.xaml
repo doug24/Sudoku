@@ -84,6 +84,8 @@
                               IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=EASY, Mode=TwoWay}" />
                     <MenuItem Header="Intermediate" IsCheckable="True"
                               IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=INTERMEDIATE, Mode=TwoWay}" />
+                    <MenuItem Header="Tough" IsCheckable="True"
+                              IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=TOUGH, Mode=TwoWay}" />
                     <MenuItem Header="Expert" IsCheckable="True"
                               IsChecked="{Binding Path=PuzzleDifficulty, Converter={StaticResource ebc}, ConverterParameter=EXPERT, Mode=TwoWay}" />
                 </MenuItem>

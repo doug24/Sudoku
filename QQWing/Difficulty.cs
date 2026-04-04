@@ -25,5 +25,6 @@ public enum Difficulty
     SIMPLE,
     EASY,
     INTERMEDIATE,
+    TOUGH,
     EXPERT
 }
