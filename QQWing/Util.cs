@@ -177,5 +177,77 @@ namespace QQWingLib
 
             return tokens;
         }
+
+        /// <summary>
+        /// Parse Killer Sudoku cage definitions into a list of <see cref="Cage"/> objects.
+        /// Each line defines one cage. The first number is the cage sum, followed by
+        /// space-separated row,col pairs (0-based, 0-8) for the cells in the cage.
+        /// Blank lines and lines starting with '#' are ignored.
+        /// <example>
+        /// Example input:
+        /// <code>
+        /// 3 0,0 0,1
+        /// 15 0,2 1,2
+        /// </code>
+        /// </example>
+        /// </summary>
+        /// <param name="killerData">Multi-line string of cage definitions.</param>
+        /// <returns>A list of <see cref="Cage"/> objects parsed from the input.</returns>
+        public static List<Cage> ParseKillerData(string killerData)
+        {
+            ArgumentNullException.ThrowIfNull(killerData);
+
+            List<Cage> cages = [];
+            string[] lines = killerData.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+
+            for (int lineNum = 0; lineNum < lines.Length; lineNum++)
+            {
+                string line = lines[lineNum].Trim();
+                if (line.Length == 0 || line[0] == '#')
+                    continue;
+
+                string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length < 2)
+                {
+                    throw new ArgumentException(
+                        $"Line {lineNum + 1}: expected a sum followed by at least one row,col pair.",
+                        nameof(killerData));
+                }
+
+                if (!int.TryParse(parts[0], out int sum))
+                {
+                    throw new ArgumentException(
+                        $"Line {lineNum + 1}: '{parts[0]}' is not a valid cage sum.",
+                        nameof(killerData));
+                }
+
+                int[] cells = new int[parts.Length - 1];
+                for (int i = 1; i < parts.Length; i++)
+                {
+                    string[] rc = parts[i].Split(',');
+                    if (rc.Length != 2 ||
+                        !int.TryParse(rc[0], out int row) ||
+                        !int.TryParse(rc[1], out int col))
+                    {
+                        throw new ArgumentException(
+                            $"Line {lineNum + 1}: '{parts[i]}' is not a valid row,col pair.",
+                            nameof(killerData));
+                    }
+
+                    if (row < 0 || row > 8 || col < 0 || col > 8)
+                    {
+                        throw new ArgumentException(
+                            $"Line {lineNum + 1}: row,col ({row},{col}) is out of range (0-8).",
+                            nameof(killerData));
+                    }
+
+                    cells[i - 1] = row * 9 + col;
+                }
+
+                cages.Add(new Cage(cells, sum));
+            }
+
+            return cages;
+        }
     }
 }
