@@ -49,7 +49,19 @@
                                         </Border>
                                     </Border>
 
-
+                                    <!-- Cage borders: dashed lines outside cell content, on top of everything -->
+                                    <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" VerticalAlignment="Top"
+                                          Stroke="{Binding CageTopBrush}" StrokeThickness="1" StrokeDashArray="6,2"
+                                          SnapsToDevicePixels="True"/>
+                                    <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" VerticalAlignment="Bottom"
+                                          Stroke="{Binding CageBottomBrush}" StrokeThickness="1" StrokeDashArray="6,2"
+                                          SnapsToDevicePixels="True"/>
+                                    <Line X1="0" Y1="0" X2="0" Y2="1" Stretch="Fill" HorizontalAlignment="Left"
+                                          Stroke="{Binding CageLeftBrush}" StrokeThickness="1" StrokeDashArray="6,2"
+                                          SnapsToDevicePixels="True"/>
+                                    <Line X1="0" Y1="0" X2="0" Y2="1" Stretch="Fill" HorizontalAlignment="Right"
+                                          Stroke="{Binding CageRightBrush}" StrokeThickness="1" StrokeDashArray="6,2"
+                                          SnapsToDevicePixels="True"/>
                                 </Grid>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsSelected" Value="True">
@@ -61,6 +73,11 @@
                         </Setter.Value>
                     </Setter>
                     <Setter Property="Margin" Value="0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsKillerMode}" Value="True">
+                            <Setter Property="Margin" Value="1.5"/>
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
             </ListBox.ItemContainerStyle>
 

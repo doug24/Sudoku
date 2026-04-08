@@ -37,20 +37,10 @@
     <Grid>
         <Border Background="{Binding Background}" Margin="2"/>
 
-        <!-- Cage dashed borders: each edge is an independent line -->
-        <Border BorderThickness="0,1.5,0,0" BorderBrush="{Binding CageTopBrush}" Margin="1,1,1,0"
-                Visibility="{Binding IsKillerMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
-        <Border BorderThickness="0,0,1.5,0" BorderBrush="{Binding CageRightBrush}" Margin="0,1,1,1"
-                Visibility="{Binding IsKillerMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
-        <Border BorderThickness="0,0,0,1.5" BorderBrush="{Binding CageBottomBrush}" Margin="1,0,1,1"
-                Visibility="{Binding IsKillerMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
-        <Border BorderThickness="1.5,0,0,0" BorderBrush="{Binding CageLeftBrush}" Margin="1,1,0,1"
-                Visibility="{Binding IsKillerMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
-
         <!-- Cage sum label in top-left corner -->
         <TextBlock Text="{Binding CageSumText}"
                    FontSize="10" 
-                   Margin="3,1,0,0"
+                   Margin="1,1,0,0"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
                    Foreground="{Binding CageSumForeground}"

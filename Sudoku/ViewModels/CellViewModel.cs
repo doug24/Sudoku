@@ -343,6 +343,11 @@ public partial class CellViewModel : ObservableObject
         CageSumText = sumText;
         CageSumForeground = isDarkMode ? cageSumBrushDark : cageSumBrush;
         IsKillerMode = true;
+
+        // Hide section borders in Killer mode — sections are
+        // already differentiated by background color
+        RightBrush = Brushes.Transparent;
+        BottomBrush = Brushes.Transparent;
     }
 
     public void ClearCageLayout()
@@ -354,5 +359,8 @@ public partial class CellViewModel : ObservableObject
         CageSumText = string.Empty;
         CageSumForeground = Brushes.Transparent;
         IsKillerMode = false;
+
+        // Restore section borders
+        ShowLayoutBoundaries();
     }
 }
