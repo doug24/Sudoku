@@ -307,37 +307,6 @@ public class KillerSolverUnitTests
     [TestMethod]
     public void ParseKillerData_Full9x9()
     {
-        //string data = """
-        //    17 0,0 0,1 1,1
-        //    15 0,2 1,2 1,3
-        //    14 0,3 0,4
-        //    16 0,5 0,6 1,6
-        //    7 0,7 0,8
-        //    10 1,0 2,0 3,0
-        //    11 1,4 1,5 2,5
-        //    13 1,7 2,7
-        //    9 1,8 2,8
-        //    14 2,1 2,2 3,1
-        //    8 2,3 2,4
-        //    27 2,6 3,6 4,5 4,6 5,6 6,6
-        //    32 3,2 3,3 4,2 4,3 4,4 5,2 5,3
-        //    8 3,4 3,5
-        //    31 3,7 3,8 4,7 4,8 5,7 5,8
-        //    12 4,0 4,1
-        //    22 5,0 6,0 7,0
-        //    16 5,1 6,1 6,2
-        //    16 5,4 5,5
-        //    9 6,3 6,4
-        //    21 6,5 7,4 7,5
-        //    5 6,7 7,7
-        //    14 6,8 7,8
-        //    11 7,1 8,0 8,1
-        //    9 7,2 7,3 8,2
-        //    15 7,6 8,5 8,6
-        //    12 8,3 8,4
-        //    11 8,7 8,8
-        //    """;
-
         List<Cage> cages = Util.ParseKillerData(Test28CagesData);
 
         Assert.HasCount(28, cages);
@@ -381,6 +350,43 @@ public class KillerSolverUnitTests
         AssertValidSudoku(result);
         AssertCagesSatisfied(result, cages);
         CollectionAssert.AreEqual(Test23CagesSolution, result, "Solver should find the known solution for the 23-cage puzzle.");
+    }
+
+    [TestMethod]
+    [Timeout(30000, CooperativeCancellation = true)]
+    public void Generate_ProducesValidUniquePuzzle()
+    {
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(25));
+
+        KillerGenerator generator = new();
+        KillerPuzzle puzzle = generator.Generate(cts.Token);
+
+        Assert.IsNotNull(puzzle, "Generator should produce a puzzle.");
+        Assert.IsNotEmpty(puzzle.Cages, "Puzzle should have at least one cage.");
+        AssertValidSudoku(puzzle.Solution);
+        AssertCagesSatisfied(puzzle.Solution, puzzle.Cages);
+        AssertFullCoverage(puzzle.Cages);
+
+        // Verify uniqueness independently
+        KillerSolver solver = new(puzzle.Cages);
+        Assert.IsTrue(solver.HasUniqueSolution(), "Generated puzzle should have a unique solution.");
+    }
+
+    [TestMethod]
+    [Timeout(30000, CooperativeCancellation = true)]
+    public void Generate_CageSizesWithinBounds()
+    {
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(25));
+
+        KillerGenerator generator = new() { MinCageSize = 2, MaxCageSize = 4 };
+        KillerPuzzle puzzle = generator.Generate(cts.Token);
+
+        Assert.IsNotNull(puzzle);
+        foreach (Cage cage in puzzle.Cages)
+        {
+            Assert.IsTrue(cage.Size >= 1 && cage.Size <= 4,
+                $"Cage has {cage.Size} cells, expected 1-4.");
+        }
     }
 
     #region Test Helpers
@@ -451,6 +457,17 @@ public class KillerSolverUnitTests
             Assert.AreEqual(cage.Sum, sum,
                 $"Cage sum mismatch for {cage}: expected {cage.Sum}, got {sum}.");
         }
+    }
+
+    private static void AssertFullCoverage(List<Cage> cages)
+    {
+        HashSet<int> covered = [];
+        foreach (Cage cage in cages)
+        {
+            foreach (int cell in cage.Cells)
+                Assert.IsTrue(covered.Add(cell), $"Cell {cell} appears in multiple cages.");
+        }
+        Assert.HasCount(81, covered);
     }
 
     #endregion
