@@ -19,6 +19,7 @@ public class Puzzle
     public int[] Solution { get; private set; } = [];
     public string Difficulty { get; private set; } = string.Empty;
     public List<string> Strategies { get; private set; } = [];
+    public List<Cage> Cages { get; private set; } = [];
 
     //public string Initial  { get => ".....9.5.1.....2...2.7..8.6.45.1....89..4.51............8..2..9.5.4.8.....1..7..."; }
     //public string Solution { get => "784629351136584297529731846645913728897246513312875964478152639953468172261397485"; }
@@ -125,6 +126,61 @@ public class Puzzle
         }
 
         return PuzzleData.Empty;
+    }
+
+    public async Task GenerateKiller()
+    {
+        Mouse.OverrideCursor = Cursors.Wait;
+
+        var timeout = TimeSpan.FromSeconds(30);
+        using CancellationTokenSource cancellationTokenSource = new(timeout);
+        var token = cancellationTokenSource.Token;
+        List<Task<KillerPuzzle>> tasks = [];
+        for (int idx = 0; idx < 4; idx++)
+        {
+            tasks.Add(Task.Run(() => GenerateKillerInternal(token), token));
+        }
+
+        Task<KillerPuzzle> completedTask = await Task.WhenAny(tasks);
+        cancellationTokenSource.Cancel();
+
+        KillerPuzzle result = completedTask.Result;
+        if (result != null)
+        {
+            Initial = new int[81]; // Killer puzzles have no givens
+            Solution = result.Solution;
+            Cages = result.Cages;
+            Difficulty = "Killer";
+        }
+
+        await Task.WhenAll(tasks);
+
+        if (result == null)
+        {
+            CustomMessageBox.Show($"Could not generate a Killer puzzle in {timeout.TotalSeconds} seconds:" +
+                Environment.NewLine + "Please try again.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        Mouse.OverrideCursor = Cursors.Arrow;
+    }
+
+    private static KillerPuzzle GenerateKillerInternal(CancellationToken token)
+    {
+        try
+        {
+            KillerGenerator generator = new();
+            return generator.Generate(token);
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.WriteLine("Killer GenerateInternal was canceled");
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            Debug.WriteLine("Error generating Killer puzzle: " + e.Message);
+        }
+
+        return null;
     }
 }
 

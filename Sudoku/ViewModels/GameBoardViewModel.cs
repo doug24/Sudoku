@@ -1258,6 +1258,7 @@ public partial class GameBoardViewModel : ObservableObject
 
         foreach (var cell in allCells)
         {
+            cell.ClearCageLayout();
             cell.Reset();
         }
         if (NumberFirstMode)
@@ -1273,6 +1274,80 @@ public partial class GameBoardViewModel : ObservableObject
         foreach (var cell in allCells)
         {
             cell.ShowLayoutBoundaries();
+        }
+    }
+
+    /// <summary>
+    /// Apply cage border and sum-label data to every cell on the board.
+    /// For each cell, determines which edges are cage boundaries (the adjacent
+    /// cell is in a different cage or off-grid) and which cell displays the
+    /// cage sum label (the top-left cell of the cage).
+    /// </summary>
+    internal void ApplyCageData(List<Cage> cages)
+    {
+        // Build cell-to-cage mapping
+        int[] cellToCage = new int[81];
+        Array.Fill(cellToCage, -1);
+        for (int ci = 0; ci < cages.Count; ci++)
+        {
+            foreach (int cell in cages[ci].Cells)
+                cellToCage[cell] = ci;
+        }
+
+        // Find the top-left cell (min row, then min col) for each cage
+        int[] cageLabelCell = new int[cages.Count];
+        Array.Fill(cageLabelCell, -1);
+        for (int ci = 0; ci < cages.Count; ci++)
+        {
+            int bestRow = int.MaxValue, bestCol = int.MaxValue, bestCell = -1;
+            foreach (int cell in cages[ci].Cells)
+            {
+                int r = cell / 9;
+                int c = cell % 9;
+                if (r < bestRow || (r == bestRow && c < bestCol))
+                {
+                    bestRow = r;
+                    bestCol = c;
+                    bestCell = cell;
+                }
+            }
+            cageLabelCell[ci] = bestCell;
+        }
+
+        foreach (var cellVm in allCells)
+        {
+            int cell = cellVm.CellIndex;
+            int ci = cellToCage[cell];
+            if (ci < 0)
+            {
+                cellVm.ClearCageLayout();
+                continue;
+            }
+
+            int row = cell / 9;
+            int col = cell % 9;
+
+            bool top = row == 0 || cellToCage[cell - 9] != ci;
+            bool bottom = row == 8 || cellToCage[cell + 9] != ci;
+            bool left = col == 0 || cellToCage[cell - 1] != ci;
+            bool right = col == 8 || cellToCage[cell + 1] != ci;
+
+            string sumText = (cell == cageLabelCell[ci])
+                ? cages[ci].Sum.ToString()
+                : string.Empty;
+
+            cellVm.ApplyCageLayout(top, right, bottom, left, sumText);
+        }
+    }
+
+    /// <summary>
+    /// Remove all cage visual data from the board.
+    /// </summary>
+    internal void ClearCageData()
+    {
+        foreach (var cell in allCells)
+        {
+            cell.ClearCageLayout();
         }
     }
 
@@ -1334,6 +1409,42 @@ public partial class GameBoardViewModel : ObservableObject
             PuzzleDescription = puz.Strategies.Count > 0
                 ? $"{puz.Difficulty}: {string.Join(", ", puz.Strategies)}"
                 : puz.Difficulty;
+        }
+    }
+
+    internal async void NewKillerPuzzle()
+    {
+        ClearBoard();
+        Puzzle puz = new();
+        await puz.GenerateKiller();
+
+        if (puz.Solution.Length == allCells.Count && puz.Cages.Count > 0)
+        {
+            ApplyCageData(puz.Cages);
+
+            undoStack.Clear();
+            List<CellState> list = [];
+
+            int idx = 0;
+            foreach (var cell in allCells)
+            {
+                int answer = puz.Solution[idx];
+
+                // Killer puzzles have no givens: every cell starts empty
+                CellState cellState = new(idx, false, 0);
+                cell.Initialize(cellState, answer);
+
+                list.Add(cellState);
+
+                idx++;
+            }
+
+            undoStack.Push(list);
+            UpdateRemainderCounts();
+            IsInProgress = true;
+            stopwatch.Restart();
+
+            PuzzleDescription = $"Killer: {puz.Cages.Count} cages";
         }
     }
 

@@ -50,6 +50,7 @@
             <MenuItem Header="File">
                 <MenuItem Header="Create New" Command="{Binding NewPuzzleCommand}"/>
                 <MenuItem Header="Create New Random" Command="{Binding NewRandomPuzzleCommand}"/>
+                <MenuItem Header="Create Killer" Command="{Binding NewKillerPuzzleCommand}"/>
                 <MenuItem Header="Layout"
                           ItemsSource="{Binding LayoutMenuItems}">
                     <MenuItem.ItemContainerStyle>

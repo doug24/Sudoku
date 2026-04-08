@@ -287,4 +287,72 @@ public partial class CellViewModel : ObservableObject
 
     [ObservableProperty]
     private Brush highlightBrush = Brushes.ForestGreen;
+
+    // Cage border brushes: non-Transparent means this edge is a cage boundary
+    [ObservableProperty]
+    private Brush cageTopBrush = Brushes.Transparent;
+
+    [ObservableProperty]
+    private Brush cageRightBrush = Brushes.Transparent;
+
+    [ObservableProperty]
+    private Brush cageBottomBrush = Brushes.Transparent;
+
+    [ObservableProperty]
+    private Brush cageLeftBrush = Brushes.Transparent;
+
+    /// <summary>
+    /// The cage sum label shown in the top-left corner of the cage's first cell.
+    /// Empty string for cells that are not the top-left cell of their cage.
+    /// </summary>
+    [ObservableProperty]
+    private string cageSumText = string.Empty;
+
+    /// <summary>
+    /// True when this cell is part of a Killer cage (controls visibility of cage borders/sum).
+    /// </summary>
+    [ObservableProperty]
+    private bool isKillerMode;
+
+    private static readonly Brush cageBorderBrush = new SolidColorBrush(Color.FromRgb(100, 100, 100));
+    private static readonly Brush cageBorderBrushDark = new SolidColorBrush(Color.FromRgb(180, 180, 180));
+    private static readonly Brush cageSumBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80));
+    private static readonly Brush cageSumBrushDark = new SolidColorBrush(Color.FromRgb(200, 200, 200));
+
+    /// <summary>
+    /// Stable foreground for the cage sum label. Does not change with cell state.
+    /// </summary>
+    [ObservableProperty]
+    private Brush cageSumForeground = Brushes.Transparent;
+
+    /// <summary>
+    /// Set the cage border brushes and sum label for this cell.
+    /// </summary>
+    /// <param name="top">True if the top edge is a cage boundary.</param>
+    /// <param name="right">True if the right edge is a cage boundary.</param>
+    /// <param name="bottom">True if the bottom edge is a cage boundary.</param>
+    /// <param name="left">True if the left edge is a cage boundary.</param>
+    /// <param name="sumText">The sum label, or empty string if not the top-left cell.</param>
+    public void ApplyCageLayout(bool top, bool right, bool bottom, bool left, string sumText)
+    {
+        Brush brush = isDarkMode ? cageBorderBrushDark : cageBorderBrush;
+        CageTopBrush = top ? brush : Brushes.Transparent;
+        CageRightBrush = right ? brush : Brushes.Transparent;
+        CageBottomBrush = bottom ? brush : Brushes.Transparent;
+        CageLeftBrush = left ? brush : Brushes.Transparent;
+        CageSumText = sumText;
+        CageSumForeground = isDarkMode ? cageSumBrushDark : cageSumBrush;
+        IsKillerMode = true;
+    }
+
+    public void ClearCageLayout()
+    {
+        CageTopBrush = Brushes.Transparent;
+        CageRightBrush = Brushes.Transparent;
+        CageBottomBrush = Brushes.Transparent;
+        CageLeftBrush = Brushes.Transparent;
+        CageSumText = string.Empty;
+        CageSumForeground = Brushes.Transparent;
+        IsKillerMode = false;
+    }
 }

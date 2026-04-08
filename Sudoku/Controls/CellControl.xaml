@@ -15,6 +15,16 @@
 
         <DataTemplate x:Key ="CandidateTemplate">
             <Viewbox>
+                <Viewbox.Style>
+                    <Style TargetType="Viewbox">
+                        <Setter Property="Margin" Value="0"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext.IsKillerMode, RelativeSource={RelativeSource AncestorType=local:CellControl}}" Value="True">
+                                <Setter Property="Margin" Value="1"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Viewbox.Style>
                 <TextBlock Text="{Binding Number}" 
                            Foreground="{Binding IsHighlight, Converter={StaticResource BoolToColorConverter}}"
                            VerticalAlignment="Center"
@@ -26,6 +36,26 @@
 
     <Grid>
         <Border Background="{Binding Background}" Margin="2"/>
+
+        <!-- Cage dashed borders: each edge is an independent line -->
+        <Border BorderThickness="0,1.5,0,0" BorderBrush="{Binding CageTopBrush}" Margin="1,1,1,0"
+                Visibility="{Binding IsKillerMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+        <Border BorderThickness="0,0,1.5,0" BorderBrush="{Binding CageRightBrush}" Margin="0,1,1,1"
+                Visibility="{Binding IsKillerMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+        <Border BorderThickness="0,0,0,1.5" BorderBrush="{Binding CageBottomBrush}" Margin="1,0,1,1"
+                Visibility="{Binding IsKillerMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+        <Border BorderThickness="1.5,0,0,0" BorderBrush="{Binding CageLeftBrush}" Margin="1,1,0,1"
+                Visibility="{Binding IsKillerMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+        <!-- Cage sum label in top-left corner -->
+        <TextBlock Text="{Binding CageSumText}"
+                   FontSize="10" 
+                   Margin="3,1,0,0"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Left"
+                   Foreground="{Binding CageSumForeground}"
+                   Visibility="{Binding IsKillerMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
         <Ellipse Stroke="{Binding HighlightBrush}" StrokeThickness="2" Margin="0" 
                  Visibility="{Binding IsHighlight, Converter={StaticResource BoolToVisibilityConverter}}"/>
         <Viewbox>
@@ -38,6 +68,16 @@
         </Viewbox>
         <ItemsControl ItemsSource="{Binding Path=Candidates}" x:Name="Candidates"
                           ItemTemplate="{StaticResource CandidateTemplate}">
+            <ItemsControl.Style>
+                <Style TargetType="ItemsControl">
+                    <Setter Property="Margin" Value="0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsKillerMode}" Value="True">
+                            <Setter Property="Margin" Value="8"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ItemsControl.Style>
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Rows="3" Columns="3" />
