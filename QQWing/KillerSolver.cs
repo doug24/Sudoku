@@ -95,6 +95,32 @@ public class KillerSolver
         return SolveRecursive(solution, candidates);
     }
 
+    /// <summary>
+    /// Assess the difficulty of this puzzle by solving it with layered strategies.
+    /// Returns the difficulty level based on the most advanced strategy required.
+    /// Returns <see cref="Difficulty.UNKNOWN"/> if the puzzle has no solution.
+    /// </summary>
+    public Difficulty GetDifficulty()
+    {
+        int[] solution = new int[BOARD_SIZE];
+        int[] candidates = new int[BOARD_SIZE];
+        Array.Fill(candidates, ALL_CANDIDATES);
+
+        Difficulty maxDifficulty = Difficulty.SIMPLE;
+
+        if (!PropagateDifficulty(solution, candidates, ref maxDifficulty))
+            return Difficulty.UNKNOWN;
+
+        if (IsSolved(solution))
+            return maxDifficulty;
+
+        // Could not solve with logic alone — verify solvable with backtracking
+        if (SolveRecursive(solution, candidates) != null)
+            return Difficulty.EXPERT;
+
+        return Difficulty.UNKNOWN;
+    }
+
     #region Constraint Propagation
 
     /// <summary>
@@ -143,6 +169,90 @@ public class KillerSolver
                     }
                 }
             }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Apply constraint propagation using layered strategies, tracking the most
+    /// advanced strategy required. Tries strategies in order of difficulty and
+    /// restarts from the simplest level after each successful elimination.
+    /// Returns false if a contradiction is detected.
+    /// </summary>
+    private bool PropagateDifficulty(int[] solution, int[] candidates, ref Difficulty maxDifficulty)
+    {
+        bool progress = true;
+        while (progress)
+        {
+            progress = false;
+
+            // --- SIMPLE: Naked singles + cage sum pruning ---
+            for (int cell = 0; cell < BOARD_SIZE; cell++)
+            {
+                if (solution[cell] != 0) continue;
+                if (candidates[cell] == 0) return false;
+                if (IsSingleBit(candidates[cell]))
+                {
+                    if (!PlaceValue(solution, candidates, cell, BitToValue(candidates[cell])))
+                        return false;
+                    progress = true;
+                }
+            }
+            if (progress) continue;
+
+            for (int ci = 0; ci < _cages.Length; ci++)
+            {
+                if (!ValidateCage(solution, ci))
+                    return false;
+                if (PruneCageCandidates(solution, candidates, ci))
+                {
+                    progress = true;
+                    for (int cell = 0; cell < BOARD_SIZE; cell++)
+                    {
+                        if (solution[cell] == 0 && candidates[cell] == 0)
+                            return false;
+                    }
+                }
+            }
+            if (progress) continue;
+
+            // --- EASY: Hidden singles ---
+            bool strategyProgress = false;
+
+            if (!HiddenSinglesInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.EASY) maxDifficulty = Difficulty.EASY; progress = true; continue; }
+
+            if (!HiddenSinglesInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.EASY) maxDifficulty = Difficulty.EASY; progress = true; continue; }
+
+            if (!HiddenSinglesInSections(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.EASY) maxDifficulty = Difficulty.EASY; progress = true; continue; }
+
+            // --- INTERMEDIATE: Naked pairs, hidden pairs, pointing pairs, box-line reduction ---
+            if (!NakedPairsInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!NakedPairsInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!NakedPairsInSections(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!HiddenPairsInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!HiddenPairsInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!HiddenPairsInSections(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!PointingPairs(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!BoxLineReduction(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
         }
 
         return true;
@@ -303,6 +413,376 @@ public class KillerSolver
                 }
             }
         }
+        return true;
+    }
+
+    #endregion
+
+    #region Intermediate Strategies
+
+    private static bool NakedPairsInRows(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int row = 0; row < SIZE; row++)
+        {
+            for (int col1 = 0; col1 < SIZE; col1++)
+            {
+                int cell1 = row * SIZE + col1;
+                if (solution[cell1] != 0 || PopCount(candidates[cell1]) != 2) continue;
+
+                for (int col2 = col1 + 1; col2 < SIZE; col2++)
+                {
+                    int cell2 = row * SIZE + col2;
+                    if (solution[cell2] != 0 || candidates[cell2] != candidates[cell1]) continue;
+
+                    int pairMask = candidates[cell1];
+                    for (int col3 = 0; col3 < SIZE; col3++)
+                    {
+                        int cell3 = row * SIZE + col3;
+                        if (cell3 == cell1 || cell3 == cell2 || solution[cell3] != 0) continue;
+                        int before = candidates[cell3];
+                        candidates[cell3] &= ~pairMask;
+                        if (candidates[cell3] != before) progress = true;
+                        if (candidates[cell3] == 0) return false;
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool NakedPairsInColumns(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int col = 0; col < SIZE; col++)
+        {
+            for (int row1 = 0; row1 < SIZE; row1++)
+            {
+                int cell1 = row1 * SIZE + col;
+                if (solution[cell1] != 0 || PopCount(candidates[cell1]) != 2) continue;
+
+                for (int row2 = row1 + 1; row2 < SIZE; row2++)
+                {
+                    int cell2 = row2 * SIZE + col;
+                    if (solution[cell2] != 0 || candidates[cell2] != candidates[cell1]) continue;
+
+                    int pairMask = candidates[cell1];
+                    for (int row3 = 0; row3 < SIZE; row3++)
+                    {
+                        int cell3 = row3 * SIZE + col;
+                        if (cell3 == cell1 || cell3 == cell2 || solution[cell3] != 0) continue;
+                        int before = candidates[cell3];
+                        candidates[cell3] &= ~pairMask;
+                        if (candidates[cell3] != before) progress = true;
+                        if (candidates[cell3] == 0) return false;
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool NakedPairsInSections(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int sec = 0; sec < SIZE; sec++)
+        {
+            int pairCount = 0;
+            int[] pairCells = new int[SIZE];
+            foreach (int cell in QQWing.SectionLayout.SectionToSectionCells(sec))
+            {
+                if (solution[cell] == 0 && PopCount(candidates[cell]) == 2)
+                    pairCells[pairCount++] = cell;
+            }
+
+            for (int a = 0; a < pairCount; a++)
+            {
+                for (int b = a + 1; b < pairCount; b++)
+                {
+                    if (candidates[pairCells[a]] != candidates[pairCells[b]]) continue;
+
+                    int pairMask = candidates[pairCells[a]];
+                    foreach (int cell in QQWing.SectionLayout.SectionToSectionCells(sec))
+                    {
+                        if (cell == pairCells[a] || cell == pairCells[b] || solution[cell] != 0) continue;
+                        int before = candidates[cell];
+                        candidates[cell] &= ~pairMask;
+                        if (candidates[cell] != before) progress = true;
+                        if (candidates[cell] == 0) return false;
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool HiddenPairsInRows(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int row = 0; row < SIZE; row++)
+        {
+            int[] valCols = new int[SIZE + 1];
+            for (int val = 1; val <= SIZE; val++)
+            {
+                bool placed = false;
+                for (int col = 0; col < SIZE; col++)
+                {
+                    int cell = row * SIZE + col;
+                    if (solution[cell] == val) { placed = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & (1 << (val - 1))) != 0)
+                        valCols[val] |= 1 << col;
+                }
+                if (placed) valCols[val] = 0;
+            }
+
+            for (int v1 = 1; v1 <= SIZE; v1++)
+            {
+                if (PopCount(valCols[v1]) != 2) continue;
+                for (int v2 = v1 + 1; v2 <= SIZE; v2++)
+                {
+                    if (valCols[v2] != valCols[v1]) continue;
+                    int keepMask = (1 << (v1 - 1)) | (1 << (v2 - 1));
+                    int colMask = valCols[v1];
+                    for (int col = 0; col < SIZE; col++)
+                    {
+                        if ((colMask & (1 << col)) == 0) continue;
+                        int cell = row * SIZE + col;
+                        int before = candidates[cell];
+                        candidates[cell] &= keepMask;
+                        if (candidates[cell] != before) progress = true;
+                        if (candidates[cell] == 0) return false;
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool HiddenPairsInColumns(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int col = 0; col < SIZE; col++)
+        {
+            int[] valRows = new int[SIZE + 1];
+            for (int val = 1; val <= SIZE; val++)
+            {
+                bool placed = false;
+                for (int row = 0; row < SIZE; row++)
+                {
+                    int cell = row * SIZE + col;
+                    if (solution[cell] == val) { placed = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & (1 << (val - 1))) != 0)
+                        valRows[val] |= 1 << row;
+                }
+                if (placed) valRows[val] = 0;
+            }
+
+            for (int v1 = 1; v1 <= SIZE; v1++)
+            {
+                if (PopCount(valRows[v1]) != 2) continue;
+                for (int v2 = v1 + 1; v2 <= SIZE; v2++)
+                {
+                    if (valRows[v2] != valRows[v1]) continue;
+                    int keepMask = (1 << (v1 - 1)) | (1 << (v2 - 1));
+                    int rowMask = valRows[v1];
+                    for (int row = 0; row < SIZE; row++)
+                    {
+                        if ((rowMask & (1 << row)) == 0) continue;
+                        int cell = row * SIZE + col;
+                        int before = candidates[cell];
+                        candidates[cell] &= keepMask;
+                        if (candidates[cell] != before) progress = true;
+                        if (candidates[cell] == 0) return false;
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool HiddenPairsInSections(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int sec = 0; sec < SIZE; sec++)
+        {
+            int[] secCells = new int[SIZE];
+            int cellIdx = 0;
+            foreach (int cell in QQWing.SectionLayout.SectionToSectionCells(sec))
+                secCells[cellIdx++] = cell;
+
+            int[] valPositions = new int[SIZE + 1];
+            for (int val = 1; val <= SIZE; val++)
+            {
+                bool placed = false;
+                for (int i = 0; i < SIZE; i++)
+                {
+                    int cell = secCells[i];
+                    if (solution[cell] == val) { placed = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & (1 << (val - 1))) != 0)
+                        valPositions[val] |= 1 << i;
+                }
+                if (placed) valPositions[val] = 0;
+            }
+
+            for (int v1 = 1; v1 <= SIZE; v1++)
+            {
+                if (PopCount(valPositions[v1]) != 2) continue;
+                for (int v2 = v1 + 1; v2 <= SIZE; v2++)
+                {
+                    if (valPositions[v2] != valPositions[v1]) continue;
+                    int keepMask = (1 << (v1 - 1)) | (1 << (v2 - 1));
+                    int posMask = valPositions[v1];
+                    for (int i = 0; i < SIZE; i++)
+                    {
+                        if ((posMask & (1 << i)) == 0) continue;
+                        int cell = secCells[i];
+                        int before = candidates[cell];
+                        candidates[cell] &= keepMask;
+                        if (candidates[cell] != before) progress = true;
+                        if (candidates[cell] == 0) return false;
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool PointingPairs(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int sec = 0; sec < SIZE; sec++)
+        {
+            for (int val = 1; val <= SIZE; val++)
+            {
+                int bit = 1 << (val - 1);
+                int row = -1, col = -1;
+                bool sameRow = true, sameCol = true;
+                bool placed = false;
+                int count = 0;
+
+                foreach (int cell in QQWing.SectionLayout.SectionToSectionCells(sec))
+                {
+                    if (solution[cell] == val) { placed = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        int r = cell / SIZE;
+                        int c = cell % SIZE;
+                        if (count == 0) { row = r; col = c; }
+                        else { if (r != row) sameRow = false; if (c != col) sameCol = false; }
+                        count++;
+                    }
+                }
+                if (placed || count < 2) continue;
+
+                if (sameRow)
+                {
+                    for (int c = 0; c < SIZE; c++)
+                    {
+                        int cell = row * SIZE + c;
+                        if (QQWing.SectionLayout.CellToSection(cell) == sec) continue;
+                        if (solution[cell] != 0) continue;
+                        int before = candidates[cell];
+                        candidates[cell] &= ~bit;
+                        if (candidates[cell] != before) progress = true;
+                        if (candidates[cell] == 0) return false;
+                    }
+                    if (progress) return true;
+                }
+
+                if (sameCol)
+                {
+                    for (int r = 0; r < SIZE; r++)
+                    {
+                        int cell = r * SIZE + col;
+                        if (QQWing.SectionLayout.CellToSection(cell) == sec) continue;
+                        if (solution[cell] != 0) continue;
+                        int before = candidates[cell];
+                        candidates[cell] &= ~bit;
+                        if (candidates[cell] != before) progress = true;
+                        if (candidates[cell] == 0) return false;
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool BoxLineReduction(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int row = 0; row < SIZE; row++)
+        {
+            for (int val = 1; val <= SIZE; val++)
+            {
+                int bit = 1 << (val - 1);
+                int sec = -1;
+                bool sameSec = true;
+                bool placed = false;
+                int count = 0;
+
+                for (int col = 0; col < SIZE; col++)
+                {
+                    int cell = row * SIZE + col;
+                    if (solution[cell] == val) { placed = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        int s = QQWing.SectionLayout.CellToSection(cell);
+                        if (count == 0) sec = s;
+                        else if (s != sec) sameSec = false;
+                        count++;
+                    }
+                }
+                if (placed || count < 2 || !sameSec) continue;
+
+                foreach (int cell in QQWing.SectionLayout.SectionToSectionCells(sec))
+                {
+                    if (cell / SIZE == row) continue;
+                    if (solution[cell] != 0) continue;
+                    int before = candidates[cell];
+                    candidates[cell] &= ~bit;
+                    if (candidates[cell] != before) progress = true;
+                    if (candidates[cell] == 0) return false;
+                }
+                if (progress) return true;
+            }
+        }
+
+        for (int col = 0; col < SIZE; col++)
+        {
+            for (int val = 1; val <= SIZE; val++)
+            {
+                int bit = 1 << (val - 1);
+                int sec = -1;
+                bool sameSec = true;
+                bool placed = false;
+                int count = 0;
+
+                for (int row = 0; row < SIZE; row++)
+                {
+                    int cell = row * SIZE + col;
+                    if (solution[cell] == val) { placed = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        int s = QQWing.SectionLayout.CellToSection(cell);
+                        if (count == 0) sec = s;
+                        else if (s != sec) sameSec = false;
+                        count++;
+                    }
+                }
+                if (placed || count < 2 || !sameSec) continue;
+
+                foreach (int cell in QQWing.SectionLayout.SectionToSectionCells(sec))
+                {
+                    if (cell % SIZE == col) continue;
+                    if (solution[cell] != 0) continue;
+                    int before = candidates[cell];
+                    candidates[cell] &= ~bit;
+                    if (candidates[cell] != before) progress = true;
+                    if (candidates[cell] == 0) return false;
+                }
+                if (progress) return true;
+            }
+        }
+
         return true;
     }
 

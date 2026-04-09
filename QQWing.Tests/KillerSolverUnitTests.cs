@@ -359,7 +359,7 @@ public class KillerSolverUnitTests
         using CancellationTokenSource cts = new(TimeSpan.FromSeconds(25));
 
         KillerGenerator generator = new();
-        KillerPuzzle puzzle = generator.Generate(cts.Token);
+        KillerPuzzle puzzle = generator.Generate(Difficulty.UNKNOWN, cts.Token);
 
         Assert.IsNotNull(puzzle, "Generator should produce a puzzle.");
         Assert.IsNotEmpty(puzzle.Cages, "Puzzle should have at least one cage.");
@@ -373,13 +373,73 @@ public class KillerSolverUnitTests
     }
 
     [TestMethod]
+    public void GetDifficulty_AllSingleCellCages_ReturnsSimple()
+    {
+        // Single-cell cages are like givens: solved by naked singles alone
+        List<Cage> cages = [];
+        for (int cell = 0; cell < 81; cell++)
+        {
+            cages.Add(new Cage([cell], TestSolution[cell]));
+        }
+
+        KillerSolver solver = new(cages);
+        Assert.AreEqual(Difficulty.SIMPLE, solver.GetDifficulty());
+    }
+
+    [TestMethod]
+    public void GetDifficulty_28CagePuzzle_ReturnsKnownDifficulty()
+    {
+        List<Cage> cages = Util.ParseKillerData(Test28CagesData);
+        KillerSolver solver = new(cages);
+
+        Difficulty difficulty = solver.GetDifficulty();
+
+        Assert.AreNotEqual(Difficulty.UNKNOWN, difficulty, "A solvable puzzle should have a known difficulty.");
+    }
+
+    [TestMethod]
+    public void GetDifficulty_23CagePuzzle_ReturnsKnownDifficulty()
+    {
+        List<Cage> cages = Util.ParseKillerData(Test23CagesData);
+        KillerSolver solver = new(cages);
+
+        Difficulty difficulty = solver.GetDifficulty();
+
+        Assert.AreNotEqual(Difficulty.UNKNOWN, difficulty, "A solvable puzzle should have a known difficulty.");
+    }
+
+    [TestMethod]
+    public void GetDifficulty_ImpossiblePuzzle_ReturnsUnknown()
+    {
+        // A cage with sum 1 spanning two cells is impossible
+        List<Cage> cages = [new Cage([0, 1], 1)];
+
+        KillerSolver solver = new(cages);
+        Assert.AreEqual(Difficulty.UNKNOWN, solver.GetDifficulty());
+    }
+
+    [TestMethod]
+    [Timeout(30000, CooperativeCancellation = true)]
+    public void Generate_PuzzleHasDifficulty()
+    {
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(25));
+
+        KillerGenerator generator = new();
+        KillerPuzzle puzzle = generator.Generate(Difficulty.UNKNOWN, cts.Token);
+
+        Assert.IsNotNull(puzzle, "Generator should produce a puzzle.");
+        Assert.AreNotEqual(Difficulty.UNKNOWN, puzzle.Difficulty,
+            "Generated puzzle should have an assessed difficulty.");
+    }
+
+    [TestMethod]
     [Timeout(30000, CooperativeCancellation = true)]
     public void Generate_CageSizesWithinBounds()
     {
         using CancellationTokenSource cts = new(TimeSpan.FromSeconds(25));
 
         KillerGenerator generator = new() { MinCageSize = 2, MaxCageSize = 4 };
-        KillerPuzzle puzzle = generator.Generate(cts.Token);
+        KillerPuzzle puzzle = generator.Generate(Difficulty.UNKNOWN, cts.Token);
 
         Assert.IsNotNull(puzzle);
         foreach (Cage cage in puzzle.Cages)

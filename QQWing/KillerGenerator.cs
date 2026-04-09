@@ -37,7 +37,10 @@ public class KillerGenerator
     /// Generate a Killer Sudoku puzzle. Returns the cage list and the solution,
     /// or null if generation could not produce a unique puzzle before cancellation.
     /// </summary>
-    public KillerPuzzle Generate(CancellationToken token)
+    /// <param name="targetDifficulty">
+    /// The desired difficulty level. Pass <see cref="Difficulty.UNKNOWN"/> to accept any difficulty.
+    /// </param>
+    public KillerPuzzle Generate(Difficulty targetDifficulty, CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
@@ -59,7 +62,13 @@ public class KillerGenerator
                 KillerSolver solver = new(cages);
                 if (solver.HasUniqueSolution())
                 {
-                    return new KillerPuzzle(cages, solution);
+                    Difficulty difficulty = solver.GetDifficulty();
+
+                    // Step 4: check difficulty matches the target
+                    if (targetDifficulty != Difficulty.UNKNOWN && difficulty != targetDifficulty)
+                        continue;
+
+                    return new KillerPuzzle(cages, solution, difficulty);
                 }
             }
         }
@@ -177,7 +186,7 @@ public class KillerGenerator
 /// The result of a successful Killer Sudoku generation: the cage definitions
 /// and the underlying solution.
 /// </summary>
-public class KillerPuzzle(List<Cage> cages, int[] solution)
+public class KillerPuzzle(List<Cage> cages, int[] solution, Difficulty difficulty = Difficulty.UNKNOWN)
 {
     /// <summary>
     /// The cages that define the puzzle. Every cell 0-80 belongs to exactly one cage.
@@ -188,4 +197,9 @@ public class KillerPuzzle(List<Cage> cages, int[] solution)
     /// The unique solution (values 1-9 for all 81 cells).
     /// </summary>
     public int[] Solution { get; } = solution;
+
+    /// <summary>
+    /// The assessed difficulty of the puzzle.
+    /// </summary>
+    public Difficulty Difficulty { get; } = difficulty;
 }

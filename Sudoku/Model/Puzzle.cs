@@ -128,7 +128,7 @@ public class Puzzle
         return PuzzleData.Empty;
     }
 
-    public async Task GenerateKiller()
+    public async Task GenerateKiller(Difficulty difficulty)
     {
         Mouse.OverrideCursor = Cursors.Wait;
 
@@ -138,7 +138,7 @@ public class Puzzle
         List<Task<KillerPuzzle>> tasks = [];
         for (int idx = 0; idx < 4; idx++)
         {
-            tasks.Add(Task.Run(() => GenerateKillerInternal(token), token));
+            tasks.Add(Task.Run(() => GenerateKillerInternal(difficulty, token), token));
         }
 
         Task<KillerPuzzle> completedTask = await Task.WhenAny(tasks);
@@ -150,7 +150,8 @@ public class Puzzle
             Initial = new int[81]; // Killer puzzles have no givens
             Solution = result.Solution;
             Cages = result.Cages;
-            Difficulty = "Killer";
+            Difficulty = result.Difficulty != QQWingLib.Difficulty.UNKNOWN
+                ? $"Killer {result.Difficulty}" : "Killer";
         }
 
         await Task.WhenAll(tasks);
@@ -164,12 +165,12 @@ public class Puzzle
         Mouse.OverrideCursor = Cursors.Arrow;
     }
 
-    private static KillerPuzzle GenerateKillerInternal(CancellationToken token)
+    private static KillerPuzzle GenerateKillerInternal(Difficulty difficulty, CancellationToken token)
     {
         try
         {
             KillerGenerator generator = new();
-            return generator.Generate(token);
+            return generator.Generate(difficulty, token);
         }
         catch (OperationCanceledException)
         {

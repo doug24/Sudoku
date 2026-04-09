@@ -1454,11 +1454,11 @@ public partial class GameBoardViewModel : ObservableObject
         }
     }
 
-    internal async void NewKillerPuzzle()
+    internal async void NewKillerPuzzle(Difficulty difficulty)
     {
         ClearBoard();
         Puzzle puz = new();
-        await puz.GenerateKiller();
+        await puz.GenerateKiller(difficulty);
 
         if (puz.Solution.Length == allCells.Count && puz.Cages.Count > 0)
         {
@@ -1486,7 +1486,7 @@ public partial class GameBoardViewModel : ObservableObject
             IsInProgress = true;
             stopwatch.Restart();
 
-            PuzzleDescription = $"Killer: {puz.Cages.Count} cages";
+            PuzzleDescription = $"{puz.Difficulty}: {puz.Cages.Count} cages";
         }
     }
 

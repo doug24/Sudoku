@@ -164,7 +164,7 @@ public partial class SudokuViewModel : ObservableObject
         });
 
     public ICommand NewKillerPuzzleCommand => new RelayCommand(
-        p => GameBoard.NewKillerPuzzle());
+        p => GameBoard.NewKillerPuzzle(PuzzleDifficulty));
 
     public ICommand SnapshotCommand => new RelayCommand(
         p => Snapshot(),
