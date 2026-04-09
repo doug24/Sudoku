@@ -319,18 +319,20 @@ public partial class CellViewModel : ObservableObject
 
     private static readonly Brush[] lightCageBrushes =
     [
-        new SolidColorBrush(Color.FromRgb(255, 230, 230)),  // pink
-        new SolidColorBrush(Color.FromRgb(220, 245, 220)),  // mint
-        new SolidColorBrush(Color.FromRgb(225, 235, 255)),  // blue
-        new SolidColorBrush(Color.FromRgb(255, 255, 220)),  // yellow
+        new SolidColorBrush(Color.FromRgb(255, 230, 230)),  // 0: pink
+        new SolidColorBrush(Color.FromRgb(220, 245, 220)),  // 1: mint
+        new SolidColorBrush(Color.FromRgb(225, 235, 255)),  // 2: blue
+        new SolidColorBrush(Color.FromRgb(255, 255, 220)),  // 3: yellow
+        new SolidColorBrush(Color.FromRgb(245, 240, 245)),  // 4: single-cell (light gray-lavender)
     ];
 
     private static readonly Brush[] darkCageBrushes =
     [
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C2020")),  // dark red
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A4D1A")),  // dark green
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A2A5C")),  // dark blue
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4D4D0A")),  // dark yellow
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C2020")),  // 0: dark red
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A4D1A")),  // 1: dark green
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A2A5C")),  // 2: dark blue
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4D4D0A")),  // 3: dark yellow
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3A3A3A")),  // 4: single-cell (dark gray)
     ];
 
     /// <summary>

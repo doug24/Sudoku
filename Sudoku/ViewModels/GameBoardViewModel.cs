@@ -1297,7 +1297,7 @@ public partial class GameBoardViewModel : ObservableObject
         }
 
         // Build cage adjacency: two cages are adjacent if any of their
-        // cells are orthogonal neighbors on the grid
+        // cells are orthogonal neighbours on the grid
         HashSet<int>[] adjacent = new HashSet<int>[cageCount];
         for (int ci = 0; ci < cageCount; ci++)
             adjacent[ci] = [];
@@ -1312,10 +1312,10 @@ public partial class GameBoardViewModel : ObservableObject
 
             ReadOnlySpan<int> neighbours =
             [
-                row > 0 ? cell - 9 : -1,
-                row < 8 ? cell + 9 : -1,
-                col > 0 ? cell - 1 : -1,
-                col < 8 ? cell + 1 : -1,
+                row > 0 ? cell - 9 : -1,  // up
+                row < 8 ? cell + 9 : -1,  // down
+                col > 0 ? cell - 1 : -1,  // left
+                col < 8 ? cell + 1 : -1,  // right
             ];
 
             foreach (int nb in neighbours)
@@ -1325,12 +1325,25 @@ public partial class GameBoardViewModel : ObservableObject
             }
         }
 
-        // Greedy graph-coloring: assign the lowest color index not used
-        // by any adjacent cage
+        // Pre-assign single-cell cages to a dedicated 5th color (index 4).
+        // Single-cell cages can never be orthogonally adjacent to each other
+        // (the flood-fill generator always grows a cage to include unassigned
+        // neighbours), so they can safely share one color.
+        const int singleCellColor = 4;
         int[] cageColor = new int[cageCount];
         Array.Fill(cageColor, -1);
         for (int ci = 0; ci < cageCount; ci++)
         {
+            if (cages[ci].Size == 1)
+                cageColor[ci] = singleCellColor;
+        }
+
+        // Greedy graph-coloring for multi-cell cages: assign the lowest
+        // color index (0-3) not used by any adjacent cage
+        for (int ci = 0; ci < cageCount; ci++)
+        {
+            if (cageColor[ci] >= 0) continue; // already assigned (single-cell)
+
             HashSet<int> usedColors = [];
             foreach (int adj in adjacent[ci])
             {
@@ -1342,6 +1355,16 @@ public partial class GameBoardViewModel : ObservableObject
             while (usedColors.Contains(color))
                 color++;
             cageColor[ci] = color;
+        }
+
+        // Verify: no two adjacent cages share the same color
+        for (int ci = 0; ci < cageCount; ci++)
+        {
+            foreach (int adj in adjacent[ci])
+            {
+                Debug.Assert(cageColor[ci] != cageColor[adj],
+                    $"Cage {ci} and cage {adj} are adjacent but both have color {cageColor[ci]}.");
+            }
         }
 
         // Find the top-left cell (min row, then min col) for each cage

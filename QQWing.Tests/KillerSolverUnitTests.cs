@@ -449,6 +449,58 @@ public class KillerSolverUnitTests
         }
     }
 
+    /// <summary>
+    /// Verify that greedy graph-coloring assigns different colors to
+    /// adjacent cages, including single-cell cages next to multi-cell cages.
+    /// </summary>
+    [TestMethod]
+    public void GraphColoring_SingleCellAdjacentToMultiCell_DifferentColors()
+    {
+        // Layout: a single-cell cage at cell 0, a 4-cell cage at cells 1,2,9,10
+        // Cell 0 (row 0, col 0) is orthogonally adjacent to cell 1 (row 0, col 1)
+        // and cell 9 (row 1, col 0), so the cages share edges.
+        List<Cage> cages =
+        [
+            new Cage([0], TestSolution[0]),                              // single cell
+            new Cage([1, 2, 9, 10],                                     // 4-cell block
+                TestSolution[1] + TestSolution[2] + TestSolution[9] + TestSolution[10]),
+        ];
+
+        // Fill remaining cells as single-cell cages to make a complete partition
+        HashSet<int> used = [0, 1, 2, 9, 10];
+        for (int cell = 0; cell < 81; cell++)
+        {
+            if (!used.Contains(cell))
+                cages.Add(new Cage([cell], TestSolution[cell]));
+        }
+
+        int[] colors = ComputeCageColors(cages);
+
+        // Cage 0 (single cell at 0) and cage 1 (4-cell block containing cell 1)
+        // are orthogonally adjacent — they must have different colors
+        Assert.AreNotEqual(colors[0], colors[1],
+            "Single-cell cage and adjacent 4-cell cage must have different colors.");
+    }
+
+    /// <summary>
+    /// Generate a puzzle and verify graph-coloring produces no adjacent
+    /// same-color cages (orthogonal or diagonal).
+    /// </summary>
+    [TestMethod]
+    [Timeout(30000, CooperativeCancellation = true)]
+    public void GraphColoring_GeneratedPuzzle_NoAdjacentSameColor()
+    {
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(25));
+
+        KillerGenerator generator = new();
+        KillerPuzzle puzzle = generator.Generate(Difficulty.UNKNOWN, cts.Token);
+
+        Assert.IsNotNull(puzzle);
+
+        int[] colors = ComputeCageColors(puzzle.Cages);
+        AssertNoAdjacentSameColor(puzzle.Cages, colors);
+    }
+
     #region Test Helpers
 
     private static List<Cage> BuildHorizontalPairCages(int[] solution)
@@ -528,6 +580,115 @@ public class KillerSolverUnitTests
                 Assert.IsTrue(covered.Add(cell), $"Cell {cell} appears in multiple cages.");
         }
         Assert.HasCount(81, covered);
+    }
+
+    /// <summary>
+    /// Greedy graph-coloring: same algorithm as GameBoardViewModel.ApplyCageData,
+    /// extracted for testability. Returns an array of color indices per cage.
+    /// </summary>
+    private static int[] ComputeCageColors(List<Cage> cages)
+    {
+        int cageCount = cages.Count;
+        int[] cellToCage = new int[81];
+        Array.Fill(cellToCage, -1);
+        for (int ci = 0; ci < cageCount; ci++)
+        {
+            foreach (int cell in cages[ci].Cells)
+                cellToCage[cell] = ci;
+        }
+
+        HashSet<int>[] adjacent = new HashSet<int>[cageCount];
+        for (int ci = 0; ci < cageCount; ci++)
+            adjacent[ci] = [];
+
+        for (int cell = 0; cell < 81; cell++)
+        {
+            int ci = cellToCage[cell];
+            if (ci < 0) continue;
+
+            int row = cell / 9;
+            int col = cell % 9;
+
+            int[] neighbours =
+            [
+                row > 0 ? cell - 9 : -1,
+                row < 8 ? cell + 9 : -1,
+                col > 0 ? cell - 1 : -1,
+                col < 8 ? cell + 1 : -1,
+            ];
+
+            foreach (int nb in neighbours)
+            {
+                if (nb >= 0 && cellToCage[nb] >= 0 && cellToCage[nb] != ci)
+                    adjacent[ci].Add(cellToCage[nb]);
+            }
+        }
+
+        const int singleCellColor = 4;
+        int[] cageColor = new int[cageCount];
+        Array.Fill(cageColor, -1);
+        for (int ci = 0; ci < cageCount; ci++)
+        {
+            if (cages[ci].Size == 1)
+                cageColor[ci] = singleCellColor;
+        }
+        for (int ci = 0; ci < cageCount; ci++)
+        {
+            if (cageColor[ci] >= 0) continue;
+            HashSet<int> usedColors = [];
+            foreach (int adj in adjacent[ci])
+            {
+                if (cageColor[adj] >= 0)
+                    usedColors.Add(cageColor[adj]);
+            }
+            int color = 0;
+            while (usedColors.Contains(color))
+                color++;
+            cageColor[ci] = color;
+        }
+
+        return cageColor;
+    }
+
+    /// <summary>
+    /// Assert no two orthogonally adjacent cages share the same color.
+    /// </summary>
+    private static void AssertNoAdjacentSameColor(List<Cage> cages, int[] colors)
+    {
+        int[] cellToCage = new int[81];
+        Array.Fill(cellToCage, -1);
+        for (int ci = 0; ci < cages.Count; ci++)
+        {
+            foreach (int cell in cages[ci].Cells)
+                cellToCage[cell] = ci;
+        }
+
+        for (int cell = 0; cell < 81; cell++)
+        {
+            int ci = cellToCage[cell];
+            if (ci < 0) continue;
+
+            int row = cell / 9;
+            int col = cell % 9;
+
+            int[] neighbours =
+            [
+                row > 0 ? cell - 9 : -1,
+                row < 8 ? cell + 9 : -1,
+                col > 0 ? cell - 1 : -1,
+                col < 8 ? cell + 1 : -1,
+            ];
+
+            foreach (int nb in neighbours)
+            {
+                if (nb >= 0 && cellToCage[nb] >= 0 && cellToCage[nb] != ci)
+                {
+                    int adj = cellToCage[nb];
+                    Assert.AreNotEqual(colors[ci], colors[adj],
+                        $"Cage {ci} (cell {cell}) and cage {adj} (cell {nb}) are adjacent but share color {colors[ci]}.");
+                }
+            }
+        }
     }
 
     #endregion
