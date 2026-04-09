@@ -1278,26 +1278,76 @@ public partial class GameBoardViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Apply cage border and sum-label data to every cell on the board.
-    /// For each cell, determines which edges are cage boundaries (the adjacent
-    /// cell is in a different cage or off-grid) and which cell displays the
-    /// cage sum label (the top-left cell of the cage).
+    /// Apply cage color and sum-label data to every cell on the board.
+    /// Uses greedy graph-coloring so no two adjacent cages share the same
+    /// color. The four color theorem guarantees 4 colors suffice for any
+    /// planar cage layout.
     /// </summary>
     internal void ApplyCageData(List<Cage> cages)
     {
+        int cageCount = cages.Count;
+
         // Build cell-to-cage mapping
         int[] cellToCage = new int[81];
         Array.Fill(cellToCage, -1);
-        for (int ci = 0; ci < cages.Count; ci++)
+        for (int ci = 0; ci < cageCount; ci++)
         {
             foreach (int cell in cages[ci].Cells)
                 cellToCage[cell] = ci;
         }
 
+        // Build cage adjacency: two cages are adjacent if any of their
+        // cells are orthogonal neighbors on the grid
+        HashSet<int>[] adjacent = new HashSet<int>[cageCount];
+        for (int ci = 0; ci < cageCount; ci++)
+            adjacent[ci] = [];
+
+        for (int cell = 0; cell < 81; cell++)
+        {
+            int ci = cellToCage[cell];
+            if (ci < 0) continue;
+
+            int row = cell / 9;
+            int col = cell % 9;
+
+            ReadOnlySpan<int> neighbours =
+            [
+                row > 0 ? cell - 9 : -1,
+                row < 8 ? cell + 9 : -1,
+                col > 0 ? cell - 1 : -1,
+                col < 8 ? cell + 1 : -1,
+            ];
+
+            foreach (int nb in neighbours)
+            {
+                if (nb >= 0 && cellToCage[nb] >= 0 && cellToCage[nb] != ci)
+                    adjacent[ci].Add(cellToCage[nb]);
+            }
+        }
+
+        // Greedy graph-coloring: assign the lowest color index not used
+        // by any adjacent cage
+        int[] cageColor = new int[cageCount];
+        Array.Fill(cageColor, -1);
+        for (int ci = 0; ci < cageCount; ci++)
+        {
+            HashSet<int> usedColors = [];
+            foreach (int adj in adjacent[ci])
+            {
+                if (cageColor[adj] >= 0)
+                    usedColors.Add(cageColor[adj]);
+            }
+
+            int color = 0;
+            while (usedColors.Contains(color))
+                color++;
+            cageColor[ci] = color;
+        }
+
         // Find the top-left cell (min row, then min col) for each cage
-        int[] cageLabelCell = new int[cages.Count];
+        int[] cageLabelCell = new int[cageCount];
         Array.Fill(cageLabelCell, -1);
-        for (int ci = 0; ci < cages.Count; ci++)
+        for (int ci = 0; ci < cageCount; ci++)
         {
             int bestRow = int.MaxValue, bestCol = int.MaxValue, bestCell = -1;
             foreach (int cell in cages[ci].Cells)
@@ -1324,19 +1374,11 @@ public partial class GameBoardViewModel : ObservableObject
                 continue;
             }
 
-            int row = cell / 9;
-            int col = cell % 9;
-
-            bool top = row == 0 || cellToCage[cell - 9] != ci;
-            bool bottom = row == 8 || cellToCage[cell + 9] != ci;
-            bool left = col == 0 || cellToCage[cell - 1] != ci;
-            bool right = col == 8 || cellToCage[cell + 1] != ci;
-
             string sumText = (cell == cageLabelCell[ci])
                 ? cages[ci].Sum.ToString()
                 : string.Empty;
 
-            cellVm.ApplyCageLayout(top, right, bottom, left, sumText);
+            cellVm.ApplyCageLayout(sumText, cageColor[ci]);
         }
     }
 
