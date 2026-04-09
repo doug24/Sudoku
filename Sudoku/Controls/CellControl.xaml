@@ -20,7 +20,7 @@
                         <Setter Property="Margin" Value="0"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding DataContext.IsKillerMode, RelativeSource={RelativeSource AncestorType=local:CellControl}}" Value="True">
-                                <Setter Property="Margin" Value="1"/>
+                                <Setter Property="Margin" Value="0.5"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -63,7 +63,7 @@
                     <Setter Property="Margin" Value="0"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsKillerMode}" Value="True">
-                            <Setter Property="Margin" Value="8"/>
+                            <Setter Property="Margin" Value="3,9,3,3"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
