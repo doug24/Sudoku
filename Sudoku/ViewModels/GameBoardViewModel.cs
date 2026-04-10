@@ -31,6 +31,7 @@ public partial class GameBoardViewModel : ObservableObject
     private readonly Dictionary<int, List<CellViewModel>> cols;
     private Dictionary<int, List<CellViewModel>> sections;
 
+    private List<Cage> currentCages = [];
     private int currentHighlightNumber = -1;
     private bool selectedNumberChanged;
     private int hintIndex;
@@ -399,6 +400,11 @@ public partial class GameBoardViewModel : ObservableObject
                 else
                     sb.AppendLine(state.ToSnapshotString());
             }
+        }
+        if (currentCages.Count > 0)
+        {
+            sb.AppendLine("K");
+            sb.Append(Util.SerializeKillerData(currentCages));
         }
         return sb.ToString();
     }
@@ -1078,47 +1084,89 @@ public partial class GameBoardViewModel : ObservableObject
             ssData = ssData.Skip(1).ToArray();
         }
 
-        int[] initial = GetPuzzle(ssData);
-
-        QQWing ss = new();
-        ss.SetPuzzle(initial);
-        ss.SetRecordHistory(true);
-        ss.Solve(CancellationToken.None);
-        if (ss.IsSolved())
+        // Separate board rows from killer cage data (after "K" marker)
+        string[] boardRows = ssData;
+        List<Cage> cages = [];
+        int killerMarker = Array.IndexOf(ssData, "K");
+        if (killerMarker >= 0)
         {
-            int[] solution = ss.GetSolution();
+            boardRows = ssData.Take(killerMarker).ToArray();
+            string killerData = string.Join("\n", ssData.Skip(killerMarker + 1));
+            if (!string.IsNullOrWhiteSpace(killerData))
+            {
+                cages = Util.ParseKillerData(killerData);
+            }
+        }
+
+        int[] solution;
+        string difficulty;
+        List<string> strategies = [];
+
+        if (cages.Count > 0)
+        {
+            // Killer puzzle: use KillerSolver to find the solution
+            KillerSolver ks = new(cages);
+            int[] solved = ks.Solve();
+            if (solved == null)
+            {
+                CustomMessageBox.Show("Killer puzzle has no solution", "Sudoku");
+                return;
+            }
+            solution = solved;
+            Difficulty diff = ks.GetDifficulty();
+            difficulty = diff.ToString();
+            PuzzleDescription = $"{difficulty}: {cages.Count} cages";
+
+            ApplyCageData(cages);
+        }
+        else
+        {
+            // Regular puzzle: use QQWing solver
+            int[] initial = GetPuzzle(boardRows);
+
+            QQWing ss = new();
+            ss.SetPuzzle(initial);
+            ss.SetRecordHistory(true);
+            ss.Solve(CancellationToken.None);
+            if (!ss.IsSolved())
+            {
+                UpdateRemainderCounts();
+                return;
+            }
+
+            solution = ss.GetSolution();
 
             // Get difficulty and strategies before HasMultipleSolutions,
             // which calls Reset and clears the solve instructions
-            string difficulty = ss.GetDifficultyAsString();
-            List<string> strategies = ss.GetStrategiesUsed();
+            difficulty = ss.GetDifficultyAsString();
+            strategies = ss.GetStrategiesUsed();
             PuzzleDescription = strategies.Count > 0
                 ? $"{difficulty}: {string.Join(", ", strategies)}"
                 : difficulty;
 
             if (ss.HasMultipleSolutions())
                 CustomMessageBox.Show("Puzzle has multiple solutions", "Sudoku");
+        }
 
-            List<CellState> list = [];
+        List<CellState> list = [];
 
-            for (int row = 0; row < 9; row++)
+        for (int row = 0; row < 9; row++)
+        {
+            string[] parts = boardRows[row].Split(',');
+            if (parts.Length == 9)
             {
-                string[] parts = ssData[row].Split(',');
-                if (parts.Length == 9)
+                for (int col = 0; col < 9; col++)
                 {
-                    for (int col = 0; col < 9; col++)
-                    {
-                        int cellIndex = QQWing.RowColumnToCell(row, col);
-                        var state = CellState.FromSnapshotString(cellIndex, parts[col]);
-                        list.Add(state);
-                        allCells[cellIndex].Initialize(state, solution[cellIndex]);
-                    }
+                    int cellIndex = QQWing.RowColumnToCell(row, col);
+                    var state = CellState.FromSnapshotString(cellIndex, parts[col]);
+                    list.Add(state);
+                    allCells[cellIndex].Initialize(state, solution[cellIndex]);
                 }
             }
-            undoStack.Push(list);
-            IsInProgress = true;
-            stopwatch.Restart();
         }
+        undoStack.Push(list);
+        IsInProgress = true;
+        stopwatch.Restart();
         UpdateRemainderCounts();
     }
 
@@ -1252,6 +1300,7 @@ public partial class GameBoardViewModel : ObservableObject
     {
         undoStack.Clear();
         redoStack.Clear();
+        currentCages = [];
         hintIndex = 0;
         stopwatch.Reset();
         Time = ShowTimer ? "00:00" : string.Empty;
@@ -1285,6 +1334,7 @@ public partial class GameBoardViewModel : ObservableObject
     /// </summary>
     internal void ApplyCageData(List<Cage> cages)
     {
+        currentCages = cages;
         int cageCount = cages.Count;
 
         // Build cell-to-cage mapping

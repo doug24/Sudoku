@@ -249,5 +249,29 @@ namespace QQWingLib
 
             return cages;
         }
+
+        /// <summary>
+        /// Serialize a list of <see cref="Cage"/> objects into the multi-line text format
+        /// expected by <see cref="ParseKillerData"/>. Each line contains the cage sum
+        /// followed by space-separated row,col pairs (0-based, 0-8).
+        /// </summary>
+        public static string SerializeKillerData(List<Cage> cages)
+        {
+            if (cages == null || cages.Count == 0) return string.Empty;
+
+            StringBuilder sb = new();
+            foreach (var cage in cages)
+            {
+                sb.Append(cage.Sum);
+                foreach (int cell in cage.Cells)
+                {
+                    int row = cell / 9;
+                    int col = cell % 9;
+                    sb.Append($" {row},{col}");
+                }
+                sb.AppendLine();
+            }
+            return sb.ToString();
+        }
     }
 }
