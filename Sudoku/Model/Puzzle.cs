@@ -147,7 +147,15 @@ public class Puzzle
         KillerPuzzle? result = completedTask.Result;
         if (result != null)
         {
-            Initial = new int[81]; // Killer puzzles have no givens
+            int[] initial = new int[81];
+            foreach (Cage cage in result.Cages)
+            {
+                if (cage.Size == 1)
+                {
+                    initial[cage.Cells[0]] = cage.Sum;
+                }
+            }
+            Initial = initial;
             Solution = result.Solution;
             Cages = result.Cages;
             Difficulty = result.Difficulty != QQWingLib.Difficulty.UNKNOWN

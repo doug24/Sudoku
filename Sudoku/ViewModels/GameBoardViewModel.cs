@@ -1543,10 +1543,10 @@ public partial class GameBoardViewModel : ObservableObject
             int idx = 0;
             foreach (var cell in allCells)
             {
+                int given = puz.Initial[idx];
                 int answer = puz.Solution[idx];
 
-                // Killer puzzles have no givens: every cell starts empty
-                CellState cellState = new(idx, false, 0);
+                CellState cellState = new(idx, given > 0, Math.Max(0, given));
                 cell.Initialize(cellState, answer);
 
                 list.Add(cellState);
