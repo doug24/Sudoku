@@ -1297,7 +1297,7 @@ public partial class GameBoardViewModel : ObservableObject
         }
 
         // Build cage adjacency: two cages are adjacent if any of their
-        // cells are orthogonal neighbours on the grid
+        // cells are orthogonal neighbors on the grid
         HashSet<int>[] adjacent = new HashSet<int>[cageCount];
         for (int ci = 0; ci < cageCount; ci++)
             adjacent[ci] = [];
@@ -1328,7 +1328,7 @@ public partial class GameBoardViewModel : ObservableObject
         // Pre-assign single-cell cages to a dedicated 5th color (index 4).
         // Single-cell cages can never be orthogonally adjacent to each other
         // (the flood-fill generator always grows a cage to include unassigned
-        // neighbours), so they can safely share one color.
+        // neighbors), so they can safely share one color.
         const int singleCellColor = 4;
         int[] cageColor = new int[cageCount];
         Array.Fill(cageColor, -1);
