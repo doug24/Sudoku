@@ -122,6 +122,7 @@ public class KillerGenerator
             // Grow the cage from the seed cell
             List<int> cells = [seed];
             cageId[seed] = cages.Count;
+            int usedDigitsMask = 1 << (solution[seed] - 1);
 
             // Frontier: unassigned orthogonal neighbors of cells already in this cage
             List<int> frontier = [];
@@ -136,8 +137,14 @@ public class KillerGenerator
                 if (cageId[next] != -1)
                     continue;
 
+                // Killer convention: a cage cannot contain the same digit twice
+                int digitBit = 1 << (solution[next] - 1);
+                if ((usedDigitsMask & digitBit) != 0)
+                    continue;
+
                 cells.Add(next);
                 cageId[next] = cages.Count;
+                usedDigitsMask |= digitBit;
                 AddNeighbours(next, cageId, frontier);
             }
 
