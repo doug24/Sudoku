@@ -34,6 +34,19 @@ public class KillerGenerator
     public int MaxPartitionAttempts { get; set; } = 20;
 
     /// <summary>
+    /// The symmetry to apply to the first <see cref="SymmetricCageCount"/> cage pairs.
+    /// Supported values: NONE, ROTATE180, MIRROR, FLIP. RANDOM picks one of
+    /// the three at random. ROTATE90 falls back to ROTATE180.
+    /// </summary>
+    public Symmetry Symmetry { get; set; } = Symmetry.NONE;
+
+    /// <summary>
+    /// Number of cage pairs to create symmetrically before falling back to
+    /// random flood-fill for the remaining cells.
+    /// </summary>
+    public int SymmetricCageCount { get; set; } = 4;
+
+    /// <summary>
     /// Generate a Killer Sudoku puzzle. Returns the cage list and the solution,
     /// or null if generation could not produce a unique puzzle before cancellation.
     /// </summary>
@@ -95,10 +108,9 @@ public class KillerGenerator
 
     /// <summary>
     /// Partition all 81 cells into contiguous cages and compute each cage's
-    /// sum from the solution. Uses a randomized flood-fill: pick a random
-    /// unassigned cell as a seed, then grow the cage by repeatedly adding a
-    /// random orthogonally adjacent unassigned neighbor until the target
-    /// size is reached or no neighbors remain.
+    /// sum from the solution. When <see cref="Symmetry"/> is set, the first
+    /// <see cref="SymmetricCageCount"/> cage pairs are placed symmetrically,
+    /// then remaining cells are filled with random flood-fill.
     /// </summary>
     private List<Cage> PartitionIntoCages(int[] solution)
     {
@@ -107,7 +119,13 @@ public class KillerGenerator
 
         List<Cage> cages = [];
 
-        // Build a shuffled list of cells to seed cages
+        Symmetry effectiveSymmetry = ResolveSymmetry();
+        if (effectiveSymmetry != Symmetry.NONE && SymmetricCageCount > 0)
+        {
+            PlaceSymmetricCages(solution, cageId, cages, effectiveSymmetry);
+        }
+
+        // Fill remaining unassigned cells with random flood-fill
         int[] order = new int[BOARD_SIZE];
         for (int i = 0; i < BOARD_SIZE; i++) order[i] = i;
         Shuffle(order);
@@ -117,45 +135,216 @@ public class KillerGenerator
             if (cageId[seed] != -1)
                 continue;
 
-            int targetSize = random.Next(MinCageSize, MaxCageSize + 1);
-
-            // Grow the cage from the seed cell
-            List<int> cells = [seed];
-            cageId[seed] = cages.Count;
-            int usedDigitsMask = 1 << (solution[seed] - 1);
-
-            // Frontier: unassigned orthogonal neighbors of cells already in this cage
-            List<int> frontier = [];
-            AddNeighbours(seed, cageId, frontier);
-
-            while (cells.Count < targetSize && frontier.Count > 0)
-            {
-                int idx = random.Next(frontier.Count);
-                int next = frontier[idx];
-                frontier.RemoveAt(idx);
-
-                if (cageId[next] != -1)
-                    continue;
-
-                // Killer convention: a cage cannot contain the same digit twice
-                int digitBit = 1 << (solution[next] - 1);
-                if ((usedDigitsMask & digitBit) != 0)
-                    continue;
-
-                cells.Add(next);
-                cageId[next] = cages.Count;
-                usedDigitsMask |= digitBit;
-                AddNeighbours(next, cageId, frontier);
-            }
-
-            int sum = 0;
-            foreach (int cell in cells)
-                sum += solution[cell];
-
-            cages.Add(new Cage([.. cells], sum));
+            GrowCage(seed, solution, cageId, cages);
         }
 
         return cages;
+    }
+
+    /// <summary>
+    /// Place up to <see cref="SymmetricCageCount"/> symmetric cage pairs.
+    /// For each pair, a cage is grown from a random seed in the primary half,
+    /// then its mirror is created at the symmetric positions.
+    /// </summary>
+    private void PlaceSymmetricCages(int[] solution, int[] cageId, List<Cage> cages, Symmetry symmetry)
+    {
+        // Build a shuffled list of cells in the primary half
+        List<int> seeds = [];
+        for (int cell = 0; cell < BOARD_SIZE; cell++)
+        {
+            if (IsInPrimaryHalf(cell, symmetry))
+                seeds.Add(cell);
+        }
+        ShuffleList(seeds);
+
+        int placed = 0;
+        foreach (int seed in seeds)
+        {
+            if (placed >= SymmetricCageCount)
+                break;
+
+            if (cageId[seed] != -1)
+                continue;
+
+            int mirrorSeed = MirrorCell(seed, symmetry);
+            if (mirrorSeed == seed || cageId[mirrorSeed] != -1)
+                continue;
+
+            // Try to grow a symmetric cage pair
+            if (TryGrowSymmetricCage(seed, mirrorSeed, solution, cageId, cages, symmetry))
+                placed++;
+        }
+    }
+
+    /// <summary>
+    /// Grow a cage from <paramref name="seed"/> and simultaneously build its
+    /// mirror cage. Each cell added to the primary cage must have its mirror
+    /// cell unassigned, and both cages must satisfy the no-duplicate-digit
+    /// constraint. Returns false if only the seed pair could be placed and the
+    /// cage would be too small (single cell).
+    /// </summary>
+    private bool TryGrowSymmetricCage(int seed, int mirrorSeed, int[] solution,
+        int[] cageId, List<Cage> cages, Symmetry symmetry)
+    {
+        int targetSize = random.Next(MinCageSize, MaxCageSize + 1);
+
+        List<int> cells = [seed];
+        int primaryId = cages.Count;
+        int mirrorId = cages.Count + 1;
+
+        // Temporarily mark both seeds
+        cageId[seed] = primaryId;
+        cageId[mirrorSeed] = mirrorId;
+
+        int usedDigitsMask = 1 << (solution[seed] - 1);
+        int mirrorDigitsMask = 1 << (solution[mirrorSeed] - 1);
+
+        List<int> mirrorCells = [mirrorSeed];
+
+        List<int> frontier = [];
+        AddNeighbours(seed, cageId, frontier);
+
+        while (cells.Count < targetSize && frontier.Count > 0)
+        {
+            int idx = random.Next(frontier.Count);
+            int next = frontier[idx];
+            frontier.RemoveAt(idx);
+
+            if (cageId[next] != -1)
+                continue;
+
+            int mirror = MirrorCell(next, symmetry);
+            if (mirror == next || cageId[mirror] != -1)
+                continue;
+
+            // Check digit constraints for both cages
+            int digitBit = 1 << (solution[next] - 1);
+            if ((usedDigitsMask & digitBit) != 0)
+                continue;
+
+            int mirrorDigitBit = 1 << (solution[mirror] - 1);
+            if ((mirrorDigitsMask & mirrorDigitBit) != 0)
+                continue;
+
+            cells.Add(next);
+            cageId[next] = primaryId;
+            usedDigitsMask |= digitBit;
+            AddNeighbours(next, cageId, frontier);
+
+            mirrorCells.Add(mirror);
+            cageId[mirror] = mirrorId;
+            mirrorDigitsMask |= mirrorDigitBit;
+        }
+
+        if (cells.Count < MinCageSize)
+        {
+            // Roll back: cage is too small
+            foreach (int c in cells) cageId[c] = -1;
+            foreach (int c in mirrorCells) cageId[c] = -1;
+            return false;
+        }
+
+        int sum = 0;
+        foreach (int c in cells) sum += solution[c];
+        cages.Add(new Cage([.. cells], sum));
+
+        int mirrorSum = 0;
+        foreach (int c in mirrorCells) mirrorSum += solution[c];
+        cages.Add(new Cage([.. mirrorCells], mirrorSum));
+
+        return true;
+    }
+
+    /// <summary>
+    /// Grow a single cage from the seed cell using random flood-fill.
+    /// </summary>
+    private void GrowCage(int seed, int[] solution, int[] cageId, List<Cage> cages)
+    {
+        int targetSize = random.Next(MinCageSize, MaxCageSize + 1);
+
+        // Grow the cage from the seed cell
+        List<int> cells = [seed];
+        cageId[seed] = cages.Count;
+        int usedDigitsMask = 1 << (solution[seed] - 1);
+
+        // Frontier: unassigned orthogonal neighbors of cells already in this cage
+        List<int> frontier = [];
+        AddNeighbours(seed, cageId, frontier);
+
+        while (cells.Count < targetSize && frontier.Count > 0)
+        {
+            int idx = random.Next(frontier.Count);
+            int next = frontier[idx];
+            frontier.RemoveAt(idx);
+
+            if (cageId[next] != -1)
+                continue;
+
+            // Killer convention: a cage cannot contain the same digit twice
+            int digitBit = 1 << (solution[next] - 1);
+            if ((usedDigitsMask & digitBit) != 0)
+                continue;
+
+            cells.Add(next);
+            cageId[next] = cages.Count;
+            usedDigitsMask |= digitBit;
+            AddNeighbours(next, cageId, frontier);
+        }
+
+        int sum = 0;
+        foreach (int cell in cells)
+            sum += solution[cell];
+
+        cages.Add(new Cage([.. cells], sum));
+    }
+
+    /// <summary>
+    /// Resolve RANDOM and ROTATE90 to a concrete supported symmetry.
+    /// </summary>
+    private Symmetry ResolveSymmetry()
+    {
+        Symmetry[] supported = [Symmetry.ROTATE180, Symmetry.MIRROR, Symmetry.FLIP];
+
+        if (Symmetry == Symmetry.RANDOM || Symmetry == Symmetry.ROTATE90)
+            return supported[random.Next(supported.Length)];
+
+        return Symmetry;
+    }
+
+    /// <summary>
+    /// Returns true if <paramref name="cell"/> is in the primary half of the
+    /// board for the given symmetry. The primary half excludes the axis of
+    /// symmetry so that seed and mirror are always distinct.
+    /// </summary>
+    private static bool IsInPrimaryHalf(int cell, Symmetry symmetry)
+    {
+        int row = cell / SIZE;
+        int col = cell % SIZE;
+
+        return symmetry switch
+        {
+            Symmetry.ROTATE180 => cell < BOARD_SIZE / 2, // cells 0-39 (excludes center cell 40)
+            Symmetry.MIRROR => col < SIZE / 2,           // columns 0-3 (excludes center column 4)
+            Symmetry.FLIP => row < SIZE / 2,             // rows 0-3 (excludes center row 4)
+            _ => false,
+        };
+    }
+
+    /// <summary>
+    /// Return the symmetric counterpart of <paramref name="cell"/>.
+    /// </summary>
+    private static int MirrorCell(int cell, Symmetry symmetry)
+    {
+        int row = cell / SIZE;
+        int col = cell % SIZE;
+
+        return symmetry switch
+        {
+            Symmetry.ROTATE180 => (SIZE - 1 - row) * SIZE + (SIZE - 1 - col),
+            Symmetry.MIRROR => row * SIZE + (SIZE - 1 - col),
+            Symmetry.FLIP => (SIZE - 1 - row) * SIZE + col,
+            _ => cell,
+        };
     }
 
     /// <summary>
@@ -185,6 +374,15 @@ public class KillerGenerator
         {
             int j = random.Next(i + 1);
             (array[i], array[j]) = (array[j], array[i]);
+        }
+    }
+
+    private static void ShuffleList(List<int> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
         }
     }
 }

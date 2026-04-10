@@ -128,23 +128,23 @@ public class Puzzle
         return PuzzleData.Empty;
     }
 
-    public async Task GenerateKiller(Difficulty difficulty)
+    public async Task GenerateKiller(Difficulty difficulty, Symmetry symmetry = Symmetry.NONE)
     {
         Mouse.OverrideCursor = Cursors.Wait;
 
         var timeout = TimeSpan.FromSeconds(30);
         using CancellationTokenSource cancellationTokenSource = new(timeout);
         var token = cancellationTokenSource.Token;
-        List<Task<KillerPuzzle>> tasks = [];
+        List<Task<KillerPuzzle?>> tasks = [];
         for (int idx = 0; idx < 4; idx++)
         {
-            tasks.Add(Task.Run(() => GenerateKillerInternal(difficulty, token), token));
+            tasks.Add(Task.Run(() => GenerateKillerInternal(difficulty, symmetry, token), token));
         }
 
-        Task<KillerPuzzle> completedTask = await Task.WhenAny(tasks);
+        Task<KillerPuzzle?> completedTask = await Task.WhenAny(tasks);
         cancellationTokenSource.Cancel();
 
-        KillerPuzzle result = completedTask.Result;
+        KillerPuzzle? result = completedTask.Result;
         if (result != null)
         {
             Initial = new int[81]; // Killer puzzles have no givens
@@ -165,11 +165,11 @@ public class Puzzle
         Mouse.OverrideCursor = Cursors.Arrow;
     }
 
-    private static KillerPuzzle GenerateKillerInternal(Difficulty difficulty, CancellationToken token)
+    private static KillerPuzzle? GenerateKillerInternal(Difficulty difficulty, Symmetry symmetry, CancellationToken token)
     {
         try
         {
-            KillerGenerator generator = new();
+            KillerGenerator generator = new() { Symmetry = symmetry };
             return generator.Generate(difficulty, token);
         }
         catch (OperationCanceledException)

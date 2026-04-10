@@ -168,7 +168,7 @@ public partial class SudokuViewModel : ObservableObject
         {
             // Killer puzzles only support the classic layout because of the cage coloring
             SectionLayout = QQWing.ClassicLayout;
-            GameBoard.NewKillerPuzzle(PuzzleDifficulty);
+            GameBoard.NewKillerPuzzle(PuzzleDifficulty, PuzzleSymmetry);
         });
 
     public ICommand SnapshotCommand => new RelayCommand(

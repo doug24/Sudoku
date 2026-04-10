@@ -1527,11 +1527,11 @@ public partial class GameBoardViewModel : ObservableObject
         }
     }
 
-    internal async void NewKillerPuzzle(Difficulty difficulty)
+    internal async void NewKillerPuzzle(Difficulty difficulty, Symmetry symmetry)
     {
         ClearBoard();
         Puzzle puz = new();
-        await puz.GenerateKiller(difficulty);
+        await puz.GenerateKiller(difficulty, symmetry);
 
         if (puz.Solution.Length == allCells.Count && puz.Cages.Count > 0)
         {

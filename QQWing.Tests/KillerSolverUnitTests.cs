@@ -501,7 +501,78 @@ public class KillerSolverUnitTests
         AssertNoAdjacentSameColor(puzzle.Cages, colors);
     }
 
+    [TestMethod]
+    [Timeout(30000, CooperativeCancellation = true)]
+    [DataRow(Symmetry.ROTATE180)]
+    [DataRow(Symmetry.MIRROR)]
+    [DataRow(Symmetry.FLIP)]
+    public void Generate_WithSymmetry_ProducesSymmetricCages(Symmetry symmetry)
+    {
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(25));
+
+        KillerGenerator generator = new() { Symmetry = symmetry, SymmetricCageCount = 5 };
+        KillerPuzzle puzzle = generator.Generate(Difficulty.UNKNOWN, cts.Token);
+
+        Assert.IsNotNull(puzzle, "Generator should produce a puzzle.");
+        AssertValidSudoku(puzzle.Solution);
+        AssertCagesSatisfied(puzzle.Solution, puzzle.Cages);
+        AssertFullCoverage(puzzle.Cages);
+
+        KillerSolver solver = new(puzzle.Cages);
+        Assert.IsTrue(solver.HasUniqueSolution(), "Generated puzzle should have a unique solution.");
+
+        // Verify that some cages have symmetric counterparts
+        int symmetricPairs = CountSymmetricPairs(puzzle.Cages, symmetry);
+        Assert.IsTrue(symmetricPairs >= 1,
+            $"Expected at least 1 symmetric cage pair for {symmetry}, found {symmetricPairs}.");
+    }
+
     #region Test Helpers
+
+    /// <summary>
+    /// Count cage pairs where one cage's cells are the symmetric mirror of another's.
+    /// </summary>
+    private static int CountSymmetricPairs(List<Cage> cages, Symmetry symmetry)
+    {
+        int pairs = 0;
+        bool[] matched = new bool[cages.Count];
+
+        for (int i = 0; i < cages.Count; i++)
+        {
+            if (matched[i]) continue;
+
+            HashSet<int> mirrorCells = [];
+            foreach (int cell in cages[i].Cells)
+            {
+                int row = cell / 9;
+                int col = cell % 9;
+                int mirror = symmetry switch
+                {
+                    Symmetry.ROTATE180 => (8 - row) * 9 + (8 - col),
+                    Symmetry.MIRROR => row * 9 + (8 - col),
+                    Symmetry.FLIP => (8 - row) * 9 + col,
+                    _ => cell,
+                };
+                mirrorCells.Add(mirror);
+            }
+
+            for (int j = i + 1; j < cages.Count; j++)
+            {
+                if (matched[j]) continue;
+
+                if (cages[j].Cells.Length == mirrorCells.Count &&
+                    new HashSet<int>(cages[j].Cells).SetEquals(mirrorCells))
+                {
+                    matched[i] = true;
+                    matched[j] = true;
+                    pairs++;
+                    break;
+                }
+            }
+        }
+
+        return pairs;
+    }
 
     private static List<Cage> BuildHorizontalPairCages(int[] solution)
     {
