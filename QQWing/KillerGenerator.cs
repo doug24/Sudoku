@@ -47,6 +47,14 @@ public class KillerGenerator
     public int SymmetricCageCount { get; set; } = 4;
 
     /// <summary>
+    /// Number of cages to bias toward extreme (very low or very high) sums.
+    /// Half target low sums and half target high sums. These cages are seeded
+    /// from cells with extreme digit values and grown by preferring neighbors
+    /// whose digits reinforce the bias.
+    /// </summary>
+    public int ExtremeCageCount { get; set; } = 4;
+
+    /// <summary>
     /// Generate a Killer Sudoku puzzle. Returns the cage list and the solution,
     /// or null if generation could not produce a unique puzzle before cancellation.
     /// </summary>
@@ -123,6 +131,12 @@ public class KillerGenerator
         if (effectiveSymmetry != Symmetry.NONE && SymmetricCageCount > 0)
         {
             PlaceSymmetricCages(solution, cageId, cages, effectiveSymmetry);
+        }
+
+        // Place a few cages biased toward extreme (low/high) sums
+        if (ExtremeCageCount > 0)
+        {
+            PlaceExtremeCages(solution, cageId, cages);
         }
 
         // Fill remaining unassigned cells with random flood-fill
@@ -256,9 +270,53 @@ public class KillerGenerator
     }
 
     /// <summary>
-    /// Grow a single cage from the seed cell using random flood-fill.
+    /// Place up to <see cref="ExtremeCageCount"/> cages biased toward extreme sums.
+    /// Half target low sums (seeded from cells with digits 1-2, grown toward low
+    /// digits) and half target high sums (seeded from digits 8-9, grown toward
+    /// high digits).
     /// </summary>
-    private void GrowCage(int seed, int[] solution, int[] cageId, List<Cage> cages)
+    private void PlaceExtremeCages(int[] solution, int[] cageId, List<Cage> cages)
+    {
+        int lowTarget = ExtremeCageCount / 2;
+        int highTarget = ExtremeCageCount - lowTarget;
+
+        List<int> lowSeeds = [];
+        List<int> highSeeds = [];
+        for (int i = 0; i < BOARD_SIZE; i++)
+        {
+            if (solution[i] <= 2) lowSeeds.Add(i);
+            else if (solution[i] >= 8) highSeeds.Add(i);
+        }
+        ShuffleList(lowSeeds);
+        ShuffleList(highSeeds);
+
+        int placed = 0;
+        foreach (int seed in lowSeeds)
+        {
+            if (placed >= lowTarget) break;
+            if (cageId[seed] != -1) continue;
+            GrowCage(seed, solution, cageId, cages, SumBias.Low);
+            placed++;
+        }
+
+        placed = 0;
+        foreach (int seed in highSeeds)
+        {
+            if (placed >= highTarget) break;
+            if (cageId[seed] != -1) continue;
+            GrowCage(seed, solution, cageId, cages, SumBias.High);
+            placed++;
+        }
+    }
+
+    /// <summary>
+    /// Grow a single cage from the seed cell using flood-fill. When
+    /// <paramref name="bias"/> is not <see cref="SumBias.None"/>, frontier
+    /// cells with the lowest or highest digit are preferred, producing cages
+    /// with extreme sums.
+    /// </summary>
+    private void GrowCage(int seed, int[] solution, int[] cageId, List<Cage> cages,
+        SumBias bias = SumBias.None)
     {
         int targetSize = random.Next(MinCageSize, MaxCageSize + 1);
 
@@ -273,7 +331,10 @@ public class KillerGenerator
 
         while (cells.Count < targetSize && frontier.Count > 0)
         {
-            int idx = random.Next(frontier.Count);
+            int idx = bias != SumBias.None
+                ? SelectBiasedIndex(frontier, solution, bias)
+                : random.Next(frontier.Count);
+
             int next = frontier[idx];
             frontier.RemoveAt(idx);
 
@@ -296,6 +357,30 @@ public class KillerGenerator
             sum += solution[cell];
 
         cages.Add(new Cage([.. cells], sum));
+    }
+
+    /// <summary>
+    /// Return the index in <paramref name="frontier"/> of the cell with the
+    /// lowest (for <see cref="SumBias.Low"/>) or highest (for
+    /// <see cref="SumBias.High"/>) digit value.
+    /// </summary>
+    private static int SelectBiasedIndex(List<int> frontier, int[] solution, SumBias bias)
+    {
+        int bestIdx = 0;
+        int bestDigit = solution[frontier[0]];
+
+        for (int i = 1; i < frontier.Count; i++)
+        {
+            int digit = solution[frontier[i]];
+            if ((bias == SumBias.Low && digit < bestDigit) ||
+                (bias == SumBias.High && digit > bestDigit))
+            {
+                bestDigit = digit;
+                bestIdx = i;
+            }
+        }
+
+        return bestIdx;
     }
 
     /// <summary>
@@ -385,6 +470,8 @@ public class KillerGenerator
             (list[i], list[j]) = (list[j], list[i]);
         }
     }
+
+    private enum SumBias { None, Low, High }
 }
 
 /// <summary>
