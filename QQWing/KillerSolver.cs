@@ -253,6 +253,70 @@ public class KillerSolver
 
             if (!BoxLineReduction(solution, candidates, ref strategyProgress)) return false;
             if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!NakedTriplesInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!NakedTriplesInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!NakedTriplesInSections(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!HiddenTriplesInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!HiddenTriplesInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            if (!HiddenTriplesInSections(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+
+            // --- TOUGH: Naked quads, hidden quads, X-Wing, Y-Wing, XYZ-Wing, Swordfish, Jellyfish, Simple Coloring ---
+            if (!NakedQuadsInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!NakedQuadsInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!NakedQuadsInSections(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!HiddenQuadsInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!HiddenQuadsInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!HiddenQuadsInSections(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!XWingInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!XWingInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!YWing(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!XyzWing(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!SwordfishInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!SwordfishInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!JellyfishInRows(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!JellyfishInColumns(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+
+            if (!SimpleColoring(solution, candidates, ref strategyProgress)) return false;
+            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
         }
 
         return true;
@@ -788,6 +852,738 @@ public class KillerSolver
 
     #endregion
 
+    #region Additional Intermediate Strategies
+
+    private static bool NakedTriplesInRows(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int row = 0; row < SIZE; row++)
+        {
+            if (!NakedSubsetInUnit(solution, candidates, GetRowCells(row), 3, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool NakedTriplesInColumns(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int col = 0; col < SIZE; col++)
+        {
+            if (!NakedSubsetInUnit(solution, candidates, GetColumnCells(col), 3, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool NakedTriplesInSections(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int sec = 0; sec < SIZE; sec++)
+        {
+            if (!NakedSubsetInUnit(solution, candidates, GetSectionCells(sec), 3, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool HiddenTriplesInRows(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int row = 0; row < SIZE; row++)
+        {
+            if (!HiddenSubsetInUnit(solution, candidates, GetRowCells(row), 3, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool HiddenTriplesInColumns(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int col = 0; col < SIZE; col++)
+        {
+            if (!HiddenSubsetInUnit(solution, candidates, GetColumnCells(col), 3, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool HiddenTriplesInSections(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int sec = 0; sec < SIZE; sec++)
+        {
+            if (!HiddenSubsetInUnit(solution, candidates, GetSectionCells(sec), 3, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    #endregion
+
+    #region Tough Strategies
+
+    private static bool NakedQuadsInRows(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int row = 0; row < SIZE; row++)
+        {
+            if (!NakedSubsetInUnit(solution, candidates, GetRowCells(row), 4, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool NakedQuadsInColumns(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int col = 0; col < SIZE; col++)
+        {
+            if (!NakedSubsetInUnit(solution, candidates, GetColumnCells(col), 4, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool NakedQuadsInSections(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int sec = 0; sec < SIZE; sec++)
+        {
+            if (!NakedSubsetInUnit(solution, candidates, GetSectionCells(sec), 4, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool HiddenQuadsInRows(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int row = 0; row < SIZE; row++)
+        {
+            if (!HiddenSubsetInUnit(solution, candidates, GetRowCells(row), 4, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool HiddenQuadsInColumns(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int col = 0; col < SIZE; col++)
+        {
+            if (!HiddenSubsetInUnit(solution, candidates, GetColumnCells(col), 4, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool HiddenQuadsInSections(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int sec = 0; sec < SIZE; sec++)
+        {
+            if (!HiddenSubsetInUnit(solution, candidates, GetSectionCells(sec), 4, ref progress)) return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool XWingInRows(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int val = 1; val <= SIZE; val++)
+        {
+            int bit = 1 << (val - 1);
+            for (int r1 = 0; r1 < SIZE - 1; r1++)
+            {
+                int colMask1 = 0;
+                int count1 = 0;
+                bool placed1 = false;
+                for (int col = 0; col < SIZE; col++)
+                {
+                    int cell = r1 * SIZE + col;
+                    if (solution[cell] == val) { placed1 = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        colMask1 |= 1 << col;
+                        count1++;
+                    }
+                }
+                if (placed1 || count1 != 2) continue;
+
+                for (int r2 = r1 + 1; r2 < SIZE; r2++)
+                {
+                    int colMask2 = 0;
+                    int count2 = 0;
+                    bool placed2 = false;
+                    for (int col = 0; col < SIZE; col++)
+                    {
+                        int cell = r2 * SIZE + col;
+                        if (solution[cell] == val) { placed2 = true; break; }
+                        if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                        {
+                            colMask2 |= 1 << col;
+                            count2++;
+                        }
+                    }
+                    if (placed2 || count2 != 2 || colMask2 != colMask1) continue;
+
+                    for (int row = 0; row < SIZE; row++)
+                    {
+                        if (row == r1 || row == r2) continue;
+                        for (int col = 0; col < SIZE; col++)
+                        {
+                            if ((colMask1 & (1 << col)) == 0) continue;
+                            int cell = row * SIZE + col;
+                            if (solution[cell] != 0) continue;
+                            int before = candidates[cell];
+                            candidates[cell] &= ~bit;
+                            if (candidates[cell] != before) progress = true;
+                            if (candidates[cell] == 0) return false;
+                        }
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool XWingInColumns(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int val = 1; val <= SIZE; val++)
+        {
+            int bit = 1 << (val - 1);
+            for (int c1 = 0; c1 < SIZE - 1; c1++)
+            {
+                int rowMask1 = 0;
+                int count1 = 0;
+                bool placed1 = false;
+                for (int row = 0; row < SIZE; row++)
+                {
+                    int cell = row * SIZE + c1;
+                    if (solution[cell] == val) { placed1 = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        rowMask1 |= 1 << row;
+                        count1++;
+                    }
+                }
+                if (placed1 || count1 != 2) continue;
+
+                for (int c2 = c1 + 1; c2 < SIZE; c2++)
+                {
+                    int rowMask2 = 0;
+                    int count2 = 0;
+                    bool placed2 = false;
+                    for (int row = 0; row < SIZE; row++)
+                    {
+                        int cell = row * SIZE + c2;
+                        if (solution[cell] == val) { placed2 = true; break; }
+                        if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                        {
+                            rowMask2 |= 1 << row;
+                            count2++;
+                        }
+                    }
+                    if (placed2 || count2 != 2 || rowMask2 != rowMask1) continue;
+
+                    for (int col = 0; col < SIZE; col++)
+                    {
+                        if (col == c1 || col == c2) continue;
+                        for (int row = 0; row < SIZE; row++)
+                        {
+                            if ((rowMask1 & (1 << row)) == 0) continue;
+                            int cell = row * SIZE + col;
+                            if (solution[cell] != 0) continue;
+                            int before = candidates[cell];
+                            candidates[cell] &= ~bit;
+                            if (candidates[cell] != before) progress = true;
+                            if (candidates[cell] == 0) return false;
+                        }
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool YWing(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int pivot = 0; pivot < BOARD_SIZE; pivot++)
+        {
+            if (solution[pivot] != 0 || PopCount(candidates[pivot]) != 2) continue;
+
+            int pivotCands = candidates[pivot];
+            int valA = -1, valB = -1;
+            for (int v = 0; v < SIZE; v++)
+            {
+                if ((pivotCands & (1 << v)) != 0)
+                {
+                    if (valA == -1) valA = v;
+                    else valB = v;
+                }
+            }
+
+            List<int> peers = GetPeers(pivot);
+
+            for (int wi = 0; wi < peers.Count; wi++)
+            {
+                int wing1 = peers[wi];
+                if (solution[wing1] != 0 || PopCount(candidates[wing1]) != 2) continue;
+
+                int w1Cands = candidates[wing1];
+                bool w1HasA = (w1Cands & (1 << valA)) != 0;
+                bool w1HasB = (w1Cands & (1 << valB)) != 0;
+                if (w1HasA == w1HasB) continue;
+
+                int sharedVal = w1HasA ? valA : valB;
+                int otherPivotVal = w1HasA ? valB : valA;
+                int valC = -1;
+                for (int v = 0; v < SIZE; v++)
+                {
+                    if ((w1Cands & (1 << v)) != 0 && v != sharedVal)
+                    {
+                        valC = v;
+                        break;
+                    }
+                }
+
+                for (int wj = wi + 1; wj < peers.Count; wj++)
+                {
+                    int wing2 = peers[wj];
+                    if (solution[wing2] != 0 || PopCount(candidates[wing2]) != 2) continue;
+
+                    int w2Cands = candidates[wing2];
+                    if ((w2Cands & (1 << otherPivotVal)) == 0 || (w2Cands & (1 << valC)) == 0) continue;
+                    if (PopCount(w2Cands) != 2) continue;
+
+                    int bitC = 1 << valC;
+                    for (int target = 0; target < BOARD_SIZE; target++)
+                    {
+                        if (target == pivot || target == wing1 || target == wing2) continue;
+                        if (solution[target] != 0) continue;
+                        if ((candidates[target] & bitC) == 0) continue;
+
+                        if (SharesUnit(target, wing1) && SharesUnit(target, wing2))
+                        {
+                            int before = candidates[target];
+                            candidates[target] &= ~bitC;
+                            if (candidates[target] != before) progress = true;
+                            if (candidates[target] == 0) return false;
+                        }
+                    }
+                    if (progress) return true;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool XyzWing(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int pivot = 0; pivot < BOARD_SIZE; pivot++)
+        {
+            if (solution[pivot] != 0 || PopCount(candidates[pivot]) != 3) continue;
+
+            int pivotCands = candidates[pivot];
+            int[] pivotVals = new int[3];
+            int pIdx = 0;
+            for (int v = 0; v < SIZE; v++)
+            {
+                if ((pivotCands & (1 << v)) != 0)
+                    pivotVals[pIdx++] = v;
+            }
+
+            List<int> peers = GetPeers(pivot);
+
+            for (int ci = 0; ci < 3; ci++)
+            {
+                int valC = pivotVals[ci];
+                int valA = pivotVals[(ci + 1) % 3];
+                int valB = pivotVals[(ci + 2) % 3];
+
+                for (int wi = 0; wi < peers.Count; wi++)
+                {
+                    int wing1 = peers[wi];
+                    if (solution[wing1] != 0 || PopCount(candidates[wing1]) != 2) continue;
+                    if ((candidates[wing1] & (1 << valA)) == 0 || (candidates[wing1] & (1 << valC)) == 0) continue;
+
+                    for (int wj = wi + 1; wj < peers.Count; wj++)
+                    {
+                        int wing2 = peers[wj];
+                        if (solution[wing2] != 0 || PopCount(candidates[wing2]) != 2) continue;
+                        if ((candidates[wing2] & (1 << valB)) == 0 || (candidates[wing2] & (1 << valC)) == 0) continue;
+
+                        int bitC = 1 << valC;
+                        for (int target = 0; target < BOARD_SIZE; target++)
+                        {
+                            if (target == pivot || target == wing1 || target == wing2) continue;
+                            if (solution[target] != 0) continue;
+                            if ((candidates[target] & bitC) == 0) continue;
+
+                            if (SharesUnit(target, pivot) && SharesUnit(target, wing1) && SharesUnit(target, wing2))
+                            {
+                                int before = candidates[target];
+                                candidates[target] &= ~bitC;
+                                if (candidates[target] != before) progress = true;
+                                if (candidates[target] == 0) return false;
+                            }
+                        }
+                        if (progress) return true;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private static bool SwordfishInRows(int[] solution, int[] candidates, ref bool progress)
+    {
+        return FishInRows(solution, candidates, 3, ref progress);
+    }
+
+    private static bool SwordfishInColumns(int[] solution, int[] candidates, ref bool progress)
+    {
+        return FishInColumns(solution, candidates, 3, ref progress);
+    }
+
+    private static bool JellyfishInRows(int[] solution, int[] candidates, ref bool progress)
+    {
+        return FishInRows(solution, candidates, 4, ref progress);
+    }
+
+    private static bool JellyfishInColumns(int[] solution, int[] candidates, ref bool progress)
+    {
+        return FishInColumns(solution, candidates, 4, ref progress);
+    }
+
+    private static bool FishInRows(int[] solution, int[] candidates, int fishSize, ref bool progress)
+    {
+        for (int val = 1; val <= SIZE; val++)
+        {
+            int bit = 1 << (val - 1);
+            int[] rowColMask = new int[SIZE];
+            int[] rowColCount = new int[SIZE];
+            for (int row = 0; row < SIZE; row++)
+            {
+                bool placed = false;
+                for (int col = 0; col < SIZE; col++)
+                {
+                    int cell = row * SIZE + col;
+                    if (solution[cell] == val) { placed = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        rowColMask[row] |= 1 << col;
+                        rowColCount[row]++;
+                    }
+                }
+                if (placed) { rowColMask[row] = 0; rowColCount[row] = 0; }
+            }
+
+            int eligCount = 0;
+            int[] eligible = new int[SIZE];
+            for (int row = 0; row < SIZE; row++)
+            {
+                if (rowColCount[row] >= 2 && rowColCount[row] <= fishSize)
+                    eligible[eligCount++] = row;
+            }
+            if (eligCount < fishSize) continue;
+
+            int[] combo = new int[fishSize];
+            if (!FishRowRecurse(solution, candidates, eligible, eligCount, rowColMask, fishSize, 0, 0, combo, bit, ref progress))
+                return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool FishRowRecurse(int[] solution, int[] candidates, int[] eligible, int eligCount,
+        int[] rowColMask, int fishSize, int start, int depth, int[] combo, int bit, ref bool progress)
+    {
+        if (depth == fishSize)
+        {
+            int unionMask = 0;
+            for (int d = 0; d < fishSize; d++)
+                unionMask |= rowColMask[combo[d]];
+            if (PopCount(unionMask) != fishSize) return true;
+
+            for (int row = 0; row < SIZE; row++)
+            {
+                bool inCombo = false;
+                for (int d = 0; d < fishSize; d++)
+                    if (combo[d] == row) { inCombo = true; break; }
+                if (inCombo) continue;
+
+                for (int col = 0; col < SIZE; col++)
+                {
+                    if ((unionMask & (1 << col)) == 0) continue;
+                    int cell = row * SIZE + col;
+                    if (solution[cell] != 0) continue;
+                    int before = candidates[cell];
+                    candidates[cell] &= ~bit;
+                    if (candidates[cell] != before) progress = true;
+                    if (candidates[cell] == 0) return false;
+                }
+            }
+            return true;
+        }
+
+        for (int i = start; i <= eligCount - (fishSize - depth); i++)
+        {
+            combo[depth] = eligible[i];
+            if (depth > 0)
+            {
+                int partialUnion = 0;
+                for (int d = 0; d <= depth; d++)
+                    partialUnion |= rowColMask[combo[d]];
+                if (PopCount(partialUnion) > fishSize) continue;
+            }
+            if (!FishRowRecurse(solution, candidates, eligible, eligCount, rowColMask, fishSize, i + 1, depth + 1, combo, bit, ref progress))
+                return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool FishInColumns(int[] solution, int[] candidates, int fishSize, ref bool progress)
+    {
+        for (int val = 1; val <= SIZE; val++)
+        {
+            int bit = 1 << (val - 1);
+            int[] colRowMask = new int[SIZE];
+            int[] colRowCount = new int[SIZE];
+            for (int col = 0; col < SIZE; col++)
+            {
+                bool placed = false;
+                for (int row = 0; row < SIZE; row++)
+                {
+                    int cell = row * SIZE + col;
+                    if (solution[cell] == val) { placed = true; break; }
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        colRowMask[col] |= 1 << row;
+                        colRowCount[col]++;
+                    }
+                }
+                if (placed) { colRowMask[col] = 0; colRowCount[col] = 0; }
+            }
+
+            int eligCount = 0;
+            int[] eligible = new int[SIZE];
+            for (int col = 0; col < SIZE; col++)
+            {
+                if (colRowCount[col] >= 2 && colRowCount[col] <= fishSize)
+                    eligible[eligCount++] = col;
+            }
+            if (eligCount < fishSize) continue;
+
+            int[] combo = new int[fishSize];
+            if (!FishColRecurse(solution, candidates, eligible, eligCount, colRowMask, fishSize, 0, 0, combo, bit, ref progress))
+                return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool FishColRecurse(int[] solution, int[] candidates, int[] eligible, int eligCount,
+        int[] colRowMask, int fishSize, int start, int depth, int[] combo, int bit, ref bool progress)
+    {
+        if (depth == fishSize)
+        {
+            int unionMask = 0;
+            for (int d = 0; d < fishSize; d++)
+                unionMask |= colRowMask[combo[d]];
+            if (PopCount(unionMask) != fishSize) return true;
+
+            for (int col = 0; col < SIZE; col++)
+            {
+                bool inCombo = false;
+                for (int d = 0; d < fishSize; d++)
+                    if (combo[d] == col) { inCombo = true; break; }
+                if (inCombo) continue;
+
+                for (int row = 0; row < SIZE; row++)
+                {
+                    if ((unionMask & (1 << row)) == 0) continue;
+                    int cell = row * SIZE + col;
+                    if (solution[cell] != 0) continue;
+                    int before = candidates[cell];
+                    candidates[cell] &= ~bit;
+                    if (candidates[cell] != before) progress = true;
+                    if (candidates[cell] == 0) return false;
+                }
+            }
+            return true;
+        }
+
+        for (int i = start; i <= eligCount - (fishSize - depth); i++)
+        {
+            combo[depth] = eligible[i];
+            if (depth > 0)
+            {
+                int partialUnion = 0;
+                for (int d = 0; d <= depth; d++)
+                    partialUnion |= colRowMask[combo[d]];
+                if (PopCount(partialUnion) > fishSize) continue;
+            }
+            if (!FishColRecurse(solution, candidates, eligible, eligCount, colRowMask, fishSize, i + 1, depth + 1, combo, bit, ref progress))
+                return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool SimpleColoring(int[] solution, int[] candidates, ref bool progress)
+    {
+        for (int val = 1; val <= SIZE; val++)
+        {
+            int bit = 1 << (val - 1);
+
+            int candCount = 0;
+            int[] candCells = new int[BOARD_SIZE];
+            for (int cell = 0; cell < BOARD_SIZE; cell++)
+            {
+                if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    candCells[candCount++] = cell;
+            }
+            if (candCount < 3) continue;
+
+            // Build conjugate pair links
+            Dictionary<int, List<int>> links = [];
+            for (int i = 0; i < candCount; i++)
+                links[candCells[i]] = [];
+
+            for (int row = 0; row < SIZE; row++)
+            {
+                int c1 = -1, c2 = -1, count = 0;
+                for (int col = 0; col < SIZE; col++)
+                {
+                    int cell = row * SIZE + col;
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        if (c1 == -1) c1 = cell;
+                        else if (c2 == -1) c2 = cell;
+                        count++;
+                    }
+                }
+                if (count == 2) { links[c1].Add(c2); links[c2].Add(c1); }
+            }
+
+            for (int col = 0; col < SIZE; col++)
+            {
+                int c1 = -1, c2 = -1, count = 0;
+                for (int row = 0; row < SIZE; row++)
+                {
+                    int cell = row * SIZE + col;
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        if (c1 == -1) c1 = cell;
+                        else if (c2 == -1) c2 = cell;
+                        count++;
+                    }
+                }
+                if (count == 2)
+                {
+                    if (!links[c1].Contains(c2)) links[c1].Add(c2);
+                    if (!links[c2].Contains(c1)) links[c2].Add(c1);
+                }
+            }
+
+            for (int sec = 0; sec < SIZE; sec++)
+            {
+                int c1 = -1, c2 = -1, count = 0;
+                foreach (int cell in QQWing.SectionLayout.SectionToSectionCells(sec))
+                {
+                    if (solution[cell] == 0 && (candidates[cell] & bit) != 0)
+                    {
+                        if (c1 == -1) c1 = cell;
+                        else if (c2 == -1) c2 = cell;
+                        count++;
+                    }
+                }
+                if (count == 2)
+                {
+                    if (!links[c1].Contains(c2)) links[c1].Add(c2);
+                    if (!links[c2].Contains(c1)) links[c2].Add(c1);
+                }
+            }
+
+            // BFS coloring for each connected component
+            HashSet<int> visited = [];
+            for (int ci = 0; ci < candCount; ci++)
+            {
+                int startCell = candCells[ci];
+                if (visited.Contains(startCell) || links[startCell].Count == 0) continue;
+
+                Dictionary<int, int> color = [];
+                Queue<int> queue = new();
+                color[startCell] = 0;
+                queue.Enqueue(startCell);
+                visited.Add(startCell);
+
+                while (queue.Count > 0)
+                {
+                    int cell = queue.Dequeue();
+                    int nextColor = 1 - color[cell];
+                    foreach (int linked in links[cell])
+                    {
+                        if (!color.ContainsKey(linked))
+                        {
+                            color[linked] = nextColor;
+                            visited.Add(linked);
+                            queue.Enqueue(linked);
+                        }
+                    }
+                }
+
+                if (color.Count < 2) continue;
+
+                List<int> color0 = [];
+                List<int> color1 = [];
+                foreach (var kvp in color)
+                {
+                    if (kvp.Value == 0) color0.Add(kvp.Key);
+                    else color1.Add(kvp.Key);
+                }
+
+                // Rule 2: Color contradiction
+                bool color0Invalid = HasSameColorConflict(color0);
+                bool color1Invalid = HasSameColorConflict(color1);
+                if (color0Invalid && color1Invalid) continue;
+
+                if (color0Invalid || color1Invalid)
+                {
+                    List<int> invalidCells = color0Invalid ? color0 : color1;
+                    foreach (int cell in invalidCells)
+                    {
+                        int before = candidates[cell];
+                        candidates[cell] &= ~bit;
+                        if (candidates[cell] != before) progress = true;
+                        if (candidates[cell] == 0) return false;
+                    }
+                    if (progress) return true;
+                }
+
+                // Rule 4: Color elimination
+                for (int ci2 = 0; ci2 < candCount; ci2++)
+                {
+                    int cell = candCells[ci2];
+                    if (color.ContainsKey(cell)) continue;
+
+                    bool seesColor0 = false, seesColor1 = false;
+                    foreach (int c0 in color0)
+                        if (SharesUnit(cell, c0)) { seesColor0 = true; break; }
+                    if (!seesColor0) continue;
+                    foreach (int c1 in color1)
+                        if (SharesUnit(cell, c1)) { seesColor1 = true; break; }
+
+                    if (seesColor0 && seesColor1)
+                    {
+                        int before = candidates[cell];
+                        candidates[cell] &= ~bit;
+                        if (candidates[cell] != before) progress = true;
+                        if (candidates[cell] == 0) return false;
+                    }
+                }
+                if (progress) return true;
+            }
+        }
+        return true;
+    }
+
+    #endregion
+
     #region Cage Constraints
 
     /// <summary>
@@ -1057,6 +1853,210 @@ public class KillerSolver
             value >>= 1;
         }
         return count;
+    }
+
+    private static int[] GetRowCells(int row)
+    {
+        int[] cells = new int[SIZE];
+        for (int col = 0; col < SIZE; col++)
+            cells[col] = row * SIZE + col;
+        return cells;
+    }
+
+    private static int[] GetColumnCells(int col)
+    {
+        int[] cells = new int[SIZE];
+        for (int row = 0; row < SIZE; row++)
+            cells[row] = row * SIZE + col;
+        return cells;
+    }
+
+    private static int[] GetSectionCells(int sec)
+    {
+        int[] cells = new int[SIZE];
+        int i = 0;
+        foreach (int cell in QQWing.SectionLayout.SectionToSectionCells(sec))
+            cells[i++] = cell;
+        return cells;
+    }
+
+    private static bool NakedSubsetInUnit(int[] solution, int[] candidates, int[] unitCells, int subsetSize, ref bool progress)
+    {
+        int eligibleCount = 0;
+        int[] eligible = new int[SIZE];
+        for (int i = 0; i < unitCells.Length; i++)
+        {
+            int cell = unitCells[i];
+            if (solution[cell] != 0) continue;
+            int pc = PopCount(candidates[cell]);
+            if (pc >= 2 && pc <= subsetSize)
+                eligible[eligibleCount++] = cell;
+        }
+        if (eligibleCount < subsetSize) return true;
+
+        int[] combo = new int[subsetSize];
+        return NakedSubsetRecurse(solution, candidates, unitCells, eligible, eligibleCount, subsetSize, 0, 0, combo, ref progress);
+    }
+
+    private static bool NakedSubsetRecurse(int[] solution, int[] candidates, int[] unitCells,
+        int[] eligible, int eligibleCount, int subsetSize, int start, int depth, int[] combo, ref bool progress)
+    {
+        if (depth == subsetSize)
+        {
+            int unionMask = 0;
+            for (int d = 0; d < subsetSize; d++)
+                unionMask |= candidates[combo[d]];
+            if (PopCount(unionMask) != subsetSize) return true;
+
+            for (int i = 0; i < unitCells.Length; i++)
+            {
+                int cell = unitCells[i];
+                if (solution[cell] != 0) continue;
+                bool inCombo = false;
+                for (int d = 0; d < subsetSize; d++)
+                    if (combo[d] == cell) { inCombo = true; break; }
+                if (inCombo) continue;
+
+                int before = candidates[cell];
+                candidates[cell] &= ~unionMask;
+                if (candidates[cell] != before) progress = true;
+                if (candidates[cell] == 0) return false;
+            }
+            return true;
+        }
+
+        for (int i = start; i <= eligibleCount - (subsetSize - depth); i++)
+        {
+            combo[depth] = eligible[i];
+            if (depth > 0)
+            {
+                int partialUnion = 0;
+                for (int d = 0; d <= depth; d++)
+                    partialUnion |= candidates[combo[d]];
+                if (PopCount(partialUnion) > subsetSize) continue;
+            }
+            if (!NakedSubsetRecurse(solution, candidates, unitCells, eligible, eligibleCount, subsetSize, i + 1, depth + 1, combo, ref progress))
+                return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool HiddenSubsetInUnit(int[] solution, int[] candidates, int[] unitCells, int subsetSize, ref bool progress)
+    {
+        int[] valPosMask = new int[SIZE];
+        int[] valPosCount = new int[SIZE];
+        for (int val = 1; val <= SIZE; val++)
+        {
+            bool placed = false;
+            for (int i = 0; i < unitCells.Length; i++)
+            {
+                int cell = unitCells[i];
+                if (solution[cell] == val) { placed = true; break; }
+                if (solution[cell] == 0 && (candidates[cell] & (1 << (val - 1))) != 0)
+                {
+                    valPosMask[val - 1] |= 1 << i;
+                    valPosCount[val - 1]++;
+                }
+            }
+            if (placed) { valPosMask[val - 1] = 0; valPosCount[val - 1] = 0; }
+        }
+
+        int eligCount = 0;
+        int[] eligible = new int[SIZE];
+        for (int v = 0; v < SIZE; v++)
+        {
+            if (valPosCount[v] >= 2 && valPosCount[v] <= subsetSize)
+                eligible[eligCount++] = v;
+        }
+        if (eligCount < subsetSize) return true;
+
+        int[] combo = new int[subsetSize];
+        return HiddenSubsetRecurse(candidates, unitCells, valPosMask, eligible, eligCount, subsetSize, 0, 0, combo, ref progress);
+    }
+
+    private static bool HiddenSubsetRecurse(int[] candidates, int[] unitCells,
+        int[] valPosMask, int[] eligible, int eligCount, int subsetSize, int start, int depth, int[] combo, ref bool progress)
+    {
+        if (depth == subsetSize)
+        {
+            int unionMask = 0;
+            for (int d = 0; d < subsetSize; d++)
+                unionMask |= valPosMask[combo[d]];
+            if (PopCount(unionMask) != subsetSize) return true;
+
+            int keepMask = 0;
+            for (int d = 0; d < subsetSize; d++)
+                keepMask |= 1 << combo[d];
+
+            for (int bit = 0; bit < SIZE; bit++)
+            {
+                if ((unionMask & (1 << bit)) == 0) continue;
+                int cell = unitCells[bit];
+                int before = candidates[cell];
+                candidates[cell] &= keepMask;
+                if (candidates[cell] != before) progress = true;
+                if (candidates[cell] == 0) return false;
+            }
+            return true;
+        }
+
+        for (int i = start; i <= eligCount - (subsetSize - depth); i++)
+        {
+            combo[depth] = eligible[i];
+            if (depth > 0)
+            {
+                int partialUnion = 0;
+                for (int d = 0; d <= depth; d++)
+                    partialUnion |= valPosMask[combo[d]];
+                if (PopCount(partialUnion) > subsetSize) continue;
+            }
+            if (!HiddenSubsetRecurse(candidates, unitCells, valPosMask, eligible, eligCount, subsetSize, i + 1, depth + 1, combo, ref progress))
+                return false;
+            if (progress) return true;
+        }
+        return true;
+    }
+
+    private static bool SharesUnit(int cell1, int cell2)
+    {
+        if (cell1 / SIZE == cell2 / SIZE) return true;
+        if (cell1 % SIZE == cell2 % SIZE) return true;
+        if (QQWing.SectionLayout.CellToSection(cell1) == QQWing.SectionLayout.CellToSection(cell2)) return true;
+        return false;
+    }
+
+    private static List<int> GetPeers(int cell)
+    {
+        HashSet<int> peers = [];
+        int row = cell / SIZE;
+        int col = cell % SIZE;
+        int section = QQWing.SectionLayout.CellToSection(cell);
+
+        for (int c = 0; c < SIZE; c++)
+        {
+            int pos = row * SIZE + c;
+            if (pos != cell) peers.Add(pos);
+        }
+        for (int r = 0; r < SIZE; r++)
+        {
+            int pos = r * SIZE + col;
+            if (pos != cell) peers.Add(pos);
+        }
+        foreach (int pos in QQWing.SectionLayout.SectionToSectionCells(section))
+        {
+            if (pos != cell) peers.Add(pos);
+        }
+        return [.. peers];
+    }
+
+    private static bool HasSameColorConflict(List<int> cells)
+    {
+        for (int i = 0; i < cells.Count - 1; i++)
+            for (int j = i + 1; j < cells.Count; j++)
+                if (SharesUnit(cells[i], cells[j]))
+                    return true;
+        return false;
     }
 
     #endregion
