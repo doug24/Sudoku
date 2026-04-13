@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="Sudoku.KillerCalculatorResultControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Sudoku"
+             mc:Ignorable="d" 
+             d:DesignHeight="400"
+             d:DesignWidth="100"
+             MinWidth="100">
+
+    <UserControl.DataContext>
+        <local:KillerCalculatorResultViewModel/>
+    </UserControl.DataContext>
+
+    <Border BorderBrush="LightBlue" BorderThickness="1" Margin="3">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" BorderBrush="LightBlue" BorderThickness="0,0,0,1" Margin="0">
+                <TextBlock Text="{Binding Title, Mode=OneWay}"
+                   FontSize="16" Margin="6" MinHeight="48"/>
+            </Border>
+
+            <Border Grid.Row="1" BorderBrush="LightBlue" BorderThickness="0,0,0,1" Margin="0">
+                <TextBlock Text="{Binding IncludeExclude, Mode=OneWay}" 
+                   FontSize="16" Margin="3" Height="48"/>
+            </Border>
+
+            <TextBlock Grid.Row="2" Text="{Binding Results, Mode=OneWay}" 
+                   FontSize="20" Margin="6" MinHeight="120" Width="100" 
+                   TextWrapping="NoWrap"/>
+
+        </Grid>
+    </Border>
+</UserControl>

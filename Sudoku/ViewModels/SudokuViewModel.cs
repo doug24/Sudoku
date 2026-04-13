@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -40,6 +41,9 @@ public partial class SudokuViewModel : ObservableObject
             PuzzleSymmetry = symm;
         }
 
+        GameBoard.KillerCalculator = KillerCalculator;
+        GameBoard.PropertyChanged += GameBoard_PropertyChanged;
+
         IrregularLayout layout = new();
         LayoutMenuItems.Add(new("Classic", -1, SectionLayout == -1));
         LayoutMenuItems.Add(new("Random", 999, SectionLayout == 999));
@@ -59,8 +63,10 @@ public partial class SudokuViewModel : ObservableObject
             SectionLayout = index;
             LayoutMenuItems.ForEach(menu => menu.IsChecked = menu.LayoutId == index);
         });
-    }
 
+        if (DesignerProperties.GetIsInDesignMode(new System.Windows.DependencyObject()))
+            ShowKillerCalculator = true;
+    }
 
     internal void SaveSettings()
     {
@@ -102,6 +108,15 @@ public partial class SudokuViewModel : ObservableObject
                 Process.Start(Application.ResourceAssembly.Location.Replace(".dll", ".exe"));
                 Application.Current.Shutdown();
             }
+        }
+    }
+
+    private void GameBoard_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(GameBoard.IsKillerSudoku) ||
+            e.PropertyName == nameof(GameBoard.ShowKillerCalculator))
+        {
+            ShowKillerCalculator = GameBoard.IsKillerSudoku && GameBoard.ShowKillerCalculator;
         }
     }
 
@@ -148,6 +163,13 @@ public partial class SudokuViewModel : ObservableObject
 
     [ObservableProperty]
     private bool isHighlightMode;
+
+    [ObservableProperty]
+    private KillerCalculatorViewModel killerCalculator = new();
+
+    [ObservableProperty]
+    private bool showKillerCalculator = false;
+
 
     public ObservableCollection<LayoutMenuItemViewModel> LayoutMenuItems { get; set; } = [];
 

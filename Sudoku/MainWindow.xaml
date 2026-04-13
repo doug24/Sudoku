@@ -15,9 +15,10 @@
         Height="760">
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <local:EnumBooleanConverter x:Key="ebc" />
         <local:NumToBooleanConverter x:Key="nbc"/>
-
+        
         <LinearGradientBrush x:Key="thumbBrush" EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#FFB3B5B7" Offset="1"/>
             <GradientStop Color="#FFEDEEEE"/>
@@ -132,6 +133,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
@@ -161,19 +163,30 @@
                             UncheckedContent="No" CheckedContent="Yes" 
                             Margin="0,6" HorizontalAlignment="Left"/>
 
-                <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"
-                           Text="Timer" Margin="3" FontSize="14"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                           VerticalAlignment="Center"
+                           Text="Killer Calculator" Margin="3" FontSize="14"/>
                 <ToggleSwitch:HorizontalToggleSwitch Grid.Row="3" Grid.Column="2"
+                            IsChecked="{Binding GameBoard.ShowKillerCalculator, Mode=TwoWay, FallbackValue=True}" 
+                            Style="{StaticResource carbon}"
+                            UncheckedContent="No" CheckedContent="Yes" 
+                            Margin="0,0,0,6"
+                            IsEnabled="{Binding GameBoard.IsKillerSudoku}" VerticalAlignment="Bottom"/>
+
+                <TextBlock Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"
+                           Text="Timer" Margin="3" FontSize="14"/>
+                <ToggleSwitch:HorizontalToggleSwitch Grid.Row="4" Grid.Column="2"
                             IsChecked="{Binding GameBoard.ShowTimer, Mode=TwoWay}" 
                             Style="{StaticResource carbon}"
                             UncheckedContent="No" CheckedContent="Yes" 
                             Margin="0,6" HorizontalAlignment="Left"/>
 
-                <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
+                <TextBlock Grid.Row="4" Grid.Column="1"
                            Margin="3,0"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            Text="{Binding GameBoard.Time}"
-                           FontSize="28"/>
+                           FontSize="24"/>
 
                 <Button Grid.Row="5" Grid.Column="0"
                         Width="{Binding ElementName=ff, Path=ActualWidth}"
@@ -181,7 +194,7 @@
                         Content="Hint"
                         Padding="6" Margin="3"
                         Command="{Binding Path=GameBoard.HintCommand}"/>
-                
+
                 <Button Grid.Row="5" Grid.Column="1" 
                         HorizontalAlignment="Stretch"
                         Content="Fill candidates" 
@@ -196,6 +209,30 @@
 
                 <local:KeyPadControl Grid.Row="6" Grid.ColumnSpan="3" 
                                      VerticalAlignment="Bottom" MaxWidth="220"/>
+
+                <StackPanel Grid.Row="0" Grid.Column="3" Grid.RowSpan="7" Margin="20,3,3,3"
+                            Visibility="{Binding ShowKillerCalculator, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                    <ListBox Margin="3" HorizontalAlignment="Stretch"
+                             ItemsSource="{Binding KillerCalculator.Selections}"
+                             SelectedIndex="{Binding KillerCalculator.SelectedIndex, Mode=TwoWay}"
+                             MaxWidth="{Binding ElementName=Row1Panel, Path=ActualWidth}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             MaxHeight="180">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
+
+                    <StackPanel x:Name="Row1Panel" Orientation="Horizontal" HorizontalAlignment="Left">
+                        <local:CheckNums DataContext="{Binding KillerCalculator.Exclude}" Margin="3,6"/>
+                        <local:CheckNums DataContext="{Binding KillerCalculator.Include}" Margin="3,6"/>
+                        <local:KillerCalculatorResultControl DataContext="{Binding KillerCalculator.Results}" Margin="3,6"/>
+                    </StackPanel>
+
+                </StackPanel>
             </Grid>
         </Border>
     </DockPanel>

@@ -48,6 +48,10 @@
     <None Remove="Images\irr8.png" />
     <None Remove="Images\irr9.png" />
     <None Remove="Images\random.png" />
+    <None Remove="KillerCalculator\killercombos.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="KillerCalculator\killercombos.csv" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QQWing\QQWing.csproj" />

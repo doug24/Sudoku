@@ -25,6 +25,8 @@ public partial class GameBoardViewModel : ObservableObject
 
     public MultiSelectCollectionView<CellViewModel> Cells { get; private set; }
 
+    public KillerCalculatorViewModel? KillerCalculator { get; internal set; }
+
     private readonly List<CellViewModel> list = [];
     private readonly List<CellViewModel> allCells;
     private readonly Dictionary<int, List<CellViewModel>> rows;
@@ -43,6 +45,7 @@ public partial class GameBoardViewModel : ObservableObject
         HighlightIncorrect = Properties.Settings.Default.HighlightIncorrect;
         CleanPencilMarks = Properties.Settings.Default.CleanPencilMarks;
         ShowTimer = Properties.Settings.Default.ShowTimer;
+        ShowKillerCalculator = Properties.Settings.Default.ShowKillerCalculator;
         NumberFirstMode = Properties.Settings.Default.NumberFirstMode;
 
         periodicTimer.Interval = TimeSpan.FromSeconds(1);
@@ -174,6 +177,12 @@ public partial class GameBoardViewModel : ObservableObject
 
     [ObservableProperty]
     private string puzzleDescription = string.Empty;
+
+    [ObservableProperty]
+    private bool showKillerCalculator = true;
+
+    [ObservableProperty]
+    private bool isKillerSudoku = false;
 
     private void OnTimer_Tick(object? sender, EventArgs e)
     {
@@ -1095,7 +1104,13 @@ public partial class GameBoardViewModel : ObservableObject
             if (!string.IsNullOrWhiteSpace(killerData))
             {
                 cages = Util.ParseKillerData(killerData);
+
+                KillerCalculator?.Reset();
+                KillerCalculator?.Initialize(cages);
+                KillerCalculator?.Select(0);
             }
+
+            IsKillerSudoku = true;
         }
 
         int[] solution;
@@ -1298,6 +1313,7 @@ public partial class GameBoardViewModel : ObservableObject
 
     internal void ClearBoard()
     {
+        IsKillerSudoku = false;
         undoStack.Clear();
         redoStack.Clear();
         currentCages = [];
@@ -1529,13 +1545,18 @@ public partial class GameBoardViewModel : ObservableObject
 
     internal async void NewKillerPuzzle(Difficulty difficulty, Symmetry symmetry)
     {
+        KillerCalculator?.Reset();
+
         ClearBoard();
         Puzzle puz = new();
         await puz.GenerateKiller(difficulty, symmetry);
 
         if (puz.Solution.Length == allCells.Count && puz.Cages.Count > 0)
         {
+            IsKillerSudoku = true;
             ApplyCageData(puz.Cages);
+            KillerCalculator?.Initialize(puz.Cages);
+            KillerCalculator?.Select(0);
 
             undoStack.Clear();
             List<CellState> list = [];

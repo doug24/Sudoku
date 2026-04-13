@@ -14,12 +14,12 @@ public partial class MainWindow : Window
     private readonly SudokuViewModel viewModel;
     public MainWindow()
     {
+        Application.Current.ThemeMode = Properties.Settings.Default.DarkMode ? ThemeMode.Dark : ThemeMode.Light;
+
         InitializeComponent();
 
         viewModel = new SudokuViewModel();
         DataContext = viewModel;
-
-        Application.Current.ThemeMode = viewModel.DarkMode ? ThemeMode.Dark : ThemeMode.Light;
 
         Loaded += (s, e) => viewModel.AppRunning = true;
         Closing += (s, e) => viewModel.SaveSettings();
