@@ -158,6 +158,7 @@ public class Puzzle
             Initial = initial;
             Solution = result.Solution;
             Cages = result.Cages;
+            Strategies = result.Strategies;
             Difficulty = result.Difficulty != QQWingLib.Difficulty.UNKNOWN
                 ? $"Killer {result.Difficulty}" : "Killer";
         }

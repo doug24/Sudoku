@@ -1129,8 +1129,11 @@ public partial class GameBoardViewModel : ObservableObject
             }
             solution = solved;
             Difficulty diff = ks.GetDifficulty();
+            strategies = ks.GetStrategiesUsed();
             difficulty = diff.ToString();
-            PuzzleDescription = $"{difficulty}: {cages.Count} cages";
+            PuzzleDescription = strategies.Count > 0
+                ? $"{difficulty}: {string.Join(", ", strategies)}"
+                : $"{difficulty}: {cages.Count} cages";
 
             ApplyCageData(cages);
         }
@@ -1580,7 +1583,9 @@ public partial class GameBoardViewModel : ObservableObject
             IsInProgress = true;
             stopwatch.Restart();
 
-            PuzzleDescription = $"{puz.Difficulty}: {puz.Cages.Count} cages";
+            PuzzleDescription = puz.Strategies.Count > 0
+                ? $"{puz.Difficulty}: {string.Join(", ", puz.Strategies)}"
+                : $"{puz.Difficulty}: {puz.Cages.Count} cages";
         }
     }
 

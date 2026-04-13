@@ -84,12 +84,13 @@ public class KillerGenerator
                 if (solver.HasUniqueSolution())
                 {
                     Difficulty difficulty = solver.GetDifficulty();
+                    List<string> strategies = solver.GetStrategiesUsed();
 
                     // Step 4: check difficulty matches the target
                     if (targetDifficulty != Difficulty.UNKNOWN && difficulty != targetDifficulty)
                         continue;
 
-                    return new KillerPuzzle(cages, solution, difficulty);
+                    return new KillerPuzzle(cages, solution, difficulty, strategies);
                 }
             }
         }
@@ -478,7 +479,7 @@ public class KillerGenerator
 /// The result of a successful Killer Sudoku generation: the cage definitions
 /// and the underlying solution.
 /// </summary>
-public class KillerPuzzle(List<Cage> cages, int[] solution, Difficulty difficulty = Difficulty.UNKNOWN)
+public class KillerPuzzle(List<Cage> cages, int[] solution, Difficulty difficulty = Difficulty.UNKNOWN, List<string> strategies = null)
 {
     /// <summary>
     /// The cages that define the puzzle. Every cell 0-80 belongs to exactly one cage.
@@ -494,4 +495,9 @@ public class KillerPuzzle(List<Cage> cages, int[] solution, Difficulty difficult
     /// The assessed difficulty of the puzzle.
     /// </summary>
     public Difficulty Difficulty { get; } = difficulty;
+
+    /// <summary>
+    /// The distinct strategy names used to solve the puzzle, in the order they were first used.
+    /// </summary>
+    public List<string> Strategies { get; } = strategies ?? [];
 }

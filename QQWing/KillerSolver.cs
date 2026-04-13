@@ -16,6 +16,8 @@ public class KillerSolver
 
     private readonly Cage[] _cages;
     private readonly int[] _cellToCage;
+    private readonly List<string> _strategiesUsed = [];
+    private readonly HashSet<string> _strategiesSeen = [];
 
     /// <summary>
     /// Creates a new KillerSolver for the given set of cages.
@@ -102,6 +104,9 @@ public class KillerSolver
     /// </summary>
     public Difficulty GetDifficulty()
     {
+        _strategiesUsed.Clear();
+        _strategiesSeen.Clear();
+
         int[] solution = new int[BOARD_SIZE];
         int[] candidates = new int[BOARD_SIZE];
         Array.Fill(candidates, ALL_CANDIDATES);
@@ -116,9 +121,24 @@ public class KillerSolver
 
         // Could not solve with logic alone — verify solvable with backtracking
         if (SolveRecursive(solution, candidates) != null)
+        {
+            RecordStrategy("Guess");
             return Difficulty.EXPERT;
+        }
 
         return Difficulty.UNKNOWN;
+    }
+
+    /// <summary>
+    /// Get a distinct list of strategy names used in the most recent GetDifficulty call,
+    /// in the order they were first used.
+    /// </summary>
+    public List<string> GetStrategiesUsed() => new(_strategiesUsed);
+
+    private void RecordStrategy(string name)
+    {
+        if (_strategiesSeen.Add(name))
+            _strategiesUsed.Add(name);
     }
 
     #region Constraint Propagation
@@ -199,7 +219,7 @@ public class KillerSolver
                     progress = true;
                 }
             }
-            if (progress) continue;
+            if (progress) { RecordStrategy("Naked Single"); continue; }
 
             for (int ci = 0; ci < _cages.Length; ci++)
             {
@@ -215,108 +235,108 @@ public class KillerSolver
                     }
                 }
             }
-            if (progress) continue;
+            if (progress) { RecordStrategy("Cage Sum Pruning"); continue; }
 
             // --- EASY: Hidden singles ---
             bool strategyProgress = false;
 
             if (!HiddenSinglesInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.EASY) maxDifficulty = Difficulty.EASY; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Single"); if (maxDifficulty < Difficulty.EASY) maxDifficulty = Difficulty.EASY; progress = true; continue; }
 
             if (!HiddenSinglesInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.EASY) maxDifficulty = Difficulty.EASY; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Single"); if (maxDifficulty < Difficulty.EASY) maxDifficulty = Difficulty.EASY; progress = true; continue; }
 
             if (!HiddenSinglesInSections(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.EASY) maxDifficulty = Difficulty.EASY; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Single"); if (maxDifficulty < Difficulty.EASY) maxDifficulty = Difficulty.EASY; progress = true; continue; }
 
             // --- INTERMEDIATE: Naked pairs, hidden pairs, pointing pairs, box-line reduction ---
             if (!NakedPairsInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Naked Pair"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!NakedPairsInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Naked Pair"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!NakedPairsInSections(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Naked Pair"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!HiddenPairsInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Pair"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!HiddenPairsInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Pair"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!HiddenPairsInSections(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Pair"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!PointingPairs(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Pointing Pair/Triple"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!BoxLineReduction(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Box/Line Reduction"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!NakedTriplesInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Naked Triple"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!NakedTriplesInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Naked Triple"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!NakedTriplesInSections(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Naked Triple"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!HiddenTriplesInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Triple"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!HiddenTriplesInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Triple"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             if (!HiddenTriplesInSections(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Triple"); if (maxDifficulty < Difficulty.INTERMEDIATE) maxDifficulty = Difficulty.INTERMEDIATE; progress = true; continue; }
 
             // --- TOUGH: Naked quads, hidden quads, X-Wing, Y-Wing, XYZ-Wing, Swordfish, Jellyfish, Simple Coloring ---
             if (!NakedQuadsInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Naked Quad"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!NakedQuadsInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Naked Quad"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!NakedQuadsInSections(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Naked Quad"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!HiddenQuadsInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Quad"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!HiddenQuadsInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Quad"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!HiddenQuadsInSections(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Hidden Quad"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!XWingInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("X-Wing"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!XWingInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("X-Wing"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!YWing(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Y-Wing"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!XyzWing(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("XYZ-Wing"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!SwordfishInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Swordfish"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!SwordfishInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Swordfish"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!JellyfishInRows(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Jellyfish"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!JellyfishInColumns(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Jellyfish"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
 
             if (!SimpleColoring(solution, candidates, ref strategyProgress)) return false;
-            if (strategyProgress) { if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
+            if (strategyProgress) { RecordStrategy("Simple Coloring"); if (maxDifficulty < Difficulty.TOUGH) maxDifficulty = Difficulty.TOUGH; progress = true; continue; }
         }
 
         return true;
