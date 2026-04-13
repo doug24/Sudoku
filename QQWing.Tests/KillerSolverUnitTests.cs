@@ -523,7 +523,7 @@ public class KillerSolverUnitTests
 
         // Verify that some cages have symmetric counterparts
         int symmetricPairs = CountSymmetricPairs(puzzle.Cages, symmetry);
-        Assert.IsTrue(symmetricPairs >= 1,
+        Assert.IsGreaterThanOrEqualTo(1, symmetricPairs,
             $"Expected at least 1 symmetric cage pair for {symmetry}, found {symmetricPairs}.");
     }
 
