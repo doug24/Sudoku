@@ -82,15 +82,15 @@ public partial class CellViewModel : ObservableObject
 
     private static readonly Brush[] darkBrushes =
     [
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C370D")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#594C0A")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#153f70")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#301174")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#002680")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#301174")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#153f70")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#594C0A")),
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C370D")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#361E3E")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4A1C1C")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0F2A4C")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#123226")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#66330E")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#123226")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0F2A4C")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4A1C1C")),
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#361E3E")),
     ];
 
     // these are the colors used for user-marking multiple colors
@@ -328,11 +328,11 @@ public partial class CellViewModel : ObservableObject
 
     private static readonly Brush[] darkCageBrushes =
     [
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#5C2020")),  // 0: dark red
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A4D1A")),  // 1: dark green
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1A2A5C")),  // 2: dark blue
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4D4D0A")),  // 3: dark yellow
-        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3A3A3A")),  // 4: single-cell (dark gray)
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#361E3E")),  // Smoky Plum
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4A1C1C")),  // Dusty Burgundy
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#0F2A4C")),  // Slate Navy
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#123226")),  // Deep Sage
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#66330E")),  // Burnt Orange/Rust (single-cell) 
     ];
 
     /// <summary>
