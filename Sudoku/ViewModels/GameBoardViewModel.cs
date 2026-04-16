@@ -860,6 +860,17 @@ public partial class GameBoardViewModel : ObservableObject
                     ClearCandidates(list, cell.Value, c);
                 }
             }
+            if (IsKillerSudoku && currentCages.Count > 0)
+            {
+                var cage = currentCages.FirstOrDefault(c => c.Cells.Contains(cellIndex));
+                if (cage != null)
+                {
+                    foreach (var c in cage.Cells)
+                    {
+                        ClearCandidates(list, cell.Value, allCells[c]);
+                    }
+                }
+            }
         }
 
         if (list.Count > 0)
