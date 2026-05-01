@@ -196,8 +196,7 @@ public partial class SudokuViewModel : ObservableObject
     public ICommand NewEvenOddPuzzleCommand => new RelayCommand(
         p =>
         {
-            // Even/Odd puzzles use the classic layout
-            SectionLayout = QQWing.ClassicLayout;
+            // Even/Odd puzzles use the selected layout, either classic or irregular
             GameBoard.NewEvenOddPuzzle(PuzzleDifficulty, PuzzleSymmetry);
         });
 
