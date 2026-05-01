@@ -64,6 +64,35 @@ public class QQWing
     private int lastSolveRound;
 
     /// <summary>
+    /// Shaded cells for even/odd constraint (null when no constraint is active).
+    /// </summary>
+    private int[]? evenOddShadedCells = null;
+
+    /// <summary>
+    /// True if shaded cells must be even; false if odd.
+    /// </summary>
+    private bool evenOddIsEven = false;
+
+    /// <summary>
+    /// Register an even/odd parity constraint. Every call to Reset() will pre-eliminate
+    /// impossible candidates for the shaded cells at round 1, so the constraint is respected
+    /// by all internal solves including CountSolutions and GeneratePuzzle.
+    /// </summary>
+    public void SetEvenOddConstraint(int[] shadedCells, bool isEven)
+    {
+        evenOddShadedCells = shadedCells;
+        evenOddIsEven = isEven;
+    }
+
+    /// <summary>
+    /// Remove the even/odd parity constraint.
+    /// </summary>
+    public void ClearEvenOddConstraint()
+    {
+        evenOddShadedCells = null;
+    }
+
+    /// <summary>
     /// The section layout for this sudoku: classic 3x3 or an irregular pattern. Made static to avoid changing the class
     /// interface.
     /// </summary>
@@ -205,6 +234,26 @@ public class QQWing
                 if (possibilities[valPos] != 0) return false;
                 Mark(position, round, value);
                 if (logHistory || recordHistory) AddHistoryItem(new LogItem(round, LogType.GIVEN, value, position));
+            }
+        }
+
+        // Apply even/odd parity eliminations at round 1 so every solve and CountSolutions
+        // call respects the constraint without needing manual post-reset application.
+        if (evenOddShadedCells != null)
+        {
+            foreach (int position in evenOddShadedCells)
+            {
+                if (solution[position] != 0) continue; // already solved by a given
+                for (int valIndex = 0; valIndex < ROW_COL_SEC_SIZE; valIndex++)
+                {
+                    bool valIsEven = (valIndex + 1) % 2 == 0;
+                    if (valIsEven != evenOddIsEven)
+                    {
+                        int valPos = GetPossibilityIndex(valIndex, position);
+                        if (possibilities[valPos] == 0)
+                            possibilities[valPos] = round;
+                    }
+                }
             }
         }
 
@@ -549,6 +598,146 @@ public class QQWing
         {
             RollbackRound(i);
         }
+    }
+
+    /// <summary>
+    /// Generate an Even/Odd Sudoku puzzle. This is a standard Sudoku with an additional constraint:
+    /// 8 to 12 shaded cells must contain either all even numbers (2, 4, 6, 8) or all odd numbers
+    /// (1, 3, 5, 7, 9). The constraint is used during generation so that fewer givens are needed
+    /// to produce a uniquely-solvable puzzle. The parity is chosen randomly unless
+    /// <paramref name="isEven"/> is specified. One given cell is designated as the indicator cell,
+    /// shaded differently to inform the player of the puzzle type.
+    /// </summary>
+    /// <param name="difficulty">Target difficulty.</param>
+    /// <param name="symmetry">Symmetry to use when generating the base puzzle.</param>
+    /// <param name="isEven">
+    /// Null to choose even or odd randomly; true to force even; false to force odd.
+    /// </param>
+    /// <param name="token">Cancellation token.</param>
+    /// <returns>
+    /// A tuple of (puzzle, solution, constraint) where constraint describes the shaded cells.
+    /// Returns null when cancelled or when no suitable puzzle could be generated.
+    /// </returns>
+    public (int[] Puzzle, int[] Solution, EvenOddConstraint Constraint)? GenerateEvenOddPuzzle(
+        Difficulty difficulty, Symmetry symmetry, bool? isEven, CancellationToken token)
+    {
+        bool recHistory = recordHistory;
+        SetRecordHistory(false);
+        bool lHistory = logHistory;
+        SetLogHistory(false);
+
+        const int maxAttempts = 200;
+
+        try
+        {
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                token.ThrowIfCancellationRequested();
+
+                bool parity = isEven ?? (random.Next(2) == 0);
+
+                // Step 1: fill the board completely to get a full solution.
+                ClearPuzzle();
+                ShuffleRandomArrays();
+                Solve(token);
+                if (!IsSolved()) continue;
+
+                int[] fullSolution = GetSolution();
+
+                // Step 2: pick 8-12 shaded cells from the full solution whose values
+                // match the chosen parity.
+                List<int> parityMatches = [];
+                for (int cell = 0; cell < BOARD_SIZE; cell++)
+                {
+                    if ((fullSolution[cell] % 2 == 0) == parity)
+                        parityMatches.Add(cell);
+                }
+
+                if (parityMatches.Count < 8) continue;
+
+                int[] parityArr = [.. parityMatches];
+                ShuffleArray(parityArr, parityArr.Length);
+                int shadedCount = Math.Min(parityArr.Length, random.Next(8, 13));
+                int[] shadedCells = parityArr[..shadedCount];
+
+                // Step 3: start with all cells as givens, then register the constraint so
+                // every subsequent CountSolutions call respects it.
+                for (int i = 0; i < BOARD_SIZE; i++)
+                    puzzle[i] = fullSolution[i];
+
+                SetEvenOddConstraint(shadedCells, parity);
+
+                // Step 4: re-randomise and remove one given at a time, keeping the puzzle
+                // uniquely solvable under the even/odd constraint.
+                ShuffleRandomArrays();
+                for (int i = 0; i < BOARD_SIZE; i++)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    int position = randomBoardArray[i];
+                    if (puzzle[position] == 0) continue;
+
+                    int saved = puzzle[position];
+                    puzzle[position] = 0;
+                    Reset();
+                    if (CountSolutions(2, true) > 1)
+                        puzzle[position] = saved; // needed for uniqueness, put it back
+                }
+
+                Reset();
+
+                // Step 5: check difficulty of the constrained puzzle.
+                SetRecordHistory(true);
+                Solve(token);
+                SetRecordHistory(false);
+
+                if (difficulty != Difficulty.UNKNOWN && difficulty != GetDifficulty())
+                    continue;
+
+                if (!IsSolved()) continue;
+
+                int[] finalPuzzle = GetPuzzle();
+
+                ClearEvenOddConstraint();
+
+                // Filter shaded cells to only unknowns in the final puzzle.
+                shadedCells = [.. shadedCells.Where(c => finalPuzzle[c] == 0)];
+                if (shadedCells.Length < 4) continue; // too few unknowns remain, try again
+
+                // Step 6: pick an indicator cell — a given whose value has the right parity.
+                int indicatorCell = -1;
+                for (int cell = 0; cell < BOARD_SIZE; cell++)
+                {
+                    int val = finalPuzzle[cell];
+                    if (val > 0 && (val % 2 == 0) == parity)
+                    {
+                        indicatorCell = cell;
+                        break;
+                    }
+                }
+                if (indicatorCell < 0)
+                {
+                    for (int cell = 0; cell < BOARD_SIZE; cell++)
+                    {
+                        if (finalPuzzle[cell] > 0) { indicatorCell = cell; break; }
+                    }
+                }
+
+                return (finalPuzzle, fullSolution, new EvenOddConstraint(parity, shadedCells, indicatorCell));
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        finally
+        {
+            ClearEvenOddConstraint();
+            SetRecordHistory(recHistory);
+            SetLogHistory(lHistory);
+        }
+
+        return null;
     }
 
     public void SetPrintStyle(PrintStyle ps)

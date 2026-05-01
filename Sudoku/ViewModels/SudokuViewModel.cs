@@ -193,6 +193,14 @@ public partial class SudokuViewModel : ObservableObject
             GameBoard.NewKillerPuzzle(PuzzleDifficulty, PuzzleSymmetry);
         });
 
+    public ICommand NewEvenOddPuzzleCommand => new RelayCommand(
+        p =>
+        {
+            // Even/Odd puzzles use the classic layout
+            SectionLayout = QQWing.ClassicLayout;
+            GameBoard.NewEvenOddPuzzle(PuzzleDifficulty, PuzzleSymmetry);
+        });
+
     public ICommand SnapshotCommand => new RelayCommand(
         p => Snapshot(),
         q => GameBoard.IsInProgress);

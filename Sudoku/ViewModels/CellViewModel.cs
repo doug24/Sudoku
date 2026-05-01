@@ -365,4 +365,50 @@ public partial class CellViewModel : ObservableObject
         // Restore section-based background and borders
         ShowLayoutBoundaries();
     }
+
+    private Brush? evenOddBrush = null;
+
+    /// <summary>
+    /// Derive and apply an even/odd shading color from this cell's existing section background.
+    /// In light mode the section color is darkened (saturation up, value down).
+    /// In dark mode the section color is lightened (value up).
+    /// The indicator cell uses a stronger shift to stand out.
+    /// This becomes the persistent defaultBackground so Reset() and ResetBackground() restore it.
+    /// </summary>
+    public void SetEvenOddShading(bool isDarkMode, bool isIndicator)
+    {
+        Color baseColor = defaultBackground is SolidColorBrush sb ? sb.Color : Colors.Gray;
+        ColorHSV hsv = ColorHSV.ConvertFrom(baseColor);
+
+        if (isDarkMode)
+        {
+            // Lighten: push value up toward white
+            double shift = isIndicator ? 0.40 : 0.22;
+            hsv.Value = Math.Min(1.0, hsv.Value + shift);
+        }
+        else
+        {
+            // Darken: increase saturation and slightly reduce value
+            double sShift = isIndicator ? 0.20 : 0.10;
+            double vShift = isIndicator ? 0.10 : 0.06;
+            hsv.Saturation = Math.Min(1.0, hsv.Saturation + sShift);
+            hsv.Value      = Math.Max(0.0, hsv.Value      - vShift);
+        }
+
+        Brush brush = new SolidColorBrush(hsv.ToColor());
+        evenOddBrush = brush;
+        Background = defaultBackground = brush;
+    }
+
+    /// <summary>
+    /// Remove even/odd shading and restore the section-based background.
+    /// </summary>
+    public void ClearEvenOddShading()
+    {
+        if (evenOddBrush != null)
+        {
+            evenOddBrush = null;
+            ShowLayoutBoundaries();
+        }
+    }
 }

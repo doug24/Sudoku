@@ -323,6 +323,12 @@ public partial class GameBoardViewModel : ObservableObject
         }
 
         QQWing ss = new();
+
+        // Register the even/odd constraint so the hint solver respects parity.
+        // SetEvenOddConstraint must be called before GetHint (which calls SetPuzzle/Reset internally).
+        if (IsEvenOddSudoku && currentEvenOddConstraint != null)
+            ss.SetEvenOddConstraint(currentEvenOddConstraint.ShadedCells, currentEvenOddConstraint.IsEven);
+
         LogItem? hint = ss.GetHint(currentBoard, hasCandidates ? playerCandidates : null, hintIndex);
 
         if (hint == null)
@@ -414,6 +420,12 @@ public partial class GameBoardViewModel : ObservableObject
         {
             sb.AppendLine("K");
             sb.Append(Util.SerializeKillerData(currentCages));
+        }
+        if (currentEvenOddConstraint != null)
+        {
+            sb.AppendLine("E");
+            string shadedList = string.Join(",", currentEvenOddConstraint.ShadedCells);
+            sb.AppendLine($"{(currentEvenOddConstraint.IsEven ? 1 : 0)}|{currentEvenOddConstraint.IndicatorCell}|{shadedList}");
         }
         return sb.ToString();
     }
@@ -746,6 +758,10 @@ public partial class GameBoardViewModel : ObservableObject
 
         int[] candidates = GetCandidates(current);
 
+        // For even/odd puzzles, remove candidates that violate the parity constraint.
+        HashSet<int>? shadedCells = IsEvenOddSudoku && currentEvenOddConstraint != null
+            ? new HashSet<int>(currentEvenOddConstraint.ShadedCells) : null;
+
         List<CellState> list = [];
 
         int idx = 0;
@@ -754,6 +770,11 @@ public partial class GameBoardViewModel : ObservableObject
             if (cell.Value == 0)
             {
                 int[] cellCandidates = GetCandidatesForCell(candidates, idx);
+                if (shadedCells != null && shadedCells.Contains(idx))
+                {
+                    bool isEven = currentEvenOddConstraint!.IsEven;
+                    cellCandidates = cellCandidates.Where(v => (v % 2 == 0) == isEven).ToArray();
+                }
                 AddCandidates(list, cell, idx, cellCandidates);
             }
 
@@ -1105,8 +1126,32 @@ public partial class GameBoardViewModel : ObservableObject
         }
 
         // Separate board rows from killer cage data (after "K" marker)
+        // and even/odd constraint data (after "E" marker)
         string[] boardRows = ssData;
         List<Cage> cages = [];
+        EvenOddConstraint? evenOddConstraint = null;
+
+        int evenOddMarker = Array.IndexOf(ssData, "E");
+        if (evenOddMarker >= 0)
+        {
+            string[] remaining = ssData.Skip(evenOddMarker + 1).ToArray();
+            if (remaining.Length > 0)
+            {
+                string[] parts = remaining[0].Split('|');
+                if (parts.Length == 3
+                    && int.TryParse(parts[0], out int isEvenInt)
+                    && int.TryParse(parts[1], out int indicatorCell))
+                {
+                    int[] shadedCells = parts[2].Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => int.TryParse(s, out int v) ? v : -1)
+                        .Where(v => v >= 0)
+                        .ToArray();
+                    evenOddConstraint = new EvenOddConstraint(isEvenInt == 1, shadedCells, indicatorCell);
+                }
+            }
+            ssData = ssData.Take(evenOddMarker).ToArray();
+        }
+
         int killerMarker = Array.IndexOf(ssData, "K");
         if (killerMarker >= 0)
         {
@@ -1155,6 +1200,8 @@ public partial class GameBoardViewModel : ObservableObject
 
             QQWing ss = new();
             ss.SetPuzzle(initial);
+            if (evenOddConstraint != null)
+                ss.SetEvenOddConstraint(evenOddConstraint.ShadedCells, evenOddConstraint.IsEven);
             ss.SetRecordHistory(true);
             ss.Solve(CancellationToken.None);
             if (!ss.IsSolved())
@@ -1169,9 +1216,19 @@ public partial class GameBoardViewModel : ObservableObject
             // which calls Reset and clears the solve instructions
             difficulty = ss.GetDifficultyAsString();
             strategies = ss.GetStrategiesUsed();
-            PuzzleDescription = strategies.Count > 0
-                ? $"{difficulty}: {string.Join(", ", strategies)}"
-                : difficulty;
+            if (evenOddConstraint != null)
+            {
+                string parityLabel = evenOddConstraint.IsEven ? "Even" : "Odd";
+                PuzzleDescription = strategies.Count > 0
+                    ? $"{parityLabel} {difficulty}: {string.Join(", ", strategies)}"
+                    : $"{parityLabel} {difficulty}";
+            }
+            else
+            {
+                PuzzleDescription = strategies.Count > 0
+                    ? $"{difficulty}: {string.Join(", ", strategies)}"
+                    : difficulty;
+            }
 
             if (ss.HasMultipleSolutions())
                 CustomMessageBox.Show("Puzzle has multiple solutions", "Sudoku");
@@ -1194,6 +1251,14 @@ public partial class GameBoardViewModel : ObservableObject
             }
         }
         undoStack.Push(list);
+
+        if (evenOddConstraint != null)
+        {
+            currentEvenOddConstraint = evenOddConstraint;
+            IsEvenOddSudoku = true;
+            ApplyEvenOddShading(evenOddConstraint);
+        }
+
         IsInProgress = true;
         stopwatch.Restart();
         UpdateRemainderCounts();
@@ -1201,7 +1266,7 @@ public partial class GameBoardViewModel : ObservableObject
 
     private static int[] GetPuzzle(string[] ssData)
     {
-        if (ssData.Length != 9)
+        if (ssData.Length < 9)
             return [];
 
         int[] puzzle = new int[81];
@@ -1328,6 +1393,13 @@ public partial class GameBoardViewModel : ObservableObject
     internal void ClearBoard()
     {
         IsKillerSudoku = false;
+        IsEvenOddSudoku = false;
+        currentEvenOddConstraint = null;
+
+        foreach (var cell in allCells)
+        {
+            cell.ClearEvenOddShading();
+        }
         undoStack.Clear();
         redoStack.Clear();
         currentCages = [];
@@ -1597,6 +1669,69 @@ public partial class GameBoardViewModel : ObservableObject
             PuzzleDescription = puz.Strategies.Count > 0
                 ? $"{puz.Difficulty}: {string.Join(", ", puz.Strategies)}"
                 : $"{puz.Difficulty}: {puz.Cages.Count} cages";
+        }
+    }
+
+    [ObservableProperty]
+    private bool isEvenOddSudoku = false;
+
+    private EvenOddConstraint? currentEvenOddConstraint;
+
+    internal async void NewEvenOddPuzzle(Difficulty difficulty, Symmetry symmetry, bool? isEven = null)
+    {
+        ClearBoard();
+        Puzzle puz = new();
+        await puz.GenerateEvenOdd(difficulty, symmetry, isEven);
+
+        if (puz.Initial.Length == allCells.Count && puz.EvenOddConstraint != null)
+        {
+            IsEvenOddSudoku = true;
+            currentEvenOddConstraint = puz.EvenOddConstraint;
+
+            undoStack.Clear();
+            List<CellState> list = [];
+
+            int idx = 0;
+            foreach (var cell in allCells)
+            {
+                int given = puz.Initial[idx];
+                int answer = puz.Solution[idx];
+
+                CellState cellState = new(idx, given > 0, Math.Max(0, given));
+                cell.Initialize(cellState, answer);
+
+                list.Add(cellState);
+
+                idx++;
+            }
+
+            // Apply shading after Initialize so it overwrites the section background
+            // and becomes the new defaultBackground, surviving future Reset() calls.
+            ApplyEvenOddShading(puz.EvenOddConstraint);
+
+            undoStack.Push(list);
+            UpdateRemainderCounts();
+            IsInProgress = true;
+            stopwatch.Restart();
+
+            string parityLabel = puz.EvenOddConstraint.IsEven ? "Even" : "Odd";
+            PuzzleDescription = puz.Strategies.Count > 0
+                ? $"{parityLabel} {puz.Difficulty}: {string.Join(", ", puz.Strategies)}"
+                : $"{parityLabel} {puz.Difficulty}";
+        }
+    }
+
+    internal void ApplyEvenOddShading(EvenOddConstraint constraint)
+    {
+        bool isDarkMode = Properties.Settings.Default.DarkMode;
+        HashSet<int> shadedSet = new(constraint.ShadedCells);
+
+        foreach (var cell in allCells)
+        {
+            if (cell.CellIndex == constraint.IndicatorCell)
+                cell.SetEvenOddShading(isDarkMode, isIndicator: true);
+            else if (shadedSet.Contains(cell.CellIndex))
+                cell.SetEvenOddShading(isDarkMode, isIndicator: false);
         }
     }
 

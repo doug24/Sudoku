@@ -192,6 +192,90 @@ public class Puzzle
 
         return null;
     }
+
+    public async Task GenerateEvenOdd(Difficulty difficulty, Symmetry symmetry, bool? isEven = null)
+    {
+        Mouse.OverrideCursor = Cursors.Wait;
+
+        var timeout = TimeSpan.FromSeconds(30);
+        using CancellationTokenSource cancellationTokenSource = new(timeout);
+        var token = cancellationTokenSource.Token;
+        List<Task<EvenOddPuzzle?>> tasks = [];
+        for (int idx = 0; idx < 4; idx++)
+        {
+            tasks.Add(Task.Run(() => GenerateEvenOddInternal(difficulty, symmetry, isEven, token), token));
+        }
+
+        Task<EvenOddPuzzle?> completedTask = await Task.WhenAny(tasks);
+        cancellationTokenSource.Cancel();
+
+        EvenOddPuzzle? result = completedTask.Result;
+        if (result != null)
+        {
+            Initial = result.Initial;
+            Solution = result.Solution;
+            Difficulty = result.Difficulty;
+            Strategies = result.Strategies;
+            EvenOddConstraint = result.Constraint;
+        }
+
+        await Task.WhenAll(tasks);
+
+        if (result == null)
+        {
+            CustomMessageBox.Show($"Could not generate an Even/Odd puzzle in {timeout.TotalSeconds} seconds:" +
+                Environment.NewLine + "Please try again.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        Mouse.OverrideCursor = Cursors.Arrow;
+    }
+
+    private static EvenOddPuzzle? GenerateEvenOddInternal(Difficulty difficulty, Symmetry symmetry, bool? isEven, CancellationToken token)
+    {
+        try
+        {
+            QQWing ss = new();
+            ss.SetPrintStyle(PrintStyle.ONE_LINE);
+
+            var result = ss.GenerateEvenOddPuzzle(difficulty, symmetry, isEven, token);
+            if (result == null) return null;
+
+            var (puzzleArr, solutionArr, constraint) = result.Value;
+
+            // Re-solve with history to get difficulty/strategies
+            QQWing solver = new();
+            solver.SetRecordHistory(true);
+            solver.SetEvenOddConstraint(constraint.ShadedCells, constraint.IsEven);
+            solver.SetPuzzle(puzzleArr);
+            solver.Solve(token);
+
+            string diff = solver.GetDifficultyAsString();
+            List<string> strategies = solver.GetStrategiesUsed();
+
+            return new EvenOddPuzzle(puzzleArr, solutionArr, diff, strategies, constraint);
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.WriteLine("EvenOdd GenerateInternal was canceled");
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            Debug.WriteLine("Error generating Even/Odd puzzle: " + e.Message);
+        }
+
+        return null;
+    }
+
+    public EvenOddConstraint? EvenOddConstraint { get; private set; }
+}
+
+public class EvenOddPuzzle(int[] initial, int[] solution, string difficulty, List<string> strategies, EvenOddConstraint constraint)
+{
+    public int[] Initial { get; } = initial;
+    public int[] Solution { get; } = solution;
+    public string Difficulty { get; } = difficulty;
+    public List<string> Strategies { get; } = strategies;
+    public EvenOddConstraint Constraint { get; } = constraint;
 }
 
 public class PuzzleData(int[] initial, int[] solution, string difficulty, List<string> strategies)
