@@ -3,6 +3,11 @@
  * Copyright (C) 2006-2014 Stephen Ostermiller http://ostermiller.org/
  * Copyright (C) 2007 Jacques Bensimon (jacques@ipm.com)
  * Copyright (C) 2007 Joel Yarde (joel.yarde - gmail.com)
+ * Copyright (C) 2020 Doug Persons: C# port, and other enhancements
+ * Copyright (C) 2023 Doug Persons: add irregular Sudoku support
+ * Copyright (C) 2024 Doug Persons: update to .NET 8
+ * Copyright (C) 2026 Doug Persons: add additional solver strategies, Tough difficulty rating, and Hints
+ * Copyright (C) 2026 Doug Persons: add Even/Odd Sudoku support
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +38,7 @@ using System.Threading;
 namespace QQWingLib;
 
 /// <summary>
-/// The board containing all the memory structures and methods for solving or generating sudoku puzzles.
+/// The board containing all the memory structures and methods for solving or generating Sudoku puzzles.
 /// </summary>
 public class QQWing
 {
@@ -93,7 +98,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// The section layout for this sudoku: classic 3x3 or an irregular pattern. Made static to avoid changing the class
+    /// The section layout for this Sudoku: classic 3x3 or an irregular pattern. Made static to avoid changing the class
     /// interface.
     /// </summary>
     public static ISectionLayout SectionLayout { get; set; } = new RegularLayout();
@@ -107,13 +112,13 @@ public class QQWing
     public readonly static int RandomLayout = 999;
 
     /// <summary>
-    /// The 81 integers that make up a sudoku puzzle. Givens are 1-9, unknowns are 0. Once initialized, this puzzle
+    /// The 81 integers that make up a Sudoku puzzle. Givens are 1-9, unknowns are 0. Once initialized, this puzzle
     /// remains as is. The answer is worked out in "solution".
     /// </summary>
     private readonly int[] puzzle = new int[BOARD_SIZE];
 
     /// <summary>
-    /// The 81 integers that make up a sudoku puzzle. The solution is built here, after completion all will be 1-9.
+    /// The 81 integers that make up a Sudoku puzzle. The solution is built here, after completion all will be 1-9.
     /// </summary>
     private readonly int[] solution = new int[BOARD_SIZE];
 
@@ -488,7 +493,7 @@ public class QQWing
 
         // Now solve the puzzle the whole way. The solve
         // uses random algorithms, so we should have a
-        // really randomly totally filled sudoku
+        // really randomly totally filled Sudoku
         // Even when starting from an empty grid
         Solve(token);
 
@@ -3988,7 +3993,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// print the given BOARD_SIZEd array of ints as a sudoku puzzle. Use print options from member variables.
+    /// print the given BOARD_SIZEd array of ints as a Sudoku puzzle. Use print options from member variables.
     /// </summary>
     private void Print(int[] sudoku)
     {
@@ -4068,7 +4073,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Print the sudoku puzzle.
+    /// Print the Sudoku puzzle.
     /// </summary>
     public void PrintPuzzle()
     {
@@ -4093,7 +4098,7 @@ public class QQWing
     }
 
     /// <summary>
-    /// Print the sudoku solution.
+    /// Print the Sudoku solution.
     /// </summary>
     public void PrintSolution()
     {
