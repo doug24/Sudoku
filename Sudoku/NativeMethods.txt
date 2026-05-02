@@ -1,6 +1,8 @@
 DeleteObject
 DwmSetWindowAttribute
+GetMonitorInfo
 GetWindowLong
+MonitorFromWindow
 SendMessage
 SetWindowLong
 

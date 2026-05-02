@@ -219,7 +219,7 @@
                              SelectedIndex="{Binding KillerCalculator.SelectedIndex, Mode=TwoWay}"
                              MaxWidth="{Binding ElementName=Row1Panel, Path=ActualWidth}"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                             MaxHeight="180">
+                             MaxHeight="220">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel Orientation="Horizontal"/>

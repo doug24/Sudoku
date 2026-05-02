@@ -24,6 +24,24 @@ public partial class MainWindow : Window
         Loaded += (s, e) => viewModel.AppRunning = true;
         Closing += (s, e) => viewModel.SaveSettings();
         StateChanged += (s, e) => viewModel.GameBoard.OnStateChanged(WindowState);
+        viewModel.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(SudokuViewModel.ShowKillerCalculator))
+            {
+                double centerX = Left + Width / 2.0;
+                SizeToContent = SizeToContent.Width;
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
+                {
+                    var source = PresentationSource.FromVisual(this);
+                    double dpiScaleX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+                    var monitorHandle = Native.MonitorFromWindow(new WindowInteropHelper(this).Handle);
+                    var workArea = Native.GetMonitorWorkArea(monitorHandle, dpiScaleX);
+                    double newLeft = centerX - Width / 2.0;
+                    newLeft = Math.Max(workArea.Left, Math.Min(newLeft, workArea.Right - Width));
+                    Left = newLeft;
+                });
+            }
+        };
 
         //ImageGenerator.CreateSectionImages(26, 27);
     }

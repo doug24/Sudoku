@@ -145,6 +145,25 @@ namespace Sudoku
             }
         }
 
+        internal static IntPtr MonitorFromWindow(IntPtr hwnd)
+        {
+            // MONITOR_DEFAULTTONEAREST = 2
+            return PInvoke.MonitorFromWindow(new HWND(hwnd), Windows.Win32.Graphics.Gdi.MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
+        }
+
+        internal static Rect GetMonitorWorkArea(IntPtr monitorHandle, double dpiScaleX)
+        {
+            var mi = new Windows.Win32.Graphics.Gdi.MONITORINFO();
+            mi.cbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf<Windows.Win32.Graphics.Gdi.MONITORINFO>();
+            PInvoke.GetMonitorInfo(new Windows.Win32.Graphics.Gdi.HMONITOR(monitorHandle), ref mi);
+            var wa = mi.rcWork;
+            return new Rect(
+                wa.left / dpiScaleX,
+                wa.top / dpiScaleX,
+                (wa.right - wa.left) / dpiScaleX,
+                (wa.bottom - wa.top) / dpiScaleX);
+        }
+
         public static void RemoveIcon(Window window)
         {
             var hwnd = new HWND(new WindowInteropHelper(window).Handle);
