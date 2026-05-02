@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,8 +30,7 @@ public class Puzzle
     {
         Mouse.OverrideCursor = Cursors.Wait;
 
-        var timeout = TimeSpan.FromSeconds(30);
-        using CancellationTokenSource cancellationTokenSource = new(timeout);
+        using CancellationTokenSource cancellationTokenSource = new();
         var token = cancellationTokenSource.Token;
         List<Task<PuzzleData>> tasks = [];
         for (int idx = 0; idx < 8; idx++)
@@ -38,7 +38,10 @@ public class Puzzle
             tasks.Add(Task.Run(() => GenerateInternal(symmetry, difficulty, token), token));
         }
 
-        Task<PuzzleData> completedTask = await Task.WhenAny(tasks);
+        Task<PuzzleData> completedTask = await WaitWithCancelDialog(
+            Task.WhenAny(tasks), cancellationTokenSource,
+            "Generating puzzle\u2026 this is taking longer than expected.");
+
         cancellationTokenSource.Cancel();
 
         Initial = completedTask.Result.Initial;
@@ -50,12 +53,65 @@ public class Puzzle
 
         Mouse.OverrideCursor = Cursors.Arrow;
 
-        if (Initial.Length == 0)
+        if (Initial.Length == 0 && !token.IsCancellationRequested)
         {
-            CustomMessageBox.Show($"Could not generate a new puzzle in {timeout.TotalSeconds} seconds:" +
+            CustomMessageBox.Show("Could not generate a new puzzle." +
                 Environment.NewLine + "Try again with different settings.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+    private static readonly TimeSpan DialogDelay = TimeSpan.FromSeconds(10);
+
+    private static async Task<Task<T>> WaitWithCancelDialog<T>(
+        Task<Task<T>> whenAny,
+        CancellationTokenSource cts,
+        string message)
+    {
+        var delayTask = Task.Delay(DialogDelay);
+        var innerTask = await Task.WhenAny(whenAny, delayTask);
+
+        if (innerTask == whenAny)
+        {
+            // Completed before dialog delay — no dialog needed
+            return await whenAny;
+        }
+
+        // Still running after delay — show cancel dialog on UI thread
+        GenerationProgressDialog? dialog = null;
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            dialog = new GenerationProgressDialog(message);
+            var activeWindow = Application.Current.Windows.OfType<Window>()
+                .SingleOrDefault(x => x.IsActive);
+            if (activeWindow != null)
+                dialog.Owner = activeWindow;
+        });
+
+        // Monitor both the generation task and the dialog closing
+        var tcs = new TaskCompletionSource<Task<T>>();
+
+        _ = whenAny.ContinueWith(t =>
+        {
+            Application.Current.Dispatcher.Invoke(() => dialog?.Close());
+            tcs.TrySetResult(t.Result);
+        }, TaskScheduler.Default);
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            dialog!.Closed += (s, e) =>
+            {
+                if (dialog.Cancelled)
+                {
+                    cts.Cancel();
+                    // Return the first task regardless (it will hold an empty result after cancellation)
+                    _ = whenAny.ContinueWith(t => tcs.TrySetResult(t.Result), TaskScheduler.Default);
+                }
+            };
+            dialog.Show();
+        });
+
+        return await tcs.Task;
+    }
+
     private static PuzzleData GenerateInternal(Symmetry symmetry, Difficulty difficulty, CancellationToken token)
     {
         try
@@ -132,8 +188,7 @@ public class Puzzle
     {
         Mouse.OverrideCursor = Cursors.Wait;
 
-        var timeout = TimeSpan.FromSeconds(30);
-        using CancellationTokenSource cancellationTokenSource = new(timeout);
+        using CancellationTokenSource cancellationTokenSource = new();
         var token = cancellationTokenSource.Token;
         List<Task<KillerPuzzle?>> tasks = [];
         for (int idx = 0; idx < 8; idx++)
@@ -141,7 +196,10 @@ public class Puzzle
             tasks.Add(Task.Run(() => GenerateKillerInternal(difficulty, symmetry, token), token));
         }
 
-        Task<KillerPuzzle?> completedTask = await Task.WhenAny(tasks);
+        Task<KillerPuzzle?> completedTask = await WaitWithCancelDialog(
+            Task.WhenAny(tasks), cancellationTokenSource,
+            "Generating Killer puzzle\u2026 this is taking longer than expected.");
+
         cancellationTokenSource.Cancel();
 
         KillerPuzzle? result = completedTask.Result;
@@ -167,9 +225,9 @@ public class Puzzle
 
         Mouse.OverrideCursor = Cursors.Arrow;
 
-        if (result == null)
+        if (result == null && !token.IsCancellationRequested)
         {
-            CustomMessageBox.Show($"Could not generate a Killer puzzle in {timeout.TotalSeconds} seconds:" +
+            CustomMessageBox.Show("Could not generate a Killer puzzle." +
                 Environment.NewLine + "Please try again.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
@@ -197,8 +255,7 @@ public class Puzzle
     {
         Mouse.OverrideCursor = Cursors.Wait;
 
-        var timeout = TimeSpan.FromSeconds(30);
-        using CancellationTokenSource cancellationTokenSource = new(timeout);
+        using CancellationTokenSource cancellationTokenSource = new();
         var token = cancellationTokenSource.Token;
         List<Task<EvenOddPuzzle?>> tasks = [];
         for (int idx = 0; idx < 8; idx++)
@@ -206,7 +263,10 @@ public class Puzzle
             tasks.Add(Task.Run(() => GenerateEvenOddInternal(difficulty, symmetry, isEven, token), token));
         }
 
-        Task<EvenOddPuzzle?> completedTask = await Task.WhenAny(tasks);
+        Task<EvenOddPuzzle?> completedTask = await WaitWithCancelDialog(
+            Task.WhenAny(tasks), cancellationTokenSource,
+            "Generating Even/Odd puzzle\u2026 this is taking longer than expected.");
+
         cancellationTokenSource.Cancel();
 
         EvenOddPuzzle? result = completedTask.Result;
@@ -223,9 +283,9 @@ public class Puzzle
 
         Mouse.OverrideCursor = Cursors.Arrow;
 
-        if (result == null)
+        if (result == null && !token.IsCancellationRequested)
         {
-            CustomMessageBox.Show($"Could not generate an Even/Odd puzzle in {timeout.TotalSeconds} seconds:" +
+            CustomMessageBox.Show("Could not generate an Even/Odd puzzle." +
                 Environment.NewLine + "Please try again.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
