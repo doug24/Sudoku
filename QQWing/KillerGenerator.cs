@@ -74,6 +74,12 @@ public class KillerGenerator
     public int ExtremeCageCount { get; set; } = 4;
 
     /// <summary>
+    /// Maximum number of single-cell cages allowed in a valid puzzle.
+    /// Partitions that exceed this limit are discarded. Default is 5.
+    /// </summary>
+    public int MaxSingleCellCages { get; set; } = 5;
+
+    /// <summary>
     /// Generate a Killer Sudoku puzzle. Returns the cage list and the solution,
     /// or null if generation could not produce a unique puzzle before cancellation.
     /// </summary>
@@ -97,6 +103,13 @@ public class KillerGenerator
                 token.ThrowIfCancellationRequested();
 
                 List<Cage> cages = PartitionIntoCages(solution);
+
+                // Discard if too many single-cell cages
+                int singleCellCount = 0;
+                foreach (Cage cage in cages)
+                    if (cage.Size == 1) singleCellCount++;
+                if (singleCellCount > MaxSingleCellCages)
+                    continue;
 
                 // Step 3: verify the cage layout produces a unique solution
                 KillerSolver solver = new(cages);
