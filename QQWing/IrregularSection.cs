@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace QQWingLib;
 
 internal class IrregularSection
 {
     private readonly int[] cells;
-    private readonly Dictionary<int, List<int>> rowColumnMap = [];
-    private readonly Dictionary<int, List<int>> columnRowMap = [];
+    // Sorted arrays cached at construction time - no LINQ allocations on hot paths
+    private readonly int[] sortedRows;
+    private readonly int[] sortedCols;
+    private readonly int[][] colsByRow;   // indexed by row (0-8), null if row not in section
+    private readonly int[][] rowsByCol;   // indexed by col (0-8), null if col not in section
 
     public IrregularSection(int sectionIndex, int[] cells)
     {
@@ -17,6 +19,10 @@ internal class IrregularSection
 
         Index = sectionIndex;
         this.cells = cells;
+
+        // Build temporary mutable collections first
+        var rowColumnMap = new Dictionary<int, List<int>>();
+        var columnRowMap = new Dictionary<int, List<int>>();
 
         for (int idx = 0; idx < cells.Length; idx++)
         {
@@ -30,23 +36,43 @@ internal class IrregularSection
 
             if (!rowColumnMap.TryGetValue(row, out List<int> rowList))
             {
-                rowList = ([]);
+                rowList = [];
                 rowColumnMap.Add(row, rowList);
             }
             if (!rowList.Contains(col))
-            {
                 rowList.Add(col);
-            }
 
             if (!columnRowMap.TryGetValue(col, out List<int> colList))
             {
-                colList = ([]);
+                colList = [];
                 columnRowMap.Add(col, colList);
             }
             if (!colList.Contains(row))
-            {
                 colList.Add(row);
-            }
+        }
+
+        // Cache sorted rows and cols arrays
+        sortedRows = [.. rowColumnMap.Keys];
+        Array.Sort(sortedRows);
+
+        sortedCols = [.. columnRowMap.Keys];
+        Array.Sort(sortedCols);
+
+        // Cache colsByRow and rowsByCol as sorted arrays indexed by row/col number
+        colsByRow = new int[QQWing.ROW_COL_SEC_SIZE][];
+        foreach (var kvp in rowColumnMap)
+        {
+            int[] arr = [.. kvp.Value];
+            Array.Sort(arr);
+            colsByRow[kvp.Key] = arr;
+        }
+
+        rowsByCol = new int[QQWing.ROW_COL_SEC_SIZE][];
+        foreach (var kvp in columnRowMap)
+        {
+            int[] arr = [.. kvp.Value];
+            Array.Sort(arr);
+            rowsByCol[kvp.Key] = arr;
         }
     }
 
@@ -58,19 +84,17 @@ internal class IrregularSection
 
     public int MinCol { get; private set; } = QQWing.ROW_COL_SEC_SIZE;
 
-    public IEnumerable<int> Rows => rowColumnMap.Keys.OrderBy(x => x);
+    public IEnumerable<int> Rows => sortedRows;
 
-    public IEnumerable<int> Cols => columnRowMap.Keys.OrderBy(x => x);
+    public IEnumerable<int> Cols => sortedCols;
 
-    public IEnumerable<int> ColsByRow(int row)
-    {
-        return rowColumnMap[row].OrderBy(x => x);
-    }
+    public bool ContainsCol(int col) => rowsByCol[col] != null;
 
-    public IEnumerable<int> RowsByCol(int col)
-    {
-        return columnRowMap[col].OrderBy(x => x);
-    }
+    public bool ContainsRow(int row) => colsByRow[row] != null;
+
+    public IEnumerable<int> ColsByRow(int row) => colsByRow[row];
+
+    public IEnumerable<int> RowsByCol(int col) => rowsByCol[col];
 
     public int GetCell(int offset)
     {

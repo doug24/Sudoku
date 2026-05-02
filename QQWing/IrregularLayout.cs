@@ -13,6 +13,10 @@ public partial class IrregularLayout : ISectionLayout
     private readonly Dictionary<int, IrregularSection> cellToSectionMap = [];
     private int layoutIndex = -1;
 
+    // Cached lookups built in Initialize() - indexed by row/col (0-8)
+    private int[][] sectionsForRow = [];   // sectionsForRow[row] = sorted section indices
+    private int[][] sectionsForCol = [];   // sectionsForCol[col] = sorted section indices
+
     public IrregularLayout()
     {
         Layout = layouts.Count - 1;
@@ -62,6 +66,24 @@ public partial class IrregularLayout : ISectionLayout
                 int cell = sectionCells[jdx];
                 cellToSectionMap.Add(cell, section);
             }
+        }
+
+        // Build cached row→sections and col→sections lookup arrays
+        sectionsForRow = new int[QQWing.ROW_COL_SEC_SIZE][];
+        sectionsForCol = new int[QQWing.ROW_COL_SEC_SIZE][];
+        for (int i = 0; i < QQWing.ROW_COL_SEC_SIZE; i++)
+        {
+            var rowSecs = new List<int>();
+            var colSecs = new List<int>();
+            foreach (var sec in sectionList)
+            {
+                if (sec.ContainsRow(i)) rowSecs.Add(sec.Index);
+                if (sec.ContainsCol(i)) colSecs.Add(sec.Index);
+            }
+            rowSecs.Sort();
+            colSecs.Sort();
+            sectionsForRow[i] = [.. rowSecs];
+            sectionsForCol[i] = [.. colSecs];
         }
 
         SetBoundaries();
@@ -160,22 +182,12 @@ public partial class IrregularLayout : ISectionLayout
     /// <summary>
     /// Given a column (0-8) return the sections that intersect that column
     /// </summary>
-    public IEnumerable<int> ColumnToSections(int col)
-    {
-        return sectionList.Where(s => s.Cols.Contains(col))
-        .OrderBy(s => s.Index)
-        .Select(s => s.Index);
-    }
+    public IEnumerable<int> ColumnToSections(int col) => sectionsForCol[col];
 
     /// <summary>
     /// Given a row (0-8) return the sections that intersect that row
     /// </summary>
-    public IEnumerable<int> RowToSections(int row)
-    {
-        return sectionList.Where(s => s.Rows.Contains(row))
-        .OrderBy(s => s.Index)
-        .Select(s => s.Index);
-    }
+    public IEnumerable<int> RowToSections(int row) => sectionsForRow[row];
 
     public IEnumerable<int> SectionToSectionCells(int section)
     {

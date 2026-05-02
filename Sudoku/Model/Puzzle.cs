@@ -29,11 +29,11 @@ public class Puzzle
     {
         Mouse.OverrideCursor = Cursors.Wait;
 
-        var timeout = TimeSpan.FromSeconds(20);
+        var timeout = TimeSpan.FromSeconds(30);
         using CancellationTokenSource cancellationTokenSource = new(timeout);
         var token = cancellationTokenSource.Token;
         List<Task<PuzzleData>> tasks = [];
-        for (int idx = 0; idx < 4; idx++)
+        for (int idx = 0; idx < 8; idx++)
         {
             tasks.Add(Task.Run(() => GenerateInternal(symmetry, difficulty, token), token));
         }
@@ -48,13 +48,13 @@ public class Puzzle
 
         await Task.WhenAll(tasks);
 
+        Mouse.OverrideCursor = Cursors.Arrow;
+
         if (Initial.Length == 0)
         {
             CustomMessageBox.Show($"Could not generate a new puzzle in {timeout.TotalSeconds} seconds:" +
                 Environment.NewLine + "Try again with different settings.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-
-        Mouse.OverrideCursor = Cursors.Arrow;
     }
     private static PuzzleData GenerateInternal(Symmetry symmetry, Difficulty difficulty, CancellationToken token)
     {
@@ -136,7 +136,7 @@ public class Puzzle
         using CancellationTokenSource cancellationTokenSource = new(timeout);
         var token = cancellationTokenSource.Token;
         List<Task<KillerPuzzle?>> tasks = [];
-        for (int idx = 0; idx < 4; idx++)
+        for (int idx = 0; idx < 8; idx++)
         {
             tasks.Add(Task.Run(() => GenerateKillerInternal(difficulty, symmetry, token), token));
         }
@@ -165,13 +165,13 @@ public class Puzzle
 
         await Task.WhenAll(tasks);
 
+        Mouse.OverrideCursor = Cursors.Arrow;
+
         if (result == null)
         {
             CustomMessageBox.Show($"Could not generate a Killer puzzle in {timeout.TotalSeconds} seconds:" +
                 Environment.NewLine + "Please try again.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-
-        Mouse.OverrideCursor = Cursors.Arrow;
     }
 
     private static KillerPuzzle? GenerateKillerInternal(Difficulty difficulty, Symmetry symmetry, CancellationToken token)
@@ -201,7 +201,7 @@ public class Puzzle
         using CancellationTokenSource cancellationTokenSource = new(timeout);
         var token = cancellationTokenSource.Token;
         List<Task<EvenOddPuzzle?>> tasks = [];
-        for (int idx = 0; idx < 4; idx++)
+        for (int idx = 0; idx < 8; idx++)
         {
             tasks.Add(Task.Run(() => GenerateEvenOddInternal(difficulty, symmetry, isEven, token), token));
         }
@@ -221,13 +221,13 @@ public class Puzzle
 
         await Task.WhenAll(tasks);
 
+        Mouse.OverrideCursor = Cursors.Arrow;
+
         if (result == null)
         {
             CustomMessageBox.Show($"Could not generate an Even/Odd puzzle in {timeout.TotalSeconds} seconds:" +
                 Environment.NewLine + "Please try again.", "Sudoku", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-
-        Mouse.OverrideCursor = Cursors.Arrow;
     }
 
     private static EvenOddPuzzle? GenerateEvenOddInternal(Difficulty difficulty, Symmetry symmetry, bool? isEven, CancellationToken token)
