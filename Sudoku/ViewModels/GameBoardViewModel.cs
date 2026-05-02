@@ -1390,9 +1390,13 @@ public partial class GameBoardViewModel : ObservableObject
         UpdateRemainderCounts();
     }
 
-    internal void ClearBoard()
+    internal void ClearBoard(bool doingNewKiller = false)
     {
-        IsKillerSudoku = false;
+        if (!doingNewKiller)
+        {
+            IsKillerSudoku = false;
+        }
+
         IsEvenOddSudoku = false;
         currentEvenOddConstraint = null;
 
@@ -1633,7 +1637,7 @@ public partial class GameBoardViewModel : ObservableObject
     {
         KillerCalculator?.Reset();
 
-        ClearBoard();
+        ClearBoard(doingNewKiller: true);
         Puzzle puz = new();
         await puz.GenerateKiller(difficulty, symmetry);
 
