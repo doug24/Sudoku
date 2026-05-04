@@ -1481,24 +1481,17 @@ public partial class GameBoardViewModel : ObservableObject
             }
         }
 
-        // Pre-assign single-cell cages to a dedicated 5th color (index 4).
-        // Single-cell cages can never be orthogonally adjacent to each other
-        // (the flood-fill generator always grows a cage to include unassigned
-        // neighbors), so they can safely share one color.
-        const int singleCellColor = 4;
+        // 4-color backtracking: the Four Color Theorem guarantees that any
+        // planar graph (cage adjacency on a 2-D grid is always planar) can be
+        // colored with at most 4 colors. A simple greedy pass can overshoot
+        // that bound depending on traversal order, so we use backtracking to
+        // stay within exactly 4 colors.
         int[] cageColor = new int[cageCount];
         Array.Fill(cageColor, -1);
-        for (int ci = 0; ci < cageCount; ci++)
-        {
-            if (cages[ci].Size == 1)
-                cageColor[ci] = singleCellColor;
-        }
 
-        // Greedy graph-coloring for multi-cell cages: assign the lowest
-        // color index (0-3) not used by any adjacent cage
-        for (int ci = 0; ci < cageCount; ci++)
+        bool Backtrack(int ci)
         {
-            if (cageColor[ci] >= 0) continue; // already assigned (single-cell)
+            if (ci == cageCount) return true;
 
             HashSet<int> usedColors = [];
             foreach (int adj in adjacent[ci])
@@ -1507,11 +1500,20 @@ public partial class GameBoardViewModel : ObservableObject
                     usedColors.Add(cageColor[adj]);
             }
 
-            int color = 0;
-            while (usedColors.Contains(color))
-                color++;
-            cageColor[ci] = color;
+            for (int color = 0; color < 4; color++)
+            {
+                if (!usedColors.Contains(color))
+                {
+                    cageColor[ci] = color;
+                    if (Backtrack(ci + 1))
+                        return true;
+                    cageColor[ci] = -1;
+                }
+            }
+            return false;
         }
+
+        Backtrack(0);
 
         // Verify: no two adjacent cages share the same color
         for (int ci = 0; ci < cageCount; ci++)
@@ -1521,6 +1523,17 @@ public partial class GameBoardViewModel : ObservableObject
                 Debug.Assert(cageColor[ci] != cageColor[adj],
                     $"Cage {ci} and cage {adj} are adjacent but both have color {cageColor[ci]}.");
             }
+        }
+
+        // Assign single-cell cages to a dedicated 5th color (index 4).
+        // Single-cell cages can never be orthogonally adjacent to each other
+        // (the flood-fill generator always grows a cage to include unassigned
+        // neighbors), so they can safely share one color.
+        const int singleCellColor = 4;
+        for (int ci = 0; ci < cageCount; ci++)
+        {
+            if (cages[ci].Size == 1)
+                cageColor[ci] = singleCellColor;
         }
 
         // Find the top-left cell (min row, then min col) for each cage
