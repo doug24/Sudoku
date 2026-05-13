@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ToggleSwitch="clr-namespace:ToggleSwitch;assembly=ToggleSwitch"
         xmlns:local="clr-namespace:Sudoku"
         Icon="Images\Sudoku.ico"
         mc:Ignorable="d"
@@ -31,15 +30,6 @@
             <GradientStop Color="#FF6E97B7" Offset="1"/>
             <GradientStop Color="#FF46738A"/>
         </LinearGradientBrush>
-
-        <Style x:Key="carbon" TargetType="ToggleSwitch:HorizontalToggleSwitch">
-            <Setter Property="ToggleSwitch:HorizontalToggleSwitch.ThumbBrush" Value="{StaticResource thumbBrush}"/>
-            <Setter Property="ToggleSwitch:HorizontalToggleSwitch.UncheckedBackground" Value="{StaticResource uncheckedBrush}"/>
-            <Setter Property="ToggleSwitch:HorizontalToggleSwitch.CheckedBackground" Value="{StaticResource checkedBrush}"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="BorderBrush" Value="#FF6A6A6A"/>
-            <Setter Property="UncheckedForeground" Value="White"/>
-        </Style>
 
         <Style TargetType="MenuItem">
             <Setter Property="ToolTipService.InitialShowDelay" Value="200"/>
@@ -112,6 +102,19 @@
                 <Separator/>
                 <MenuItem Header="Clear Board" Command="{Binding ClearBoardCommand}"/>
             </MenuItem>
+            <MenuItem Header="Options">
+                <MenuItem Header="Show Timer" IsCheckable="True"
+                          IsChecked="{Binding Path=GameBoard.ShowTimer, Mode=TwoWay}"/>
+                <MenuItem Header="Highlight Incorrect Answers" IsCheckable="True"
+                          IsChecked="{Binding GameBoard.HighlightIncorrect, Mode=TwoWay}"/>
+                <MenuItem Header="Clean Pencil Marks" IsCheckable="True"
+                          IsChecked="{Binding GameBoard.CleanPencilMarks, Mode=TwoWay}"/>
+                <MenuItem Header="Highlight Selected Number" IsCheckable="True"
+                          IsChecked="{Binding Path=GameBoard.EnableNumberHighlight, Mode=TwoWay}"/>
+                <MenuItem Header="Show Killer Calculator" IsCheckable="True"
+                          IsChecked="{Binding Path=GameBoard.ShowKillerCalculator, Mode=TwoWay}"
+                          IsEnabled="{Binding GameBoard.IsKillerSudoku}"/>
+            </MenuItem>
         </Menu>
         <Border DockPanel.Dock="Left"
                 BorderBrush="Blue" 
@@ -127,7 +130,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -137,78 +139,32 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                           VerticalAlignment="Center"
-                           Text="Color incorrect answers" Margin="3" FontSize="14"/>
-                <ToggleSwitch:HorizontalToggleSwitch Grid.Row="0" Grid.Column="2"
-                            IsChecked="{Binding GameBoard.HighlightIncorrect, Mode=TwoWay}" 
-                            Style="{StaticResource carbon}"
-                            UncheckedContent="No" CheckedContent="Yes" 
-                            Margin="0,6" HorizontalAlignment="Left"/>
-
-                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                           VerticalAlignment="Center"
-                           Text="Clean pencil marks" Margin="3" FontSize="14"/>
-                <ToggleSwitch:HorizontalToggleSwitch Grid.Row="1" Grid.Column="2"
-                            IsChecked="{Binding GameBoard.CleanPencilMarks, Mode=TwoWay}" 
-                            Style="{StaticResource carbon}"
-                            UncheckedContent="No" CheckedContent="Yes" 
-                            Margin="0,6" HorizontalAlignment="Left"/>
-
-                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                           VerticalAlignment="Center"
-                           Text="Highlight selected number" Margin="3,3,6,3" FontSize="14"/>
-                <ToggleSwitch:HorizontalToggleSwitch Grid.Row="2" Grid.Column="2"
-                            IsChecked="{Binding Path=GameBoard.EnableNumberHighlight, Mode=TwoWay}" 
-                            Style="{StaticResource carbon}"
-                            UncheckedContent="No" CheckedContent="Yes" 
-                            Margin="0,6" HorizontalAlignment="Left"/>
-
-
-                <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                           VerticalAlignment="Center"
-                           Text="Killer Calculator" Margin="3" FontSize="14"/>
-                <ToggleSwitch:HorizontalToggleSwitch Grid.Row="3" Grid.Column="2"
-                            IsChecked="{Binding GameBoard.ShowKillerCalculator, Mode=TwoWay, FallbackValue=True}" 
-                            Style="{StaticResource carbon}"
-                            UncheckedContent="No" CheckedContent="Yes" 
-                            Margin="0,0,0,6"
-                            IsEnabled="{Binding GameBoard.IsKillerSudoku}" VerticalAlignment="Bottom"/>
-
-                <TextBlock Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"
-                           Text="Timer" Margin="3" FontSize="14"/>
-                <ToggleSwitch:HorizontalToggleSwitch Grid.Row="4" Grid.Column="2"
-                            IsChecked="{Binding GameBoard.ShowTimer, Mode=TwoWay}" 
-                            Style="{StaticResource carbon}"
-                            UncheckedContent="No" CheckedContent="Yes" 
-                            Margin="0,6" HorizontalAlignment="Left"/>
-
-                <TextBlock Grid.Row="4" Grid.Column="1"
-                           Margin="3,0"
+                <TextBlock Grid.Row="0" Grid.Column="1"
+                           Margin="3"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            Text="{Binding GameBoard.Time}"
                            FontSize="24"/>
 
-                <Button Grid.Row="5" Grid.Column="0"
+                <Button Grid.Row="2" Grid.Column="0"
                         Width="{Binding ElementName=ff, Path=ActualWidth}"
                         HorizontalAlignment="Right"
                         Content="Hint"
-                        Padding="6" Margin="3"
+                        Padding="6" Margin="3,12"
                         Command="{Binding Path=GameBoard.HintCommand}"/>
 
-                <Button Grid.Row="5" Grid.Column="1" 
+                <Button Grid.Row="2" Grid.Column="1" 
                         HorizontalAlignment="Stretch"
                         Content="Fill candidates" 
-                        Padding="6" Margin="3"
+                        Padding="6" Margin="3,12"
                         Command="{Binding Path=GameBoard.FillCandidatesCommand}"/>
 
-                <Button Grid.Row="5" Grid.Column="2" x:Name="ff"
+                <Button Grid.Row="2" Grid.Column="2" x:Name="ff"
                         HorizontalAlignment="Stretch"
                         Content="Fast Forward"
-                        Padding="6" Margin="3"
+                        Padding="6" Margin="3,12"
                         Command="{Binding Path=GameBoard.FastForwardCommand}"/>
 
-                <local:KeyPadControl Grid.Row="6" Grid.ColumnSpan="3" 
+                <local:KeyPadControl Grid.Row="3" Grid.ColumnSpan="3" 
                                      VerticalAlignment="Bottom" MaxWidth="220"/>
 
                 <StackPanel Grid.Row="0" Grid.Column="3" Grid.RowSpan="7" Margin="20,3,3,3"
