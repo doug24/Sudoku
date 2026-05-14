@@ -123,7 +123,7 @@
             <local:GameBoard DataContext="{Binding GameBoard}" Margin="6"/>
         </Border>
         <Border Padding="16,6,6,6">
-            <Grid>
+            <Grid Grid.IsSharedSizeScope="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -133,13 +133,13 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColumnGroup1"/>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColumnGroup1"/>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="ColumnGroup1"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="1"
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
                            Margin="3"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            Text="{Binding GameBoard.Time}"

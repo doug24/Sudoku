@@ -6,17 +6,16 @@
              xmlns:local="clr-namespace:Sudoku"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=local:SudokuViewModel, IsDesignTimeCreatable=True}"
-             d:DesignWidth="150">
+             d:DesignWidth="240">
 
     <UserControl.Resources>
-        <local:BoolToVisibilityConverter x:Key="b2vc" TrueValue="Collapsed" FalseValue="Visible"/>
         <local:EnumBooleanConverter x:Key="ebc" />
 
         <Style TargetType="Button">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Foreground" Value="{Binding ButtonForeground}"/>
             <Setter Property="Background" Value="{Binding ButtonBackground}"/>
-            <Setter Property="FontSize" Value="40"/>
+            <Setter Property="FontSize" Value="48"/>
             <Setter Property="Padding" Value="6"/>
             <Setter Property="Margin" Value="1"/>
             <Setter Property="MinWidth" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" />
@@ -51,7 +50,7 @@
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Foreground" Value="{Binding ButtonForeground}"/>
             <Setter Property="Background" Value="{Binding ButtonBackground}"/>
-            <Setter Property="FontSize" Value="40"/>
+            <Setter Property="FontSize" Value="48"/>
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -83,7 +82,7 @@
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Foreground" Value="{Binding ButtonForeground}"/>
             <Setter Property="Background" Value="{Binding ButtonBackground}"/>
-            <Setter Property="FontSize" Value="40"/>
+            <Setter Property="FontSize" Value="48"/>
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -141,75 +140,104 @@
         <Style TargetType="ToggleButton" BasedOn="{StaticResource BaseToggleButtonStyle}"/>
     </UserControl.Resources>
 
-    <Grid>
-        <Viewbox VerticalAlignment="Top">
+    <Grid Grid.IsSharedSizeScope="True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" SharedSizeGroup="ColumnGroup1"/>
+            <ColumnDefinition Width="Auto" SharedSizeGroup="ColumnGroup1"/>
+            <ColumnDefinition Width="Auto" SharedSizeGroup="ColumnGroup1"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" SharedSizeGroup="RowGroup1"/>
+            <RowDefinition Height="4"/>
+            <RowDefinition Height="Auto" SharedSizeGroup="RowGroup1"/>
+            <RowDefinition Height="Auto" SharedSizeGroup="RowGroup1"/>
+            <RowDefinition Height="Auto" SharedSizeGroup="RowGroup1"/>
+            <RowDefinition Height="4"/>
+            <RowDefinition Height="Auto" SharedSizeGroup="RowGroup1"/>
+            <RowDefinition Height="Auto" SharedSizeGroup="RowGroup1"/>
+            <RowDefinition Height="Auto" SharedSizeGroup="RowGroup1"/>
+        </Grid.RowDefinitions>
 
-            <UniformGrid Columns="3">
+        <ToggleButton Grid.Row="0" Grid.Column="0" x:Name="Pen"
+                      Content="&#xEE56;" FontFamily="Segoe Fluent Icons" 
+                      ToolTip="Set Answers" 
+                      IsChecked="{Binding Path=GameBoard.KeyInputMode, Converter={StaticResource ebc}, ConverterParameter=Pen}" />
+        <ToggleButton Grid.Row="0" Grid.Column="1"
+                      Content="&#xE70F;" FontFamily="Segoe Fluent Icons" 
+                      ToolTip="Add Pencil Marks"
+                      IsChecked="{Binding Path=GameBoard.KeyInputMode, Converter={StaticResource ebc}, ConverterParameter=Pencil}" />
+        <ToggleButton Grid.Row="0" Grid.Column="2"
+                      Content="🔢" FontFamily="Segoe UI Symbol" Foreground="#FF466F85"
+                      ToolTip="Select number first" IsChecked="{Binding GameBoard.NumberFirstMode, Mode=TwoWay}" />
 
-                <ToggleButton Content="&#xEE56;" FontFamily="Segoe Fluent Icons" 
-                              ToolTip="Set Answers" 
-                              IsChecked="{Binding Path=GameBoard.KeyInputMode, Converter={StaticResource ebc}, ConverterParameter=Pen}" />
-                <ToggleButton Content="&#xE70F;" FontFamily="Segoe Fluent Icons" 
-                              ToolTip="Add Pencil Marks"
-                              IsChecked="{Binding Path=GameBoard.KeyInputMode, Converter={StaticResource ebc}, ConverterParameter=Pencil}" />
-                <ToggleButton Content="🔢" FontFamily="Segoe UI Symbol" Foreground="#FF466F85"
-                              ToolTip="Select number first" IsChecked="{Binding GameBoard.NumberFirstMode, Mode=TwoWay}" />
+        <ToggleButton Grid.Row="2" Grid.Column="0"
+                      Content="{Binding Path=GameBoard.Number1}" Style="{StaticResource NumberToggleButtonStyle}"
+                      Command="{Binding NumberKeyCommand}" CommandParameter="1"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D1, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="2" Grid.Column="1"
+                      Content="{Binding Path=GameBoard.Number2}" Style="{StaticResource NumberToggleButtonStyle}"
+                      Command="{Binding NumberKeyCommand}" CommandParameter="2"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D2, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="2" Grid.Column="2"
+                      Content="{Binding Path=GameBoard.Number3}" Style="{StaticResource NumberToggleButtonStyle}"
+                      Command="{Binding NumberKeyCommand}" CommandParameter="3"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D3, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="3" Grid.Column="0"
+                      Content="{Binding Path=GameBoard.Number4}" Style="{StaticResource NumberToggleButtonStyle}"
+                      Command="{Binding NumberKeyCommand}" CommandParameter="4"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D4, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="3" Grid.Column="1"
+                      Content="{Binding Path=GameBoard.Number5}" Style="{StaticResource NumberToggleButtonStyle}"
+                      Command="{Binding NumberKeyCommand}" CommandParameter="5"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D5, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="3" Grid.Column="2"
+                      Content="{Binding Path=GameBoard.Number6}" Style="{StaticResource NumberToggleButtonStyle}"
+                      Command="{Binding NumberKeyCommand}" CommandParameter="6"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D6, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="4" Grid.Column="0"
+                      Content="{Binding Path=GameBoard.Number7}" Style="{StaticResource NumberToggleButtonStyle}"
+                      Command="{Binding NumberKeyCommand}" CommandParameter="7"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D7, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="4" Grid.Column="1"
+                      Content="{Binding Path=GameBoard.Number8}" Style="{StaticResource NumberToggleButtonStyle}"
+                      Command="{Binding NumberKeyCommand}" CommandParameter="8"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D8, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="4" Grid.Column="2"
+                      Content="{Binding Path=GameBoard.Number9}" Style="{StaticResource NumberToggleButtonStyle}"
+                      Command="{Binding NumberKeyCommand}" CommandParameter="9"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D9, Mode=TwoWay}"/>
 
-                <ToggleButton Content="{Binding Path=GameBoard.Number1}" Style="{StaticResource NumberToggleButtonStyle}"
-                              Command="{Binding NumberKeyCommand}" CommandParameter="1"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D1, Mode=TwoWay}"/>
-                <ToggleButton Content="{Binding Path=GameBoard.Number2}" Style="{StaticResource NumberToggleButtonStyle}"
-                              Command="{Binding NumberKeyCommand}" CommandParameter="2"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D2, Mode=TwoWay}"/>
-                <ToggleButton Content="{Binding Path=GameBoard.Number3}" Style="{StaticResource NumberToggleButtonStyle}"
-                              Command="{Binding NumberKeyCommand}" CommandParameter="3"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D3, Mode=TwoWay}"/>
-                <ToggleButton Content="{Binding Path=GameBoard.Number4}" Style="{StaticResource NumberToggleButtonStyle}"
-                              Command="{Binding NumberKeyCommand}" CommandParameter="4"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D4, Mode=TwoWay}"/>
-                <ToggleButton Content="{Binding Path=GameBoard.Number5}" Style="{StaticResource NumberToggleButtonStyle}"
-                              Command="{Binding NumberKeyCommand}" CommandParameter="5"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D5, Mode=TwoWay}"/>
-                <ToggleButton Content="{Binding Path=GameBoard.Number6}" Style="{StaticResource NumberToggleButtonStyle}"
-                              Command="{Binding NumberKeyCommand}" CommandParameter="6"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D6, Mode=TwoWay}"/>
-                <ToggleButton Content="{Binding Path=GameBoard.Number7}" Style="{StaticResource NumberToggleButtonStyle}"
-                              Command="{Binding NumberKeyCommand}" CommandParameter="7"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D7, Mode=TwoWay}"/>
-                <ToggleButton Content="{Binding Path=GameBoard.Number8}" Style="{StaticResource NumberToggleButtonStyle}"
-                              Command="{Binding NumberKeyCommand}" CommandParameter="8"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D8, Mode=TwoWay}"/>
-                <ToggleButton Content="{Binding Path=GameBoard.Number9}" Style="{StaticResource NumberToggleButtonStyle}"
-                              Command="{Binding NumberKeyCommand}" CommandParameter="9"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=D9, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="6" Grid.Column="0"
+                      Content="&#xE8C8;" FontFamily="Segoe Fluent Icons"
+                      ToolTip="Copy candidates" Command="{Binding GameBoard.CopyCommand}"
+                      IsChecked="{Binding Path=GameBoard.CandidateAction, Converter={StaticResource ebc}, ConverterParameter=Copy, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="6" Grid.Column="1"
+                      Content="&#xE77F;" FontFamily="Segoe Fluent Icons"
+                      ToolTip="Paste candidates" Command="{Binding GameBoard.PasteCommand}"
+                      IsChecked="{Binding Path=GameBoard.CandidateAction, Converter={StaticResource ebc}, ConverterParameter=Paste, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="6" Grid.Column="2"
+                      Content="&#xE75C;" FontFamily="Segoe Fluent Icons"
+                      ToolTip="Erase candidates" Command="{Binding GameBoard.EraseCommand}"
+                      IsChecked="{Binding Path=GameBoard.CandidateAction, Converter={StaticResource ebc}, ConverterParameter=Erase, Mode=TwoWay}"/>
 
-                <ToggleButton Background="{Binding ColorButton1Background}" Style="{StaticResource ColorToggleButtonStyle}"
-                              Command="{Binding ColorKeyCommand}" CommandParameter="10"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C1, Mode=TwoWay}"/>
-                <ToggleButton Background="{Binding ColorButton2Background}" Style="{StaticResource ColorToggleButtonStyle}"
-                              Command="{Binding ColorKeyCommand}" CommandParameter="11"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C2, Mode=TwoWay}"/>
-                <ToggleButton Background="{Binding ColorButton3Background}" Style="{StaticResource ColorToggleButtonStyle}" 
-                              Command="{Binding ColorKeyCommand}" CommandParameter="12"
-                              IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C3, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="7" Grid.Column="0" 
+                      Background="{Binding ColorButton1Background}" Style="{StaticResource ColorToggleButtonStyle}"
+                      Command="{Binding ColorKeyCommand}" CommandParameter="10"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C1, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="7" Grid.Column="1" 
+                      Background="{Binding ColorButton2Background}" Style="{StaticResource ColorToggleButtonStyle}"
+                      Command="{Binding ColorKeyCommand}" CommandParameter="11"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C2, Mode=TwoWay}"/>
+        <ToggleButton Grid.Row="7" Grid.Column="2" 
+                      Background="{Binding ColorButton3Background}" Style="{StaticResource ColorToggleButtonStyle}" 
+                      Command="{Binding ColorKeyCommand}" CommandParameter="12"
+                      IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C3, Mode=TwoWay}"/>
 
-                <Button Content="&#xE7A7;" FontFamily="Segoe Fluent Icons"
-                        ToolTip="Undo" Command="{Binding UndoCommand}"/>
-                <Button Content="&#xE7A6;" FontFamily="Segoe Fluent Icons"
-                        ToolTip="Redo" Command="{Binding RedoCommand}"/>
-                <Button Content="❅" FontFamily="Segoe UI Symbol"
-                        ToolTip="Clear colors" Command="{Binding ClearCommand}"/>
-
-                <ToggleButton Content="&#xE8C8;" FontFamily="Segoe Fluent Icons"
-                              ToolTip="Copy candidates" Command="{Binding GameBoard.CopyCommand}"
-                              IsChecked="{Binding Path=GameBoard.CandidateAction, Converter={StaticResource ebc}, ConverterParameter=Copy, Mode=TwoWay}"/>
-                <ToggleButton Content="&#xE77F;" FontFamily="Segoe Fluent Icons"
-                              ToolTip="Paste candidates" Command="{Binding GameBoard.PasteCommand}"
-                              IsChecked="{Binding Path=GameBoard.CandidateAction, Converter={StaticResource ebc}, ConverterParameter=Paste, Mode=TwoWay}"/>
-                <ToggleButton Content="&#xE75C;" FontFamily="Segoe Fluent Icons"
-                              ToolTip="Erase candidates" Command="{Binding GameBoard.EraseCommand}"
-                              IsChecked="{Binding Path=GameBoard.CandidateAction, Converter={StaticResource ebc}, ConverterParameter=Erase, Mode=TwoWay}"/>
-            </UniformGrid>
-        </Viewbox>
+        <Button Grid.Row="8" Grid.Column="0" Content="&#xE7A7;" FontFamily="Segoe Fluent Icons"
+                ToolTip="Undo" Command="{Binding UndoCommand}"/>
+        <Button Grid.Row="8" Grid.Column="1" Content="&#xE7A6;" FontFamily="Segoe Fluent Icons"
+                ToolTip="Redo" Command="{Binding RedoCommand}"/>
+        <Button Grid.Row="8" Grid.Column="2" Content="❅" FontFamily="Segoe UI Symbol"
+                ToolTip="Clear colors" Command="{Binding ClearCommand}"/>
     </Grid>
 </UserControl>
