@@ -16,7 +16,7 @@
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Foreground" Value="{Binding ButtonForeground}"/>
             <Setter Property="Background" Value="{Binding ButtonBackground}"/>
-            <Setter Property="FontSize" Value="44"/>
+            <Setter Property="FontSize" Value="40"/>
             <Setter Property="Padding" Value="6"/>
             <Setter Property="Margin" Value="1"/>
             <Setter Property="MinWidth" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" />
@@ -51,7 +51,7 @@
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Foreground" Value="{Binding ButtonForeground}"/>
             <Setter Property="Background" Value="{Binding ButtonBackground}"/>
-            <Setter Property="FontSize" Value="44"/>
+            <Setter Property="FontSize" Value="40"/>
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -83,7 +83,7 @@
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Foreground" Value="{Binding ButtonForeground}"/>
             <Setter Property="Background" Value="{Binding ButtonBackground}"/>
-            <Setter Property="FontSize" Value="44"/>
+            <Setter Property="FontSize" Value="40"/>
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -146,9 +146,11 @@
 
             <UniformGrid Columns="3">
 
-                <ToggleButton Content="" FontFamily="Segoe MDL2 Assets" ToolTip="Set Answers" 
+                <ToggleButton Content="&#xEE56;" FontFamily="Segoe Fluent Icons" 
+                              ToolTip="Set Answers" 
                               IsChecked="{Binding Path=GameBoard.KeyInputMode, Converter={StaticResource ebc}, ConverterParameter=Pen}" />
-                <ToggleButton Content="✎" ToolTip="Add Pencil Marks"
+                <ToggleButton Content="&#xE70F;" FontFamily="Segoe Fluent Icons" 
+                              ToolTip="Add Pencil Marks"
                               IsChecked="{Binding Path=GameBoard.KeyInputMode, Converter={StaticResource ebc}, ConverterParameter=Pencil}" />
                 <ToggleButton Content="🔢" FontFamily="Segoe UI Symbol" Foreground="#FF466F85"
                               ToolTip="Select number first" IsChecked="{Binding GameBoard.NumberFirstMode, Mode=TwoWay}" />
@@ -191,10 +193,22 @@
                               Command="{Binding ColorKeyCommand}" CommandParameter="12"
                               IsChecked="{Binding Path=GameBoard.SelectedNumber, Converter={StaticResource ebc}, ConverterParameter=C3, Mode=TwoWay}"/>
 
-                <Button Content="" FontFamily="Segoe MDL2 Assets" ToolTip="Undo" Command="{Binding UndoCommand}"/>
-                <Button Content="" FontFamily="Segoe MDL2 Assets" ToolTip="Redo" Command="{Binding RedoCommand}"/>
-                <Button Content="❅" FontFamily="Segoe UI Symbol" ToolTip="Clear" Command="{Binding ClearCommand}"/>
+                <Button Content="&#xE7A7;" FontFamily="Segoe Fluent Icons"
+                        ToolTip="Undo" Command="{Binding UndoCommand}"/>
+                <Button Content="&#xE7A6;" FontFamily="Segoe Fluent Icons"
+                        ToolTip="Redo" Command="{Binding RedoCommand}"/>
+                <Button Content="❅" FontFamily="Segoe UI Symbol"
+                        ToolTip="Clear colors" Command="{Binding ClearCommand}"/>
 
+                <ToggleButton Content="&#xE8C8;" FontFamily="Segoe Fluent Icons"
+                              ToolTip="Copy candidates" Command="{Binding GameBoard.CopyCommand}"
+                              IsChecked="{Binding Path=GameBoard.CandidateAction, Converter={StaticResource ebc}, ConverterParameter=Copy, Mode=TwoWay}"/>
+                <ToggleButton Content="&#xE77F;" FontFamily="Segoe Fluent Icons"
+                              ToolTip="Paste candidates" Command="{Binding GameBoard.PasteCommand}"
+                              IsChecked="{Binding Path=GameBoard.CandidateAction, Converter={StaticResource ebc}, ConverterParameter=Paste, Mode=TwoWay}"/>
+                <ToggleButton Content="&#xE75C;" FontFamily="Segoe Fluent Icons"
+                              ToolTip="Erase candidates" Command="{Binding GameBoard.EraseCommand}"
+                              IsChecked="{Binding Path=GameBoard.CandidateAction, Converter={StaticResource ebc}, ConverterParameter=Erase, Mode=TwoWay}"/>
             </UniformGrid>
         </Viewbox>
     </Grid>

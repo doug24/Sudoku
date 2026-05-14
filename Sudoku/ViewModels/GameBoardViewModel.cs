@@ -149,6 +149,40 @@ public partial class GameBoardViewModel : ObservableObject
     [ObservableProperty]
     private KeyPadMode keyInputMode = KeyPadMode.Pen;
 
+    partial void OnKeyInputModeChanged(KeyPadMode value)
+    {
+        // Switching to an active input mode (Pen or Pencil) clears any pending candidate action
+        if (value != KeyPadMode.None)
+        {
+            CandidateAction = CandidateAction.None;
+        }
+    }
+
+    [ObservableProperty]
+    private CandidateAction candidateAction = CandidateAction.None;
+
+    partial void OnCandidateActionChanged(CandidateAction value)
+    {
+        if (!NumberFirstMode)
+        {
+            // Briefly flash the checked state so the user sees the click, then revert
+            Application.Current.Dispatcher.InvokeAsync(async () =>
+            {
+                await Task.Delay(100);
+                CandidateAction = CandidateAction.None;
+            });
+            return;
+        }
+
+        // Activating a candidate action deselects Pen and Pencil
+        if (value != CandidateAction.None)
+        {
+            KeyInputMode = KeyPadMode.None;
+        }
+    }
+
+    private int[] candidateClipboard = [];
+
     [ObservableProperty]
     private bool numberFirstMode = false;
 
@@ -160,6 +194,7 @@ public partial class GameBoardViewModel : ObservableObject
         if (!value)
         {
             SelectedNumber = NumberSelection.None;
+            CandidateAction = CandidateAction.None;
         }
 
         InnerSelectionBorder = value ? Brushes.Transparent : Brushes.Yellow;
@@ -276,8 +311,124 @@ public partial class GameBoardViewModel : ObservableObject
         q => IsInProgress);
 
     public ICommand HintCommand => new RelayCommand(
-    p => GetHint(),
-    q => IsInProgress);
+        p => GetHint(),
+        q => IsInProgress);
+
+    public ICommand CopyCommand => new RelayCommand(
+        p => CopyCandidates(),
+        q => IsInProgress);
+
+    public ICommand PasteCommand => new RelayCommand(
+        p => PasteCandidates(),
+        q => IsInProgress);
+
+    public ICommand EraseCommand => new RelayCommand(
+        p => EraseCandidates(),
+        q => IsInProgress);
+
+    /// <summary>
+    /// Copies the current candidates to the clipboard. 
+    /// When in NumberFirstMode, the candidates of the next cell clicked after 
+    /// pressing Copy are copied, and the key pad switches to the Paste mode.
+    /// Otherwise, the selected cell's candidates are copied. if multiple cells 
+    /// are selected, only the first selected cell's candidates are copied.
+    /// </summary>
+    private void CopyCandidates()
+    {
+        if (NumberFirstMode)
+        {
+            // Wait for the next cell click to copy from
+            CandidateAction = CandidateAction.Copy;
+        }
+        else
+        {
+            var cell = Cells.SelectedItems.FirstOrDefault();
+            if (cell != null)
+            {
+                int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+                candidateClipboard = GetCurrentCellState(cellIndex).Candidates;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Pastes candidates from the clipboard. 
+    /// When in NumberFirstMode, the candidates are pasted to the next cell clicked after 
+    /// pressing Paste, and it stays in the Paste mode to allow pasting to multiple cells 
+    /// until the user selects Pen or Pencil.
+    /// Otherwise, the candidates are pasted into one or more selected cells.
+    /// </summary>
+    private void PasteCandidates()
+    {
+        if (NumberFirstMode)
+        {
+            // Stay in Paste mode until Pen or Pencil is selected
+            CandidateAction = CandidateAction.Paste;
+        }
+        else
+        {
+            if (candidateClipboard.Length == 0) return;
+
+            List<CellState> list = [];
+            foreach (var cell in Cells.SelectedItems)
+            {
+                if (cell.Given || cell.Value != 0) continue;
+
+                int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+                var oldState = GetCurrentCellState(cellIndex);
+                var newState = oldState.AddCandidates(candidateClipboard);
+                if (newState != oldState)
+                {
+                    cell.SetState(newState, HighlightIncorrect);
+                    list.Add(newState);
+                }
+            }
+
+            if (list.Count > 0)
+            {
+                undoStack.Push(list);
+                redoStack.Clear();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Erases candidates. When in NumberFirstMode, the candidates of the next cell clicked after 
+    /// pressing Erase are erased, and it stays in the Erase mode to allow erasing candidates from 
+    /// multiple cells until the user selects Pen or Pencil.
+    /// Otherwise, one or more selected cell's candidates are erased.
+    /// </summary>
+    private void EraseCandidates()
+    {
+        if (NumberFirstMode)
+        {
+            // Stay in Erase mode until Pen or Pencil is selected
+            CandidateAction = CandidateAction.Erase;
+        }
+        else
+        {
+            List<CellState> list = [];
+            foreach (var cell in Cells.SelectedItems)
+            {
+                if (cell.Given || cell.Value != 0) continue;
+
+                int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+                var oldState = GetCurrentCellState(cellIndex);
+                if (oldState.Candidates.Length > 0)
+                {
+                    var newState = oldState.RemoveCandidates();
+                    cell.SetState(newState, HighlightIncorrect);
+                    list.Add(newState);
+                }
+            }
+
+            if (list.Count > 0)
+            {
+                undoStack.Push(list);
+                redoStack.Clear();
+            }
+        }
+    }
 
     private void Describe()
     {
@@ -626,6 +777,43 @@ public partial class GameBoardViewModel : ObservableObject
         if (!(IsInProgress || IsDesignMode)) return;
 
         if (!NumberFirstMode) return;
+
+        // Handle candidate copy/paste/erase actions in NumberFirstMode
+        if (CandidateAction != CandidateAction.None && !IsDesignMode)
+        {
+            int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
+            var oldState = GetCurrentCellState(cellIndex);
+
+            if (CandidateAction == CandidateAction.Copy)
+            {
+                candidateClipboard = oldState.Candidates;
+                CandidateAction = CandidateAction.Paste;
+            }
+            else if (CandidateAction == CandidateAction.Paste)
+            {
+                if (candidateClipboard.Length > 0 && !oldState.Given && oldState.Value == 0)
+                {
+                    var newState = oldState.AddCandidates(candidateClipboard);
+                    if (newState != oldState)
+                    {
+                        cell.SetState(newState, HighlightIncorrect);
+                        undoStack.Push([newState]);
+                        redoStack.Clear();
+                    }
+                }
+            }
+            else if (CandidateAction == CandidateAction.Erase)
+            {
+                if (!oldState.Given && oldState.Value == 0 && oldState.Candidates.Length > 0)
+                {
+                    var newState = oldState.RemoveCandidates();
+                    cell.SetState(newState, HighlightIncorrect);
+                    undoStack.Push([newState]);
+                    redoStack.Clear();
+                }
+            }
+            return;
+        }
 
         int value = (int)SelectedNumber;
 
