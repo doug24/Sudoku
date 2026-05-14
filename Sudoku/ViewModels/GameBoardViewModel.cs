@@ -376,7 +376,8 @@ public partial class GameBoardViewModel : ObservableObject
 
                 int cellIndex = QQWing.RowColumnToCell(cell.Row, cell.Col);
                 var oldState = GetCurrentCellState(cellIndex);
-                var newState = oldState.AddCandidates(candidateClipboard);
+                var newState = oldState.RemoveCandidates();
+                newState = newState.AddCandidates(candidateClipboard);
                 if (newState != oldState)
                 {
                     cell.SetState(newState, HighlightIncorrect);
@@ -793,7 +794,8 @@ public partial class GameBoardViewModel : ObservableObject
             {
                 if (candidateClipboard.Length > 0 && !oldState.Given && oldState.Value == 0)
                 {
-                    var newState = oldState.AddCandidates(candidateClipboard);
+                    var newState = oldState.RemoveCandidates();
+                    newState = newState.AddCandidates(candidateClipboard);
                     if (newState != oldState)
                     {
                         cell.SetState(newState, HighlightIncorrect);
