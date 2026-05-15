@@ -122,12 +122,9 @@
                 Margin="5,0,0,5">
             <local:GameBoard DataContext="{Binding GameBoard}" Margin="6"/>
         </Border>
-        <Border Padding="16,6,6,6">
+        <Border Padding="6">
             <Grid Grid.IsSharedSizeScope="True">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -145,29 +142,28 @@
                            Text="{Binding GameBoard.Time}"
                            FontSize="24"/>
 
-                <Button Grid.Row="2" Grid.Column="0"
-                        Width="{Binding ElementName=ff, Path=ActualWidth}"
-                        HorizontalAlignment="Right"
+                <Button Grid.Row="1" Grid.Column="0"
+                        HorizontalAlignment="Stretch"
                         Content="Hint"
                         Padding="6" Margin="3,12"
                         Command="{Binding Path=GameBoard.HintCommand}"/>
 
-                <Button Grid.Row="2" Grid.Column="1" 
+                <Button Grid.Row="1" Grid.Column="1" 
                         HorizontalAlignment="Stretch"
                         Content="Fill candidates" 
                         Padding="6" Margin="3,12"
                         Command="{Binding Path=GameBoard.FillCandidatesCommand}"/>
 
-                <Button Grid.Row="2" Grid.Column="2" x:Name="ff"
+                <Button Grid.Row="1" Grid.Column="2"
                         HorizontalAlignment="Stretch"
                         Content="Fast Forward"
                         Padding="6" Margin="3,12"
                         Command="{Binding Path=GameBoard.FastForwardCommand}"/>
 
-                <local:KeyPadControl Grid.Row="3" Grid.ColumnSpan="3" 
-                                     VerticalAlignment="Bottom" MaxWidth="220"/>
+                <local:KeyPadControl Grid.Row="2" Grid.ColumnSpan="3" 
+                                     HorizontalAlignment="Center"/>
 
-                <StackPanel Grid.Row="0" Grid.Column="3" Grid.RowSpan="7" Margin="20,3,3,3"
+                <StackPanel Grid.Row="0" Grid.Column="3" Grid.RowSpan="3" Margin="3"
                             Visibility="{Binding ShowKillerCalculator, Converter={StaticResource BooleanToVisibilityConverter}}">
 
                     <ListBox Margin="3" HorizontalAlignment="Stretch"
