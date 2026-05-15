@@ -20,9 +20,9 @@ public partial class SudokuViewModel : ObservableObject
 
     public SudokuViewModel()
     {
-        DarkMode = Properties.Settings.Default.DarkMode;
+        DarkMode = Properties.UserSettings.Default.DarkMode;
         LightMode = !DarkMode;
-        SectionLayout = Properties.Settings.Default.SectionLayout;
+        SectionLayout = Properties.UserSettings.Default.SectionLayout;
 
         ButtonForeground = DarkMode ? Brushes.White : Brushes.Black;
         ButtonBackground = DarkMode ? Brushes.DarkSlateGray : Brushes.Azure;
@@ -33,11 +33,11 @@ public partial class SudokuViewModel : ObservableObject
         ColorButton2Background = CellViewModel.ColorBrushes[1];
         ColorButton3Background = CellViewModel.ColorBrushes[2];
 
-        if (Enum.TryParse(Properties.Settings.Default.PuzzleDifficulty, out Difficulty diff))
+        if (Enum.TryParse(Properties.UserSettings.Default.PuzzleDifficulty, out Difficulty diff))
         {
             PuzzleDifficulty = diff;
         }
-        if (Enum.TryParse(Properties.Settings.Default.PuzzleSymmetry, out Symmetry symm))
+        if (Enum.TryParse(Properties.UserSettings.Default.PuzzleSymmetry, out Symmetry symm))
         {
             PuzzleSymmetry = symm;
         }
@@ -71,14 +71,14 @@ public partial class SudokuViewModel : ObservableObject
 
     internal void SaveSettings()
     {
-        Properties.Settings.Default.DarkMode = DarkMode;
-        Properties.Settings.Default.SectionLayout = SectionLayout;
-        Properties.Settings.Default.PuzzleDifficulty = PuzzleDifficulty.ToString();
-        Properties.Settings.Default.PuzzleSymmetry = PuzzleSymmetry.ToString();
+        Properties.UserSettings.Default.DarkMode = DarkMode;
+        Properties.UserSettings.Default.SectionLayout = SectionLayout;
+        Properties.UserSettings.Default.PuzzleDifficulty = PuzzleDifficulty.ToString();
+        Properties.UserSettings.Default.PuzzleSymmetry = PuzzleSymmetry.ToString();
 
         GameBoard.SaveSettings();
 
-        Properties.Settings.Default.Save();
+        Properties.UserSettings.Default.Save();
     }
 
     public bool AppRunning { get; set; } = false;

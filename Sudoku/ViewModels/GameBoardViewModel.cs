@@ -40,13 +40,13 @@ public partial class GameBoardViewModel : ObservableObject
 
     public GameBoardViewModel()
     {
-        Background = Properties.Settings.Default.DarkMode ? Brushes.Black : Brushes.White;
-        SectionBorder = Properties.Settings.Default.DarkMode ? Brushes.LightBlue : Brushes.DarkViolet;
-        HighlightIncorrect = Properties.Settings.Default.HighlightIncorrect;
-        CleanPencilMarks = Properties.Settings.Default.CleanPencilMarks;
-        ShowTimer = Properties.Settings.Default.ShowTimer;
-        ShowKillerCalculator = Properties.Settings.Default.ShowKillerCalculator;
-        NumberFirstMode = Properties.Settings.Default.NumberFirstMode;
+        Background = Properties.UserSettings.Default.DarkMode ? Brushes.Black : Brushes.White;
+        SectionBorder = Properties.UserSettings.Default.DarkMode ? Brushes.LightBlue : Brushes.DarkViolet;
+        HighlightIncorrect = Properties.UserSettings.Default.HighlightIncorrect;
+        CleanPencilMarks = Properties.UserSettings.Default.CleanPencilMarks;
+        ShowTimer = Properties.UserSettings.Default.ShowTimer;
+        ShowKillerCalculator = Properties.UserSettings.Default.ShowKillerCalculator;
+        NumberFirstMode = Properties.UserSettings.Default.NumberFirstMode;
 
         periodicTimer.Interval = TimeSpan.FromSeconds(1);
         periodicTimer.Tick += OnTimer_Tick;
@@ -79,16 +79,17 @@ public partial class GameBoardViewModel : ObservableObject
             .. list.OrderBy(cell => cell.Row).ThenBy(cell => cell.Col)
         ];
 
-        EnableNumberHighlight = Properties.Settings.Default.EnableNumberHighlight;
+        EnableNumberHighlight = Properties.UserSettings.Default.EnableNumberHighlight;
     }
 
     internal void SaveSettings()
     {
-        Properties.Settings.Default.HighlightIncorrect = HighlightIncorrect;
-        Properties.Settings.Default.CleanPencilMarks = CleanPencilMarks;
-        Properties.Settings.Default.ShowTimer = ShowTimer;
-        Properties.Settings.Default.NumberFirstMode = NumberFirstMode;
-        Properties.Settings.Default.EnableNumberHighlight = EnableNumberHighlight;
+        Properties.UserSettings.Default.HighlightIncorrect = HighlightIncorrect;
+        Properties.UserSettings.Default.CleanPencilMarks = CleanPencilMarks;
+        Properties.UserSettings.Default.ShowTimer = ShowTimer;
+        Properties.UserSettings.Default.NumberFirstMode = NumberFirstMode;
+        Properties.UserSettings.Default.EnableNumberHighlight = EnableNumberHighlight;
+        Properties.UserSettings.Default.ShowKillerCalculator = ShowKillerCalculator;
     }
 
     [ObservableProperty]

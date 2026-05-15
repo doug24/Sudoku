@@ -14,7 +14,7 @@ public partial class MainWindow : Window
     private readonly SudokuViewModel viewModel;
     public MainWindow()
     {
-        Application.Current.ThemeMode = Properties.Settings.Default.DarkMode ? ThemeMode.Dark : ThemeMode.Light;
+        Application.Current.ThemeMode = Properties.UserSettings.Default.DarkMode ? ThemeMode.Dark : ThemeMode.Light;
 
         InitializeComponent();
 
