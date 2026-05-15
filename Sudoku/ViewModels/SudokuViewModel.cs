@@ -16,6 +16,7 @@ namespace Sudoku;
 public partial class SudokuViewModel : ObservableObject
 {
     private readonly static Random rand = new();
+    private readonly static string SessionFile = GetSessionFilePath();
 
     public SudokuViewModel()
     {
@@ -455,23 +456,49 @@ public partial class SudokuViewModel : ObservableObject
 
     private void Snapshot()
     {
-        var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var file = Path.Combine(path, "session.sudoku");
         string state = GameBoard.ToSnapshotString();
-        File.WriteAllText(file, state);
+        File.WriteAllText(SessionFile, state);
     }
 
     private void Restore()
     {
-        var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var file = Path.Combine(path, "session.sudoku");
-        string[] ssData = File.ReadAllLines(file);
-        GameBoard.Restore(ssData);
+        if (File.Exists(SessionFile))
+        {
+            string[] ssData = File.ReadAllLines(SessionFile);
+            GameBoard.Restore(ssData);
+        }
     }
 
     private static bool HasSessionFile()
     {
-        var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return File.Exists(Path.Combine(path, "session.sudoku"));
+        return File.Exists(SessionFile);
+    }
+
+    private static string GetSessionFilePath()
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var dir = Path.Combine(appData, "Sudoku");
+        Directory.CreateDirectory(dir);
+
+        var oldFile = Path.Combine(appData, "session.sudoku");
+        var newFile = Path.Combine(dir, "session.sudoku");
+
+        try
+        {
+            if (File.Exists(oldFile))
+            {
+                if (!File.Exists(newFile))
+                {
+                    File.Move(oldFile, newFile);
+                }
+                else
+                {
+                    File.Delete(oldFile);
+                }
+            }
+        }
+        catch { }
+
+        return newFile;
     }
 }
