@@ -302,7 +302,7 @@ namespace Sudoku
     {
         public MessageBoxViewModel()
         {
-            bool isDarkMode = Properties.Settings.Default.DarkMode;
+            bool isDarkMode = Properties.UserSettings.Default.DarkMode;
 
             WindowBackground = isDarkMode ?
                 new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF141414")) :

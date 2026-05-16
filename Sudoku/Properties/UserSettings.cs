@@ -57,9 +57,10 @@ public class UserSettings
                 // Corrupt file — fall through to defaults (or migration)
             }
         }
-
-        // No JSON file yet: attempt one-time migration from legacy settings
-        return MigrateFromLegacy();
+        var settings = new UserSettings();
+        // Persist immediately so next launch reads from JSON
+        settings.Save();
+        return settings;
     }
 
     /// <summary>Saves the current settings to disk.</summary>
@@ -75,38 +76,5 @@ public class UserSettings
         {
             System.Diagnostics.Debug.WriteLine($"[UserSettings] Failed to save settings: {ex.Message}");
         }
-    }
-
-    // ── Legacy migration ─────────────────────────────────────────────────────
-
-    private static UserSettings MigrateFromLegacy()
-    {
-        var settings = new UserSettings();
-
-        try
-        {
-            // Upgrade moves the stored values forward across application version changes
-            // so the properties reflect what the user last saved.
-            Settings.Default.Upgrade();
-
-            settings.SectionLayout = Settings.Default.SectionLayout;
-            settings.PuzzleSymmetry = Settings.Default.PuzzleSymmetry;
-            settings.PuzzleDifficulty = Settings.Default.PuzzleDifficulty;
-            settings.HighlightIncorrect = Settings.Default.HighlightIncorrect;
-            settings.CleanPencilMarks = Settings.Default.CleanPencilMarks;
-            settings.NumberFirstMode = Settings.Default.NumberFirstMode;
-            settings.EnableNumberHighlight = Settings.Default.EnableNumberHighlight;
-            settings.ShowTimer = Settings.Default.ShowTimer;
-            settings.DarkMode = Settings.Default.DarkMode;
-            settings.ShowKillerCalculator = Settings.Default.ShowKillerCalculator;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[UserSettings] Legacy migration failed: {ex.Message}");
-        }
-
-        // Persist immediately so next launch reads from JSON
-        settings.Save();
-        return settings;
     }
 }

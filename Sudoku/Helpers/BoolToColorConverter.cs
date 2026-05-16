@@ -10,7 +10,7 @@ public class BoolToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        bool isDarkMode = Properties.Settings.Default.DarkMode;
+        bool isDarkMode = Properties.UserSettings.Default.DarkMode;
 
         if (isDarkMode)
         {

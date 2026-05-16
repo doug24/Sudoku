@@ -25,7 +25,7 @@ public partial class CellViewModel : ObservableObject
 
     public CellViewModel(int row, int col)
     {
-        isDarkMode = Properties.Settings.Default.DarkMode;
+        isDarkMode = Properties.UserSettings.Default.DarkMode;
 
         HighlightBrush = isDarkMode ? Brushes.Cyan : Brushes.ForestGreen;
 

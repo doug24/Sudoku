@@ -1931,7 +1931,7 @@ public partial class GameBoardViewModel : ObservableObject
 
     internal void ApplyEvenOddShading(EvenOddConstraint constraint)
     {
-        bool isDarkMode = Properties.Settings.Default.DarkMode;
+        bool isDarkMode = Properties.UserSettings.Default.DarkMode;
         HashSet<int> shadedSet = new(constraint.ShadedCells);
 
         foreach (var cell in allCells)
